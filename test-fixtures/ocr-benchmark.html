@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>LabLens OCR Benchmark</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.0/dist/tesseract.min.js"></script>
+</head>
+<body>
+<pre id="log" style="white-space:pre-wrap;font:12px monospace"></pre>
+<script>
+if(window.pdfjsLib){try{pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'}catch(e){}}
+const logEl=document.getElementById('log');
+function log(s){logEl.textContent+=s+'\n';console.log(s)}
+
+/* ======= verbatim copies from index.html (OCR pipeline) — kept identical so the
+   benchmark measures the SAME code path the app uses, not a re-implementation ======= */
+function preprocessImageForOCR(fileOrUrl,maxDim=1800){
+  return new Promise(resolve=>{
+    try{
+      const img=new Image(); img.onload=()=>{
+        const scale=Math.min(2,Math.max(1,maxDim/Math.max(img.width,img.height)));
+        const w=Math.round(img.width*scale),h=Math.round(img.height*scale);
+        const c=document.createElement('canvas');c.width=w;c.height=h;
+        const cx=c.getContext('2d');cx.fillStyle='#fff';cx.fillRect(0,0,w,h);
+        cx.drawImage(img,0,0,w,h);
+        const d=cx.getImageData(0,0,w,h);
+        const pixels=d.data;
+        const n=w*h;
+        const gray=new Uint8Array(n);
+        for(let i=0;i<n;i++){
+          const idx=i*4;
+          gray[i]=Math.round(0.299*pixels[idx]+0.587*pixels[idx+1]+0.114*pixels[idx+2]);
+        }
+        const intImg=new Uint32Array(n);
+        for(let x=0;x<w;x++){
+          let sum=0;
+          for(let y=0;y<h;y++){
+            const idx=y*w+x;
+            sum+=gray[idx];
+            if(x===0) intImg[idx]=sum;
+            else intImg[idx]=intImg[idx-1]+sum;
+          }
+        }
+        const s=Math.round(w/16);
+        const t=15;
+        for(let i=0;i<n;i++){
+          const x=i%w, y=Math.floor(i/w);
+          const x1=Math.max(0,x-s), x2=Math.min(w-1,x+s);
+          const y1=Math.max(0,y-s), y2=Math.min(h-1,y+s);
+          const count=(x2-x1+1)*(y2-y1+1);
+          const idx_br=y2*w+x2;
+          const idx_tl=y1*w+x1;
+          const idx_tr=y1*w+x2;
+          const idx_bl=y2*w+x1;
+          let sum=intImg[idx_br];
+          if(x1>0 && y1>0) sum+=intImg[(y1-1)*w+(x1-1)];
+          if(x1>0) sum-=intImg[y2*w+(x1-1)];
+          if(y1>0) sum-=intImg[(y1-1)*w+x2];
+          const avg=sum/count;
+          const val=gray[i]<(avg*(100-t)/100)?0:255;
+          const idx=i*4;
+          pixels[idx]=pixels[idx+1]=pixels[idx+2]=val;
+        }
+        cx.putImageData(d,0,0);
+        resolve(c.toDataURL('image/png'));
+      };
+      img.onerror=()=>resolve(fileOrUrl);
+      if(typeof fileOrUrl==='string')img.src=fileOrUrl;
+      else img.src=URL.createObjectURL(fileOrUrl);
+    }catch(e){resolve(fileOrUrl)}
+  })
+}
+const PADDLE_CDNS=['https://esm.run/ppu-paddle-ocr/web','https://cdn.jsdelivr.net/npm/ppu-paddle-ocr/web/+esm'];
+let paddleOCR=null, paddleState='idle';
+window.__ocrEngineUsed='';
+async function getPaddleOCR(){
+  if(paddleState==='ready')return paddleOCR;
+  if(paddleState==='unavailable')return null;
+  if(paddleState==='loading'){
+    for(let i=0;i<200 && paddleState==='loading';i++)await new Promise(r=>setTimeout(r,100));
+    return paddleState==='ready'?paddleOCR:null;
+  }
+  paddleState='loading';
+  for(const url of PADDLE_CDNS){
+    try{
+      const mod=await import(/* webpackIgnore: true */ url);
+      const OCR=mod.PaddleOcrService||mod.default||mod;
+      const inst=(typeof OCR==='function')?new OCR():OCR;
+      if(inst&&typeof inst.initialize==='function')await inst.initialize();
+      else if(inst&&typeof inst.init==='function')await inst.init();
+      if(!inst||typeof inst.recognize!=='function')throw new Error('unexpected PaddleOCR API');
+      paddleOCR=inst; paddleState='ready';
+      return paddleOCR;
+    }catch(e){ log('PaddleOCR load failed from '+url+': '+(e&&e.message)); }
+  }
+  paddleState='unavailable';
+  return null;
+}
+function linesFromOcrBoxes(items){
+  const its=items.filter(o=>o.text&&o.text.trim()).map(o=>{
+    const pts=o.points||o.box||o.boundingBox||[];
+    const ys=pts.map(p=>Array.isArray(p)?p[1]:p.y), xs=pts.map(p=>Array.isArray(p)?p[0]:p.x);
+    const y=ys.length?ys.reduce((a,b)=>a+b,0)/ys.length:(o.y||0);
+    const x=xs.length?Math.min(...xs):(o.x||0);
+    const h=ys.length?(Math.max(...ys)-Math.min(...ys)):12;
+    return {t:o.text.trim(),x,y,h:h||12};
+  });
+  if(!its.length)return '';
+  its.sort((a,b)=>a.y-b.y||a.x-b.x);
+  const rows=[]; let cur=null;
+  for(const it of its){
+    const tol=Math.max(6,it.h*0.6);
+    if(cur&&Math.abs(it.y-cur.y)<=tol){cur.items.push(it);cur.y=(cur.y+it.y)/2}
+    else{cur={y:it.y,items:[it]};rows.push(cur)}
+  }
+  return rows.map(r=>{
+    r.items.sort((a,b)=>a.x-b.x);
+    return r.items.map(i=>i.t).join('   ');
+  }).join('\n');
+}
+function dataUrlToCanvas(dataUrl){
+  return new Promise((resolve,reject)=>{
+    const img=new Image();
+    img.onload=()=>{
+      const c=document.createElement('canvas');c.width=img.width;c.height=img.height;
+      c.getContext('2d').drawImage(img,0,0);
+      resolve(c);
+    };
+    img.onerror=reject;
+    img.src=dataUrl;
+  });
+}
+async function ocrImage(fileOrUrl,onProgress){
+  const input=await preprocessImageForOCR(fileOrUrl);
+  try{
+    if(onProgress)onProgress(0.05);
+    const p=await getPaddleOCR();
+    if(p){
+      if(onProgress)onProgress(0.35);
+      const canvasInput=await dataUrlToCanvas(input);
+      const res=await p.recognize(canvasInput);
+      const items=Array.isArray(res)?res:(res&&(res.results||res.data||res.lines))||[];
+      let text='';
+      if(items.length && (items[0].points||items[0].box||items[0].boundingBox)) text=linesFromOcrBoxes(items);
+      else if(res&&typeof res.text==='string') text=res.text;
+      else if(items.length) text=items.map(i=>i.text||'').join('\n');
+      if(onProgress)onProgress(1);
+      if(text&&text.replace(/\s/g,'').length>=12){ window.__ocrEngineUsed='PaddleOCR PP-OCRv5'; return text; }
+    }
+  }catch(e){ log('PaddleOCR recognise failed, falling back to Tesseract: '+(e&&e.message)); }
+  if(!window.Tesseract)throw new Error('OCR library not loaded');
+  try{
+    const {data}=await Tesseract.recognize(input, 'eng', {
+      workerPath: 'https://cdn.jsdelivr.net/npm/tesseract.js@5.1.0/dist/worker.min.js',
+      corePath: 'https://cdn.jsdelivr.net/npm/tesseract.js-core@5.1.0/tesseract-core.wasm.js',
+      logger: m=>{if(onProgress && m && m.status==='recognizing text')onProgress(m.progress||0)}
+    });
+    window.__ocrEngineUsed='Tesseract';
+    return data&&data.text?data.text:'';
+  }catch(err){
+    log('[bench] Tesseract failed: '+err);
+    throw err;
+  }
+}
+/* ======= end verbatim copy ======= */
+
+async function renderPdfPageCanvas(page,scale=2){
+  const viewport=page.getViewport({scale});
+  const canvas=document.createElement('canvas');
+  canvas.width=Math.floor(viewport.width);canvas.height=Math.floor(viewport.height);
+  const ctx=canvas.getContext('2d');
+  await page.render({canvasContext:ctx,viewport}).promise;
+  return canvas;
+}
+
+// Simulate a phone photo of a printed report: slight rotation (skew), blur, a
+// resolution cut (then upscaled back, the way a phone photo taken from ~30cm at
+// modest resolution behaves), and JPEG recompression artifacts.
+function degradeCanvas(srcCanvas,{angleDeg=3.5,downscaleTo=1000,jpegQuality=0.55,blurPx=1.1}={}){
+  const w=srcCanvas.width,h=srcCanvas.height;
+  // 1) rotate onto a padded canvas
+  const angle=angleDeg*Math.PI/180;
+  const diag=Math.sqrt(w*w+h*h);
+  const rc=document.createElement('canvas');rc.width=diag;rc.height=diag;
+  const rctx=rc.getContext('2d');
+  rctx.fillStyle='#fff';rctx.fillRect(0,0,diag,diag);
+  rctx.translate(diag/2,diag/2);rctx.rotate(angle);
+  rctx.drawImage(srcCanvas,-w/2,-h/2);
+  rctx.setTransform(1,0,0,1,0,0);
+  // 2) downscale to simulate a lower captured resolution, apply blur while small
+  const scale=downscaleTo/diag;
+  const dw=Math.round(diag*scale),dh=Math.round(diag*scale);
+  const dc=document.createElement('canvas');dc.width=dw;dc.height=dh;
+  const dctx=dc.getContext('2d');
+  dctx.filter=`blur(${blurPx}px)`;
+  dctx.drawImage(rc,0,0,dw,dh);
+  // 3) re-encode as JPEG at a lossy quality (introduces compression artifacts),
+  // then decode back so downstream OCR sees exactly what a saved photo would.
+  const jpegUrl=dc.toDataURL('image/jpeg',jpegQuality);
+  return jpegUrl;
+}
+
+function normalize(s){return String(s||'').toLowerCase().replace(/[’‘]/g,"'").replace(/[^a-z0-9.]+/g,' ').replace(/\s+/g,' ').trim();}
+
+function scoreAgainstGroundTruth(text,gt){
+  const n=normalize(text);
+  let hit=0;const misses=[];
+  for(const [label,value] of gt){
+    const v=normalize(String(value));
+    if(n.includes(v)) hit++; else misses.push(label+' = '+value);
+  }
+  return {hit,total:gt.length,pct:Math.round(100*hit/gt.length),misses};
+}
+
+const GROUND_TRUTH={
+  'raksha.pdf':[
+    ['Haemoglobin','12.2'],['R.B.C. Count','5.05'],['PCV','36.1'],['MCV','71.49'],
+    ['MCH','24.16'],['MCHC','33.80'],['W.B.C. Count','7900'],['Platelet Count','268000'],
+    ['HbA1c Result','5.7'],['eAG','116.89'],['Total Cholesterol','261.0'],
+    ['S.HDL Cholesterol','89.3'],['L.D.L. Cholesterol','145.92'],['S.Creatinine','0.81'],
+    ['eGFR(MDRD)','74.96'],['Serum Sodium','141.0']
+  ],
+  '1825007152.pdf':[
+    ['Erythrocyte Count','4.52'],['Haemoglobin','12.4'],['Leucocyte Count','4240'],
+    ['Platelet Count','82000'],['Neutrophil Count','73'],['Lymphocyte Count','18'],
+    ['Dengue NS1','0.05'],['Chikungunya IgM','0.13'],['C-Reactive Protein','92.7']
+  ]
+};
+
+async function ocrOneImage(dataUrl,label){
+  const t0=performance.now();
+  window.__ocrEngineUsed='';
+  let text='';
+  try{ text=await ocrImage(dataUrl); }catch(e){ text='[OCR ERROR] '+e.message; }
+  const ms=Math.round(performance.now()-t0);
+  return {label,engine:window.__ocrEngineUsed,ms,text};
+}
+
+async function runFile(name){
+  log('\n===== '+name+' =====');
+  const resp=await fetch('lab-reports/'+encodeURIComponent(name));
+  const buf=await resp.arrayBuffer();
+  const pdf=await pdfjsLib.getDocument({data:buf}).promise;
+  const page=await pdf.getPage(1); // page 1 carries the CBC panel in both fixtures
+  const cleanCanvas=await renderPdfPageCanvas(page,2);
+  const cleanUrl=cleanCanvas.toDataURL('image/png');
+  const degradedUrl=degradeCanvas(cleanCanvas);
+
+  const gt=GROUND_TRUTH[name];
+  const results={};
+  for(const [tag,url] of [['clean',cleanUrl],['degraded',degradedUrl]]){
+    const r=await ocrOneImage(url,tag);
+    const score=scoreAgainstGroundTruth(r.text,gt);
+    results[tag]={engine:r.engine,ms:r.ms,score,textLen:r.text.length};
+    log(`[${tag}] engine=${r.engine||'?'} time=${r.ms}ms value-recall=${score.hit}/${score.total} (${score.pct}%)`);
+    if(score.misses.length) log('  missed: '+score.misses.join(' | '));
+  }
+  return results;
+}
+
+async function main(){
+  const files=['raksha.pdf','1825007152.pdf'];
+  const summary={};
+  for(const f of files){ summary[f]=await runFile(f); }
+  window.__BENCH_RESULT__=summary;
+  log('\n===== DONE =====');
+  log(JSON.stringify(summary,null,2));
+}
+main();
+</script>
+</body>
+</html>
