@@ -258,6 +258,12 @@ body::before{
   .trend-graph-title{display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px;font-weight:900}.trend-graph-hint{font-size:11px;color:var(--text-secondary);font-weight:600}
   .trend-param-link{color:var(--primary);cursor:pointer;text-decoration:underline;text-underline-offset:2px}.trend-param-link:hover{color:var(--primary-dark)}
   .trend-svg{width:100%;height:280px;display:block;background:var(--bg);border:1px solid var(--border);border-radius:10px}
+  /* Results workspace: keep the five views consistent, while giving document
+     review and longitudinal trends the denser controls they need. */
+  .result-section-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:18px}.result-section-head h4{font-size:18px;margin:0 0 4px}.result-section-head p{max-width:68ch;margin:0;color:var(--text-secondary);font-size:13px;line-height:1.55}
+  .original-shell{display:grid;gap:14px}.original-head{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;padding:14px 16px;background:var(--bg);border-radius:12px}.original-file{min-width:0}.original-file strong{display:block;overflow-wrap:anywhere}.original-file span{display:block;margin-top:3px;color:var(--text-secondary);font-size:12px}.original-switch{display:inline-flex;gap:4px;padding:4px;background:var(--card);border:1px solid var(--border);border-radius:10px}.original-switch button{min-height:40px;padding:8px 12px;border:0;border-radius:7px;background:transparent;color:var(--text-secondary);font:inherit;font-size:12px;font-weight:800;cursor:pointer}.original-switch button.active{background:var(--primary-dark);color:#fff}.original-panel[hidden]{display:none}.original-panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}.original-panel-head p{margin:0;color:var(--text-secondary);font-size:12.5px}.original-copy{min-height:40px;padding:8px 12px;border:1px solid var(--border);border-radius:9px;background:var(--card);color:var(--text);font-weight:800;cursor:pointer}.original-pages-frame{padding:16px;background:#20262B;border-radius:14px}.original-pages-frame .doc-pages{max-width:900px;margin:auto}.original-pages-frame .doc-page{background:#fff;box-shadow:0 8px 24px rgba(0,0,0,.24)}.doc-raw{max-height:62vh;font-size:14px;line-height:1.7;padding:18px;tab-size:4}.doc-lasso-toolbar{position:sticky;top:78px;z-index:4;padding:10px 12px;background:var(--card);border:1px solid var(--border);border-radius:12px}.mode-btn{min-height:40px}.select-pill{border:0;font-family:inherit}
+  .trend-workspace{grid-column:1/-1;display:grid;gap:16px;min-width:0}.trend-controls{display:grid;grid-template-columns:minmax(220px,360px) minmax(0,1fr);gap:18px;align-items:end;padding:16px;background:var(--bg);border-radius:12px;min-width:0}.trend-controls>*,.trend-graph-card,.trend-table-section{min-width:0}.trend-picker label{display:block;margin-bottom:6px;font-size:12px;font-weight:900;color:var(--text-secondary)}.trend-picker select{width:100%;max-width:100%;min-height:44px;padding:9px 36px 9px 12px;border:1px solid var(--border);border-radius:9px;background:var(--card);color:var(--text);font:inherit;font-weight:800}.trend-controls-copy{color:var(--text-secondary);font-size:12.5px;line-height:1.55;overflow-wrap:anywhere}.trend-graph-card{margin:0;padding:18px}.trend-graph-title{margin-bottom:14px}.trend-heading{display:grid;gap:3px}.trend-heading strong{font-size:17px}.trend-heading span{font-size:12px;color:var(--text-secondary);font-weight:600}.trend-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;background:var(--border);border:1px solid var(--border);border-radius:11px;overflow:hidden;margin-bottom:14px}.trend-summary-item{background:var(--card);padding:12px;min-width:0}.trend-summary-item span{display:block;color:var(--text-secondary);font-size:11px;font-weight:800;margin-bottom:4px}.trend-summary-item strong{display:block;font-size:17px;overflow-wrap:anywhere}.trend-change{color:var(--text)}.trend-table-section{margin-top:2px}.trend-table-section h5{font-size:15px;margin-bottom:4px}.trend-table-section>p{color:var(--text-secondary);font-size:12.5px;line-height:1.5;margin-bottom:10px}.trend-table-wrap{max-width:100%;overflow-x:auto;border:1px solid var(--border);border-radius:11px}.trend-table{width:100%;border-collapse:collapse;font-size:12.5px}.trend-table th,.trend-table td{padding:11px 10px;border-bottom:1px solid var(--border);text-align:center}.trend-table thead th{background:var(--bg);vertical-align:bottom}.trend-table th:first-child,.trend-table td:first-child{position:sticky;left:0;z-index:1;text-align:left;background:var(--card)}.trend-table thead th:first-child{z-index:2;background:var(--bg)}.trend-param-button{border:0;background:transparent;color:var(--primary);font:inherit;font-weight:900;text-align:left;cursor:pointer;text-decoration:underline;text-underline-offset:3px;padding:5px 0}.trend-param-button[aria-current="true"]{color:var(--text);text-decoration-thickness:2px}.trend-unit{display:block;color:var(--text-secondary);font-size:11px;font-weight:600;margin-top:2px}.trend-value{display:inline-flex;align-items:center;justify-content:center;min-width:54px;min-height:30px;border-radius:7px;padding:4px 7px;font-weight:900}.trend-value.tier-safe{background:rgba(46,142,93,.10);color:var(--success)}.trend-value.tier-borderline{background:rgba(184,134,62,.12);color:var(--warning)}.trend-value.tier-concern{background:rgba(178,74,61,.12);color:var(--danger)}.trend-value.tier-unknown{background:var(--bg);color:var(--text-secondary)}
+  @media(max-width:700px){.tab-content{padding:18px 14px}.result-section-head{display:block}.result-section-head p{font-size:14px}.original-head{align-items:stretch}.original-switch{width:100%}.original-switch button{flex:1}.original-pages-frame{padding:8px;margin-inline:-4px}.doc-lasso-toolbar{top:66px}.trend-controls{grid-template-columns:minmax(0,1fr);padding:14px}.trend-summary{grid-template-columns:minmax(0,1fr)}.trend-summary-item{display:flex;justify-content:space-between;gap:12px;align-items:baseline}.trend-summary-item span{margin:0}.trend-summary-item strong{min-width:0;max-width:68%;font-size:15px;text-align:right}.trend-svg{height:auto;min-height:220px}.trend-graph-card{padding:14px}.trend-table th,.trend-table td{padding:10px 8px}}
   .ai-review-card{border:1px solid rgba(43,90,156,.22);background:rgba(43,90,156,0.06);border-radius:12px;padding:15px 16px;margin-bottom:20px}
   .ai-review-card h5{font-size:14px;margin-bottom:6px;display:flex;gap:8px;align-items:center}.ai-review-card p{font-size:12.5px;color:var(--text-secondary);line-height:1.55;margin-bottom:10px}
   .ai-review-result{white-space:pre-wrap;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:12px;margin-top:10px;font-size:13px;line-height:1.6}
@@ -576,12 +582,12 @@ body::before{
 </div>
 </div></section></div>
 
-<section class="results-section" id="resultsSection"><div class="result-header" id="resultHeader"><div><h3>Report extracted</h3><p id="resultDate">Analyzed</p></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="download-btn" onclick="printResults()">Save or print report</button></div></div><div class="tier-legend"><span class="tier-legend-item"><span class="tier-dot" style="background:var(--neon-concern)"></span>Red — outside the normal reference range</span><span class="tier-legend-item"><span class="tier-dot" style="background:var(--neon-borderline)"></span>Yellow — borderline, close to one edge of the range</span><span class="tier-legend-item"><span class="tier-dot" style="background:var(--neon-safe)"></span>Green — safely within the normal range</span><span class="tier-legend-item"><span class="tier-dot" style="background:var(--neon-unknown)"></span>Grey — no reference range available (informational only)</span></div><div class="results-body"><div aria-label="Report views" class="tabs" id="resultTabs" role="tablist"><button aria-selected="true" class="tab-btn active" data-tab="summary" onclick="switchTab('summary',this)" role="tab">Summary</button><button aria-selected="false" class="tab-btn" data-tab="detailed" onclick="switchTab('detailed',this)" role="tab">Values</button><button aria-selected="false" class="tab-btn" data-tab="document" onclick="switchTab('document',this)" role="tab">Original</button><button aria-selected="false" class="tab-btn" data-tab="comparison" onclick="switchTab('comparison',this)" role="tab">Trends</button><button aria-selected="false" class="tab-btn" data-tab="recommendations" onclick="switchTab('recommendations',this)" role="tab">Next steps</button></div>
-<div class="tab-content active" id="tab-summary"><div class="report-type-bar" id="reportTypeBar"></div><div id="demoNote"></div><div id="verificationCard"></div><div class="health-status-card" id="healthStatusDisplay"></div><div class="layman" id="laymanCard"></div><div id="aiReviewCard"></div><div class="tags-notes-card" id="tagsNotesCard"></div><div class="section-title">⚡ Quick Overview</div><div class="quick-metrics-summary" id="quickMetricsSummary"></div></div>
-<div class="tab-content" id="tab-detailed"><div class="section-title">🧫 Detailed Health Parameters</div><div id="metricsList"></div></div>
-<div class="tab-content" id="tab-document"><div class="section-title">📄 Captured Text</div><div id="documentView"></div></div>
-<div class="tab-content" id="tab-comparison"><div class="section-title">⇄ Comparison with Previous Reports</div><div class="comparison-grid" id="comparisonList"></div></div>
-<div class="tab-content" id="tab-recommendations"><div class="section-title">💡 Health Recommendations</div><div id="recommendationsList"></div></div>
+<section class="results-section" id="resultsSection"><div class="result-header" id="resultHeader"><div><h3>Report extracted</h3><p id="resultDate">Analyzed</p></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="download-btn" onclick="printResults()">Save or print report</button></div></div><div class="tier-legend"><span class="tier-legend-item"><span class="tier-dot" style="background:var(--neon-concern)"></span>Red — outside the normal reference range</span><span class="tier-legend-item"><span class="tier-dot" style="background:var(--neon-borderline)"></span>Yellow — borderline, close to one edge of the range</span><span class="tier-legend-item"><span class="tier-dot" style="background:var(--neon-safe)"></span>Green — safely within the normal reference range</span><span class="tier-legend-item"><span class="tier-dot" style="background:var(--neon-unknown)"></span>Grey — no reference range available (informational only)</span></div><div class="results-body"><div aria-label="Report views" class="tabs" id="resultTabs" role="tablist"><button aria-controls="tab-summary" aria-selected="true" class="tab-btn active" data-tab="summary" id="result-tab-summary" onclick="switchTab('summary',this)" onkeydown="handleResultTabKey(event)" role="tab" tabindex="0">Summary</button><button aria-controls="tab-detailed" aria-selected="false" class="tab-btn" data-tab="detailed" id="result-tab-detailed" onclick="switchTab('detailed',this)" onkeydown="handleResultTabKey(event)" role="tab" tabindex="-1">Values</button><button aria-controls="tab-document" aria-selected="false" class="tab-btn" data-tab="document" id="result-tab-document" onclick="switchTab('document',this)" onkeydown="handleResultTabKey(event)" role="tab" tabindex="-1">Original</button><button aria-controls="tab-comparison" aria-selected="false" class="tab-btn" data-tab="comparison" id="result-tab-comparison" onclick="switchTab('comparison',this)" onkeydown="handleResultTabKey(event)" role="tab" tabindex="-1">Trends</button><button aria-controls="tab-recommendations" aria-selected="false" class="tab-btn" data-tab="recommendations" id="result-tab-recommendations" onclick="switchTab('recommendations',this)" onkeydown="handleResultTabKey(event)" role="tab" tabindex="-1">Next steps</button></div>
+<div aria-labelledby="result-tab-summary" class="tab-content active" id="tab-summary" role="tabpanel"><div class="result-section-head"><div><h4>Report summary</h4><p>Start with values that need review, then open any marker for its range, source line, and history.</p></div></div><div class="report-type-bar" id="reportTypeBar"></div><div id="demoNote"></div><div id="verificationCard"></div><div class="health-status-card" id="healthStatusDisplay"></div><div class="layman" id="laymanCard"></div><div id="aiReviewCard"></div><div class="tags-notes-card" id="tagsNotesCard"></div><div class="section-title">Key values</div><div class="quick-metrics-summary" id="quickMetricsSummary"></div></div>
+<div class="tab-content" id="tab-detailed" role="tabpanel"><div class="result-section-head"><div><h4>All extracted values</h4><p>Select a value to compare it with the reference range and the exact source line.</p></div></div><div id="metricsList"></div></div>
+<div class="tab-content" id="tab-document" role="tabpanel"><div class="result-section-head"><div><h4>Original report</h4><p>Compare extracted values with the source document. Highlighted values open their details without sending the report anywhere.</p></div></div><div id="documentView"></div></div>
+<div class="tab-content" id="tab-comparison" role="tabpanel"><div class="result-section-head"><div><h4>Trends over time</h4><p>Choose one marker to follow across dated reports. A change is not automatically good or bad; use its reference status and clinical context.</p></div></div><div class="comparison-grid" id="comparisonList"></div></div>
+<div class="tab-content" id="tab-recommendations" role="tabpanel"><div class="result-section-head"><div><h4>Suggested next steps</h4><p>Use these prompts to verify the report and prepare questions for a qualified healthcare professional.</p></div></div><div id="recommendationsList"></div></div>
 </div></section>
 <section class="history-section" id="historySection"><div class="card" style="max-width:850px;margin:auto"><div class="history-header"><div><h3>🕘 Scan History</h3><p style="font-size:12px;color:var(--text-secondary)">Stored locally in this browser</p></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="action-btn" onclick="clearHistory()">🗑 Clear All</button></div></div><div class="history-toolbar"><input class="history-search" id="historySearch" oninput="setHistoryFilter('q',this.value)" placeholder="🔍 Search reports, dates, tags, notes…" type="search"/><div><button class="chip active" data-status="all" onclick="setHistoryFilter('status','all')">All</button><button class="chip" data-status="issues" onclick="setHistoryFilter('status','issues')">⚠ Issues</button><button class="chip" data-status="normal" onclick="setHistoryFilter('status','normal')">✅ Normal</button></div></div><div class="history-list" id="historyList"></div></div></section>
 <div class="disclaimer"><span>⚠️</span><p><strong>Medical Disclaimer:</strong> This tool is for informational purposes only and does not provide medical advice. OCR and parsing can make mistakes. Always verify results against the original document and consult a qualified healthcare provider.</p></div>
@@ -3973,17 +3979,42 @@ function medReset(i){
 }
 function medRotate(i){const v=medViewers[i];if(!v)return;v.rot=(v.rot+90)%360;medRedraw(i)}
 function medInvert(i){const v=medViewers[i];if(!v)return;v.invert=!v.invert;v.dirty=true;medRedraw(i)}
+let originalView='document';
+function setOriginalView(view){
+  originalView=view;
+  const visual=$('originalVisualPanel'),text=$('originalTextPanel');
+  if(visual)visual.hidden=view!=='document';
+  if(text)text.hidden=view!=='text';
+  [['originalVisualBtn','document'],['originalTextBtn','text']].forEach(([id,key])=>{
+    const btn=$(id);if(!btn)return;const active=view===key;
+    btn.classList.toggle('active',active);btn.setAttribute('aria-pressed',active?'true':'false');
+  });
+  if(view==='document')setTimeout(()=>document.querySelectorAll('.doc-page[data-page]').forEach(el=>drawDocOverlay(Number(el.dataset.page))),30);
+}
+async function copyOriginalText(){
+  const value=currentAnalysis&&currentAnalysis.rawText||'';if(!value)return;
+  const btn=$('copyOriginalBtn');
+  try{await navigator.clipboard.writeText(value)}catch{
+    const ta=document.createElement('textarea');ta.value=value;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();
+  }
+  if(btn){const prior=btn.textContent;btn.textContent='Copied';setTimeout(()=>btn.textContent=prior,1600)}
+}
 function renderDocumentView(a){
   const scans=Array.isArray(a.scanImages)?a.scanImages:[];
+  const docPages=Array.isArray(a.docPages)?a.docPages:[];
+  const hasBoxedMetrics=(a.metrics||[]).some(m=>m.bbox&&Number.isInteger(m.bboxPage));
+  const isImaging=a.category==='imaging'||a.category==='cardiac';
+  const hasText=!isImaging&&!!a.rawText;
+  const hasVisual=!!(scans.length||docPages.length);
   window.__medicalViewerImages=scans;
-  let html='';
+  let visual='';
   if(scans.length){
-    html+=scans.map((im,idx)=>`<div class="med-viewer">
+    visual+=scans.map((im,idx)=>`<div class="med-viewer">
       <div class="med-toolbar">
         <button aria-label="Zoom in" class="btn-secondary" onclick="medZoom(${idx},1.15)">＋</button>
         <button aria-label="Zoom out" class="btn-secondary" onclick="medZoom(${idx},.87)">－</button>
-        <button class="btn-secondary" onclick="medRotate(${idx})">↻ Rotate</button>
-        <button class="btn-secondary" onclick="medInvert(${idx})">◐ Invert</button>
+        <button class="btn-secondary" onclick="medRotate(${idx})">Rotate</button>
+        <button class="btn-secondary" onclick="medInvert(${idx})">Invert</button>
         <button class="btn-secondary" onclick="medReset(${idx})">Reset</button>
       </div>
       <div class="med-stage" id="medStage-${idx}" tabindex="0"><canvas id="medCanvas-${idx}"></canvas></div>
@@ -4001,30 +4032,18 @@ function renderDocumentView(a){
       </div></div>`).join('');
     setTimeout(()=>scans.forEach((_,i)=>initMedViewer(i)),50);
   }
-  // §6: Browse / Select (lasso) mode over the raw document -- only offered when
-  // we actually retained page images + bounding boxes for this report (digital
-  // PDF text-layer path, see extractPdfText). A scanned photo with no boxes just
-  // doesn't get this section; the raw text below still works as before.
-  const docPages=Array.isArray(a.docPages)?a.docPages:[];
-  const hasBoxedMetrics=(a.metrics||[]).some(m=>m.bbox&&Number.isInteger(m.bboxPage));
-  if(docPages.length && hasBoxedMetrics){
-    html+=renderDocLassoViewer(docPages);
-  }
-  // For imaging reports, we deliberately do NOT show the OCR blob under the image —
-  // OCR of an X-ray/CT is mostly burned-in labels and noise. The name/date it finds
-  // are still used silently for filing (extractReportDate + patient-name capture),
-  // but never displayed here.
-  const isImaging=a.category==='imaging'||a.category==='cardiac';
-  
-  if(!isImaging && a.rawText){
-    html+=`<div class="section-title">📜 Extracted report text</div><div class="doc-raw">${esc(a.rawText)}</div>`;
-  }
-  const av=$('documentView'); if(av)av.innerHTML=html||'<div class="empty-state"><div class="ic">📄</div><p>No document view to display.</p></div>';
-  if(docPages.length && hasBoxedMetrics){
+  if(docPages.length)visual+=renderDocLassoViewer(docPages,hasBoxedMetrics);
+  const countLabel=docPages.length?`${docPages.length} page${docPages.length===1?'':'s'}`:scans.length?`${scans.length} image${scans.length===1?'':'s'}`:'Text only';
+  const switcher=hasVisual&&hasText?`<div aria-label="Original report view" class="original-switch"><button aria-pressed="true" class="active" id="originalVisualBtn" onclick="setOriginalView('document')">Report view</button><button aria-pressed="false" id="originalTextBtn" onclick="setOriginalView('text')">Extracted text</button></div>`:'';
+  const visualPanel=hasVisual?`<div class="original-panel" id="originalVisualPanel">${visual}</div>`:'';
+  const textPanel=hasText?`<div class="original-panel" id="originalTextPanel" ${hasVisual?'hidden':''}><div class="original-panel-head"><p>Plain text captured by the on-device parser. Use it for search and verification.</p><button class="original-copy" id="copyOriginalBtn" onclick="copyOriginalText()">Copy text</button></div><div class="doc-raw">${esc(a.rawText)}</div></div>`:'';
+  const html=hasVisual||hasText?`<div class="original-shell"><div class="original-head"><div class="original-file"><strong>${esc(a.fileName||'Uploaded report')}</strong><span>${countLabel} · kept on this device</span></div>${switcher}</div>${visualPanel}${textPanel}</div>`:'<div class="empty-state"><div class="ic">📄</div><p>The original preview is unavailable, but any extracted values remain available.</p><button class="btn-primary" onclick="switchTab(\'detailed\')">Open extracted values</button></div>';
+  const av=$('documentView'); if(av)av.innerHTML=html;
+  originalView=hasVisual?'document':'text';
+  if(docPages.length){
     setTimeout(()=>{
       docPages.forEach((_,pi)=>drawDocOverlay(pi));
-      wireDocLasso();
-      setDocMode('browse');
+      if(hasBoxedMetrics){wireDocLasso();setDocMode('browse')}
     },60);
   }
 }
@@ -4037,21 +4056,21 @@ function renderDocumentView(a){
 let docMode='browse';
 let docLasso={active:false,pi:null,pts:[]};
 let docSelectedKeys=[];
-function renderDocLassoViewer(docPages){
-  return `<div class="doc-lasso-toolbar">
+function renderDocLassoViewer(docPages,interactive){
+  const tools=interactive?`<div class="doc-lasso-toolbar">
     <div class="mode-switch">
-      <button class="mode-btn active" id="modeBrowseBtn" onclick="setDocMode('browse')">👆 Browse</button>
-      <button class="mode-btn" id="modeSelectBtn" onclick="setDocMode('select')">🎯 Select</button>
+      <button aria-pressed="true" class="mode-btn active" id="modeBrowseBtn" onclick="setDocMode('browse')">Inspect values</button>
+      <button aria-pressed="false" class="mode-btn" id="modeSelectBtn" onclick="setDocMode('select')">Select several</button>
     </div>
     <span class="doc-lasso-hint" id="docLassoHint">Tap a highlighted value to see its details.</span>
-  </div>
-  <div class="doc-pages" id="docPagesWrap">
+  </div>`:'';
+  return `${tools}<div class="original-pages-frame"><div class="doc-pages" id="docPagesWrap">
     ${docPages.map((dp,pi)=>`<div class="doc-page" data-page="${pi}">
       <img src="${dp.image}" class="doc-page-img" draggable="false" alt="Report page ${pi+1}" onload="onDocPageImgLoad(${pi})">
       <svg class="doc-page-svg" id="docSvg-${pi}"></svg>
     </div>`).join('')}
-  </div>
-  <div class="select-pill" id="selectPill" onclick="openSelectedMetricsSheet()"></div>`;
+  </div></div>
+  ${interactive?'<button aria-label="Open selected values" class="select-pill" id="selectPill" onclick="openSelectedMetricsSheet()" type="button"></button>':''}`;
 }
 function onDocPageImgLoad(pi){ drawDocOverlay(pi); }
 function docMetricsOnPage(pi){
@@ -4078,8 +4097,8 @@ function onDocHitTap(el){
 function setDocMode(mode){
   docMode=mode;
   const b=$('modeBrowseBtn'),s=$('modeSelectBtn');
-  if(b)b.classList.toggle('active',mode==='browse');
-  if(s)s.classList.toggle('active',mode==='select');
+  if(b){b.classList.toggle('active',mode==='browse');b.setAttribute('aria-pressed',mode==='browse'?'true':'false')}
+  if(s){s.classList.toggle('active',mode==='select');s.setAttribute('aria-pressed',mode==='select'?'true':'false')}
   const hint=$('docLassoHint'); if(hint)hint.textContent=mode==='browse'?'Tap a highlighted value to see its details.':'Drag a circle around one or more values, then release.';
   document.querySelectorAll('.doc-page-svg .lasso-path').forEach(p=>p.remove());
   hideSelectPill();
@@ -4232,22 +4251,27 @@ function renderMetricsList(a){
   if(!pairs.length){ el.innerHTML=filterChip+'<div class="empty-state"><div class="ic">📭</div><p>No parameters match this filter.</p></div>'; return; }
   el.innerHTML=filterChip+pairs.map(({m,i})=>`<div class="metric-card" onclick="openMetricSheet('${m.key}')" tabindex="0" role="button" aria-label="View details for ${esc(m.name)}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openMetricSheet('${m.key}')}"><div class="metric-icon ${severityTier(m)}"></div><div><div style="font-weight:900;font-size:13px">${esc(m.name)}</div><div class="metric-reference">${m.status==='classifier'?`Cutoffs: ${esc(m.normal_range)}${m.classifierLabel?` <span class="range-src">· pattern: ${esc(m.classifierLabel)}</span>`:''}`:`Normal: ${esc(m.normal_range)}${m.rangeNote?` <span class="range-src">· ${esc(m.rangeNote)}</span>`:''}`}</div>${m.needsReview?`<span class="review-badge">Check: ${esc((m.reviewReasons||[]).join(' · '))}</span><button class="review-confirm" onclick="event.stopPropagation();confirmMetric('${m.key}')">Mark checked</button>`:''}${m.srcLine?`<div class="prov"><button class="prov-toggle" onclick="event.stopPropagation();toggleProv(${i})">🔎 Where did this come from?</button><div class="prov-body" id="prov-${i}"><div class="prov-label">Read from this line of your report:</div><code class="prov-line">${esc(m.srcLine)}</code><button class="prov-flag" onclick="event.stopPropagation();flagMetric(${i})">⚑ This value is wrong</button></div></div>`:''}</div><div class="metric-value-badge">${esc(metricValueText(m))} <span style="font-size:10px;color:var(--text-secondary)">${esc(m.unit)}</span><span class="flag" style="${m.status==='unknown'||m.status==='classifier'?'color:var(--text-secondary)':''}">${m.status==='unknown'?'NO REF. RANGE':m.status==='classifier'?'SCREENING INDEX':m.status.toUpperCase()}</span></div></div>`).join('');
 }
-function switchTab(name,btn){activeResultTab=name;document.querySelectorAll('#resultTabs .tab-btn').forEach(b=>{const active=btn?b===btn:b.dataset.tab===name;b.classList.toggle('active',active);b.setAttribute('aria-selected',active?'true':'false')});document.querySelectorAll('.results-body>.tab-content').forEach(c=>c.classList.toggle('active',c.id==='tab-'+name));if(name==='comparison')displayComparison()}
+function switchTab(name,btn){activeResultTab=name;document.querySelectorAll('#resultTabs .tab-btn').forEach(b=>{const active=btn?b===btn:b.dataset.tab===name;b.classList.toggle('active',active);b.setAttribute('aria-selected',active?'true':'false');b.tabIndex=active?0:-1});document.querySelectorAll('.results-body>.tab-content').forEach(c=>{const active=c.id==='tab-'+name;c.classList.toggle('active',active);c.hidden=!active});if(name==='comparison')displayComparison()}
+function handleResultTabKey(event){
+  if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;
+  const tabs=[...document.querySelectorAll('#resultTabs .tab-btn')];let i=tabs.indexOf(event.currentTarget);
+  if(event.key==='Home')i=0;else if(event.key==='End')i=tabs.length-1;else i=(i+(event.key==='ArrowRight'?1:-1)+tabs.length)%tabs.length;
+  event.preventDefault();tabs[i].focus();tabs[i].click();
+}
 function setDefaultTrendParam(key){defaultTrendKey=key;selectedTrendKey=key;LS.set('defaultTrendKey_'+(currentUser||'guest'),key);showToast('Default trend parameter saved','success');displayComparison()}
 function clearDefaultTrendParam(){defaultTrendKey=null;selectedTrendKey=null;LS.del('defaultTrendKey_'+(currentUser||'guest'));showToast('Default trend cleared','info');displayComparison()}
 function trendSeriesFor(key){return getHistory().filter(r=>Array.isArray(r.metrics)&&r.metrics.some(m=>m.key===key)).sort((a,b)=>new Date(a.date)-new Date(b.date)).map(r=>{const m=r.metrics.find(x=>x.key===key);return {date:r.date,value:m.value,unit:m.unit,name:m.name,status:m.status,fileName:r.fileName,min:m.min,max:m.max}})}
 function setTrendParam(key){selectedTrendKey=key;displayComparison()}
 function renderTrendGraph(series){
-  if(!series.length)return''; const vals=series.map(p=>p.value), minV=Math.min(...vals), maxV=Math.max(...vals);
+  series=series.filter(p=>typeof p.value==='number'&&isFinite(p.value));if(!series.length)return'';
+  const vals=series.map(p=>p.value), minV=Math.min(...vals), maxV=Math.max(...vals);
   const refMin=series.find(p=>p.min!=null)?.min, refMax=series.find(p=>p.max!=null)?.max;
   const allVals=[...vals]; if(refMin!=null)allVals.push(refMin); if(refMax!=null)allVals.push(refMax);
   const rawMin=Math.min(...allVals), rawMax=Math.max(...allVals), pad=Math.max((rawMax-rawMin)*0.15,1); const min=rawMin-pad, max=rawMax+pad;
   const w=720,h=280,l=58,r=18,t=22,b=46; const x=i=>l+(series.length===1?(w-l-r)/2:i*(w-l-r)/(series.length-1)); const y=v=>t+(max-v)*(h-t-b)/(max-min);
   const inRange=p=>(p.min==null||p.value>=p.min)&&(p.max==null||p.value<=p.max); const unit=series[0].unit||''; const def=defaultTrendKey===selectedTrendKey;
-  let segs=''; for(let i=0;i<series.length-1;i++){const bad=!inRange(series[i])||!inRange(series[i+1]);segs+=`<line x1="${x(i)}" y1="${y(series[i].value)}" x2="${x(i+1)}" y2="${y(series[i+1].value)}" stroke="${bad?'#B24A3D':'#5C8A63'}" stroke-width="3" vector-effect="non-scaling-stroke"/>`}
+  let segs=''; for(let i=0;i<series.length-1;i++)segs+=`<line x1="${x(i)}" y1="${y(series[i].value)}" x2="${x(i+1)}" y2="${y(series[i+1].value)}" stroke="var(--primary)" stroke-width="3" vector-effect="non-scaling-stroke"/>`;
   const refLines=[refMin!=null?`<line x1="${l}" y1="${y(refMin)}" x2="${w-r}" y2="${y(refMin)}" stroke="#5C8A63" stroke-width="2" stroke-dasharray="5 4" vector-effect="non-scaling-stroke"/><text x="${w-r-4}" y="${y(refMin)-4}" font-size="10" fill="#5C8A63" text-anchor="end">low ${refMin}</text>`:'',refMax!=null?`<line x1="${l}" y1="${y(refMax)}" x2="${w-r}" y2="${y(refMax)}" stroke="#5C8A63" stroke-width="2" stroke-dasharray="5 4" vector-effect="non-scaling-stroke"/><text x="${w-r-4}" y="${y(refMax)-4}" font-size="10" fill="#5C8A63" text-anchor="end">high ${refMax}</text>`:''].join('');
-  
-  // High contrast themed Swimlanes background overlays
   let swimlanes='';
   if (refMin != null && refMax != null) {
     swimlanes += `<rect x="${l}" y="${y(refMax)}" width="${w-r-l}" height="${Math.max(0, y(refMin)-y(refMax))}" fill="var(--success)" opacity="0.06"/>`;
@@ -4260,22 +4284,29 @@ function renderTrendGraph(series){
     swimlanes += `<rect x="${l}" y="${t}" width="${w-r-l}" height="${Math.max(0, y(refMin)-t)}" fill="var(--success)" opacity="0.06"/>`;
     swimlanes += `<rect x="${l}" y="${y(refMin)}" width="${w-r-l}" height="${Math.max(0, (h-b)-y(refMin))}" fill="var(--danger)" opacity="0.05"/>`;
   }
-  
-  return `<div class="trend-graph-card"><div class="trend-graph-title"><span>📈 ${esc(series[0].name)} trend</span><span style="display:flex;gap:6px;align-items:center;flex-wrap:wrap"><button class="trend-default-btn ${def?'active':''}" onclick="${def?'clearDefaultTrendParam()':'setDefaultTrendParam(\''+selectedTrendKey+'\')'}">${def?'★ Default':'☆ Make default'}</button><span class="trend-graph-hint">Value (${esc(unit)}) by report date</span></span></div><svg class="trend-svg" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">${swimlanes}<line x1="${l}" y1="${t}" x2="${l}" y2="${h-b}" stroke="currentColor" opacity=".35"/><line x1="${l}" y1="${h-b}" x2="${w-r}" y2="${h-b}" stroke="currentColor" opacity=".35"/>${refLines}<text x="8" y="${t+8}" font-size="11" fill="currentColor">${maxV}</text><text x="8" y="${h-b}" font-size="11" fill="currentColor">${minV}</text>${segs}${series.map((p,i)=>`<circle cx="${x(i)}" cy="${y(p.value)}" r="5" fill="${inRange(p)?'#5C8A63':'#B24A3D'}"><title>${fmtDate(p.date)}: ${p.value} ${unit}</title></circle><text x="${x(i)}" y="${h-18}" font-size="10" fill="currentColor" text-anchor="middle">${fmtDate(p.date,{month:'short',day:'numeric'})}</text>`).join('')}</svg><div style="font-size:11px;color:var(--text-secondary);margin-top:6px">Green dots are within the reference range. Red dots are outside. Green dashed line(s) show the normal reference limit(s).</div></div>`;
+  const latest=series[series.length-1],previous=series[series.length-2];
+  const delta=previous?+(latest.value-previous.value).toFixed(2):null;
+  const change=delta==null?'First recorded value':`${delta>0?'+':''}${delta} ${unit} since ${fmtDate(previous.date,{month:'short',day:'numeric',year:'2-digit'})}`;
+  const status=latest.status==='normal'?'In range':latest.status==='high'?'Above range':latest.status==='low'?'Below range':'No range';
+  const labelEvery=Math.max(1,Math.ceil(series.length/5));
+  const points=series.map((p,i)=>{const tier=severityTier(p);const color=tier==='tier-concern'?'var(--danger)':tier==='tier-borderline'?'var(--warning)':tier==='tier-safe'?'var(--success)':'var(--text-secondary)';const label=(i===0||i===series.length-1||i%labelEvery===0)?`<text x="${x(i)}" y="${h-18}" font-size="10" fill="currentColor" text-anchor="middle">${fmtDate(p.date,{month:'short',day:'numeric'})}</text>`:'';return `<circle cx="${x(i)}" cy="${y(p.value)}" r="5.5" fill="${color}" stroke="var(--card)" stroke-width="2"><title>${fmtDate(p.date)}: ${p.value} ${unit} · ${p.status||'unknown'}</title></circle>${label}`}).join('');
+  return `<div class="trend-graph-card"><div class="trend-graph-title"><div class="trend-heading"><strong>${esc(series[0].name)}</strong><span>${series.length} dated result${series.length===1?'':'s'} · ${esc(unit||'unit not supplied')}</span></div><button class="trend-default-btn ${def?'active':''}" onclick="${def?'clearDefaultTrendParam()':'setDefaultTrendParam(\''+selectedTrendKey+'\')'}">${def?'Default marker':'Make default'}</button></div><div class="trend-summary"><div class="trend-summary-item"><span>Latest</span><strong>${latest.value} ${esc(unit)}</strong></div><div class="trend-summary-item"><span>Reference status</span><strong>${status}</strong></div><div class="trend-summary-item"><span>Change</span><strong class="trend-change">${esc(change)}</strong></div></div><svg aria-label="${esc(series[0].name)} values over time" class="trend-svg" role="img" viewBox="0 0 ${w} ${h}" preserveAspectRatio="xMidYMid meet">${swimlanes}<line x1="${l}" y1="${t}" x2="${l}" y2="${h-b}" stroke="currentColor" opacity=".35"/><line x1="${l}" y1="${h-b}" x2="${w-r}" y2="${h-b}" stroke="currentColor" opacity=".35"/>${refLines}<text x="8" y="${t+8}" font-size="11" fill="currentColor">${rawMax}</text><text x="8" y="${h-b}" font-size="11" fill="currentColor">${rawMin}</text>${segs}${points}</svg><div class="trend-graph-hint" style="margin-top:8px">Dot color reflects the reference status on that report. The connecting line shows direction only; it does not label a change as good or bad.</div></div>`;
 }
 function displayComparison(){
   const el=$('comparisonList');if(!currentAnalysis){el.innerHTML='';return}
   const reports=getHistory().filter(r=>Array.isArray(r.metrics)&&r.metrics.length).sort((a,b)=>new Date(a.date)-new Date(b.date));
-  if(reports.length<2){el.innerHTML='<div class="empty-state" style="grid-column:1/-1"><div class="ic">📈</div><p>Add at least two dated lab reports to see trends by report date.</p></div>';return}
+  if(reports.length<2){el.innerHTML='<div class="empty-state" style="grid-column:1/-1"><div class="ic">↗</div><p>Trends need at least two dated reports for this profile.</p><button class="btn-primary" onclick="resetAll()">Add another report</button></div>';return}
   const keys=[];reports.forEach(r=>(r.metrics||[]).forEach(m=>{if(!keys.some(k=>k.key===m.key))keys.push({key:m.key,name:m.name,unit:m.unit})}));
-  if(defaultTrendKey&&keys.some(k=>k.key===defaultTrendKey)&&!selectedTrendKey)selectedTrendKey=defaultTrendKey;
-  const graph=(selectedTrendKey&&keys.some(k=>k.key===selectedTrendKey))?renderTrendGraph(trendSeriesFor(selectedTrendKey)):`<div class="trend-empty-prompt">📈 Select a clinical parameter below to draw its graph. If you follow one marker regularly, click <strong>Make default</strong> on its graph so it appears automatically next time.</div>`;
-  const latest=reports[reports.length-1],prev=reports[reports.length-2];
-  const latestCards=(latest.metrics||[]).map(m=>{const p=(prev.metrics||[]).find(x=>x.key===m.key);let delta='<span style="font-size:11px;color:var(--text-secondary)">No value in previous dated report</span>';const bothNumeric=typeof m.value==='number'&&isFinite(m.value)&&p&&typeof p.value==='number'&&isFinite(p.value);if(p&&bothNumeric){const d=+(m.value-p.value).toFixed(2);delta=`<span style="font-weight:900;color:${d>0?'var(--danger)':d<0?'var(--success)':'var(--text-secondary)'}">${d>0?'▲':d<0?'▼':'▬'} ${Math.abs(d)} ${esc(m.unit)}</span><br><small style="color:var(--text-secondary)">vs ${p.value} on ${fmtDate(prev.date,{month:'short',day:'numeric',year:'2-digit'})}</small>`}else if(p){delta=`<small style="color:var(--text-secondary)">vs ${esc(String(p.value))} on ${fmtDate(prev.date,{month:'short',day:'numeric',year:'2-digit'})}</small>`}return`<div class="comparison-card"><div style="display:flex;justify-content:space-between;gap:8px"><strong><span class="trend-param-link" onclick="setTrendParam('${m.key}')">${esc(m.name)}</span></strong><span class="history-status ${m.status==='normal'?'ok':'warn'}">${m.status}</span></div><div style="font-size:22px;font-weight:900;margin:8px 0">${metricValueText(m)} <small style="font-size:11px;color:var(--text-secondary)">${esc(m.unit)}</small></div>${delta}</div>`}).join('');
-  let table=`<div style="grid-column:1/-1;margin-top:8px"><div class="section-title" style="margin:10px 0">📊 Trend table by report date</div><div style="overflow-x:auto;border:1px solid var(--border);border-radius:10px"><table style="width:100%;border-collapse:collapse;font-size:12px;min-width:${Math.max(520,reports.length*110+180)}px"><thead><tr><th style="position:sticky;left:0;background:var(--bg);z-index:1;text-align:left;padding:9px;border-bottom:1px solid var(--border)">Parameter</th>${reports.map(r=>`<th style="padding:9px;text-align:center;border-bottom:1px solid var(--border)">${fmtDate(r.date,{month:'short',day:'numeric',year:'2-digit'})}<br><span style="font-weight:500;color:var(--text-secondary)">${esc((r.fileName||'Report').slice(0,18))}</span></th>`).join('')}</tr></thead><tbody>`;
-  keys.forEach(k=>{table+=`<tr><td style="position:sticky;left:0;background:var(--card);backdrop-filter:blur(var(--glass-blur)) saturate(var(--glass-sat));-webkit-backdrop-filter:blur(var(--glass-blur)) saturate(var(--glass-sat));font-weight:800;padding:9px;border-bottom:1px solid var(--border)"><span class="trend-param-link" onclick="setTrendParam('${k.key}')">${esc(k.name)}</span>${k.unit?` <span style="font-weight:500;color:var(--text-secondary)">(${esc(k.unit)})</span>`:''}</td>`;reports.forEach(r=>{const m=(r.metrics||[]).find(x=>x.key===k.key);if(!m)table+='<td style="text-align:center;color:var(--text-secondary);padding:9px;border-bottom:1px solid var(--border)">—</td>';else{const col=m.status==='normal'?'var(--success)':m.status==='high'?'var(--danger)':'#5A7A9E';table+=`<td style="text-align:center;padding:9px;border-bottom:1px solid var(--border)"><span style="font-weight:900;color:${col}">${metricValueText(m)}</span></td>`}});table+='</tr>'});
-  table+='</tbody></table></div><p style="font-size:11px;color:var(--text-secondary);margin-top:8px">Click any parameter name to update the graph. Reports are sorted by extracted report date.</p></div>';
-  el.innerHTML=graph+latestCards+table;
+  const pointCount=key=>trendSeriesFor(key).filter(p=>typeof p.value==='number'&&isFinite(p.value)).length;
+  keys.sort((a,b)=>pointCount(b.key)-pointCount(a.key)||a.name.localeCompare(b.name));
+  if(!selectedTrendKey||!keys.some(k=>k.key===selectedTrendKey))selectedTrendKey=(defaultTrendKey&&keys.some(k=>k.key===defaultTrendKey)?defaultTrendKey:(keys.find(k=>pointCount(k.key)>=2)||keys[0])?.key);
+  if(!selectedTrendKey){el.innerHTML='<div class="empty-state" style="grid-column:1/-1"><p>No numeric markers are available to trend.</p></div>';return}
+  const controls=`<div class="trend-controls"><div class="trend-picker"><label for="trendMarkerSelect">Marker to graph</label><select id="trendMarkerSelect" onchange="setTrendParam(this.value)">${keys.map(k=>`<option value="${esc(k.key)}" ${k.key===selectedTrendKey?'selected':''}>${esc(k.name)} · ${pointCount(k.key)} date${pointCount(k.key)===1?'':'s'}</option>`).join('')}</select></div><div class="trend-controls-copy">Markers with the most dated results appear first. Set a default marker if you regularly follow the same value.</div></div>`;
+  const graph=renderTrendGraph(trendSeriesFor(selectedTrendKey));
+  let table=`<section class="trend-table-section"><h5>All values by report date</h5><p>Select a marker name to redraw the graph. Colors show each value's reference status on that report.</p><div class="trend-table-wrap"><table class="trend-table" style="min-width:${Math.max(560,reports.length*116+190)}px"><thead><tr><th>Marker</th>${reports.map(r=>`<th>${fmtDate(r.date,{month:'short',day:'numeric',year:'2-digit'})}<span class="trend-unit">${esc((r.fileName||'Report').slice(0,18))}</span></th>`).join('')}</tr></thead><tbody>`;
+  keys.forEach(k=>{table+=`<tr><td><button aria-current="${k.key===selectedTrendKey?'true':'false'}" class="trend-param-button" onclick="setTrendParam('${k.key}')">${esc(k.name)}</button>${k.unit?`<span class="trend-unit">${esc(k.unit)}</span>`:''}</td>`;reports.forEach(r=>{const m=(r.metrics||[]).find(x=>x.key===k.key);table+=m?`<td><span class="trend-value ${severityTier(m)}" title="${esc(m.status||'unknown')}">${metricValueText(m)}</span></td>`:'<td aria-label="No value">—</td>'});table+='</tr>'});
+  table+='</tbody></table></div></section>';
+  el.innerHTML=`<div class="trend-workspace">${controls}${graph}${table}</div>`;
 }
 function showCurrentAnalysis(){if(!currentAnalysis){currentAnalysis=getHistory().slice().sort((a,b)=>new Date(b.date)-new Date(a.date))[0]||null}if(!currentAnalysis){showToast('No current analysis yet. Upload and analyze a report first.','info');return}$('historySection').style.display='none';$('uploadSection').style.display='none';displayResults(currentAnalysis);setActiveNav('current');$('resultsSection').scrollIntoView({behavior:'smooth',block:'start'})}
 function showHistory(){$('uploadSection').style.display='none';$('resultsSection').classList.remove('active');$('historySection').style.display='block';setActiveNav('history');renderHistoryList()}function filteredHistory(){
@@ -4922,7 +4953,7 @@ async function sendFeedback(e){
     submitBtn.textContent='✉️ Send Feedback';
   }
 }
-Object.assign(window,{showHome,resetAll,showHistory,toggleTheme,openAddUserModal,closeAddUserModal,addUser,switchUser,logoutUser,removeFile,clearAllFiles,overrideImageQuality,setGroupMode,setUploadCategory,analyzeReport,switchTab,loadHistoryReport,openHistoryItem,deleteHistoryItem,clearHistory,printResults,setHistoryFilter,addTagFromInput,removeTag,onNoteInput,runAIReview,setTrendParam,setDefaultTrendParam,clearDefaultTrendParam,showCurrentAnalysis,exportReportPDF,changeReportCategory,firstRunAdd,firstRunSkip,toggleProv,flagMetric,confirmMetric,setHistoryView,initMedViewer,medZoom,medReset,medRotate,medInvert,medRedraw,idAnswerYes,idAnswerNew,idAnswerSkip,idCancelClarify,idConfirmClarify,idPickField,idCancelNew,idCreateNewProfile,closeIdentityModal,renderNav,setMetricsFilter,openMetricSheet,closeMetricSheet,metricSheetPick,toggleSheetProv,flagMetricByKey,askAIAboutMetrics,setDocMode,onDocPageImgLoad,onDocHitTap,openSelectedMetricsSheet,explainMetricsNow,explainWithGoogleAI,openFeedbackModal,closeFeedbackModal,previewFeedbackScreenshot,sendFeedback,showTrends,exportBackup,importBackup,getOcrDiagnostics});if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+Object.assign(window,{showHome,resetAll,showHistory,toggleTheme,openAddUserModal,closeAddUserModal,addUser,switchUser,logoutUser,removeFile,clearAllFiles,overrideImageQuality,setGroupMode,setUploadCategory,analyzeReport,switchTab,handleResultTabKey,loadHistoryReport,openHistoryItem,deleteHistoryItem,clearHistory,printResults,setHistoryFilter,addTagFromInput,removeTag,onNoteInput,runAIReview,setTrendParam,setDefaultTrendParam,clearDefaultTrendParam,showCurrentAnalysis,exportReportPDF,changeReportCategory,firstRunAdd,firstRunSkip,toggleProv,flagMetric,confirmMetric,setHistoryView,initMedViewer,medZoom,medReset,medRotate,medInvert,medRedraw,idAnswerYes,idAnswerNew,idAnswerSkip,idCancelClarify,idConfirmClarify,idPickField,idCancelNew,idCreateNewProfile,closeIdentityModal,renderNav,setMetricsFilter,openMetricSheet,closeMetricSheet,metricSheetPick,toggleSheetProv,flagMetricByKey,askAIAboutMetrics,setDocMode,setOriginalView,copyOriginalText,onDocPageImgLoad,onDocHitTap,openSelectedMetricsSheet,explainMetricsNow,explainWithGoogleAI,openFeedbackModal,closeFeedbackModal,previewFeedbackScreenshot,sendFeedback,showTrends,exportBackup,importBackup,getOcrDiagnostics});if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 
 // ---- PWA: register the service worker ----
 // Only runs on a real http(s) origin — service workers are unavailable (and

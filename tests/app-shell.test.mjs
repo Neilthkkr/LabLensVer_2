@@ -64,6 +64,7 @@ test('every button is wired and every inline handler resolves',()=>{
 test('result actions and tabs use one clear action with accessible state',()=>{
   assert.equal((html.match(/class="download-btn"/g)||[]).length,1,'avoid duplicate print and PDF actions');
   assert.match(html,/>Save or print report<\/button>/);
-  assert.equal((html.match(/\brole="tab"/g)||[]).length,5);
-  assert.equal((html.match(/\baria-selected="(?:true|false)"/g)||[]).length,5);
+  const resultTabs=html.match(/<div aria-label="Report views"[\s\S]*?<\/div>/)?.[0]||'';
+  assert.equal((resultTabs.match(/\brole="tab"/g)||[]).length,5);
+  assert.equal((resultTabs.match(/\baria-selected="(?:true|false)"/g)||[]).length,5);
 });
