@@ -22,8 +22,8 @@
   @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&display=swap');
     :root{
     --primary:#2B5A9C;--primary-light:#8FB1E0;--primary-dark:#2C5185;
-    --success:#2E8E5D;--danger:#D1584A;--warning:#B87016;--info:#4E97D1;
-    --bg:#EEF3F5;--card:rgba(255,255,255,.72);--text:#262B30;--text-secondary:#6B7480;--border:rgba(150,165,175,.28);
+    --success:#21754A;--danger:#B74335;--warning:#9A5B08;--info:#286FA8;
+    --bg:#EEF3F5;--card:rgba(255,255,255,.82);--text:#262B30;--text-secondary:#56616D;--border:rgba(115,135,148,.34);
     --shadow:0 1px 3px rgba(38,50,60,.07),0 1px 2px rgba(38,50,60,.05);
     --shadow-lg:0 12px 32px -6px rgba(38,50,60,.16),0 4px 10px -2px rgba(38,50,60,.08);
     --radius:18px;--radius-sm:11px;--user-badge:#2B5A9C;
@@ -81,7 +81,7 @@ body::before{
 .header-nav{display:grid;grid-template-columns:repeat(4,auto);justify-content:center;justify-items:center;gap:6px 8px;width:100%}
 .header-nav .nav-btn{white-space:nowrap}
 @media(max-width:480px){.header-nav{grid-template-columns:repeat(4,1fr)}.header-nav .nav-btn{width:100%;text-align:center;padding-left:4px;padding-right:4px;font-size:10.5px}}
-  .logo{display:flex;align-items:center;gap:12px;color:var(--text);text-decoration:none}.logo-icon{width:40px;height:40px;background-color:var(--primary-dark);border-radius:12px;display:grid;place-items:center;font-size:20px;background-image:radial-gradient(circle at 30% 25%, rgba(255,255,255,.42), rgba(255,255,255,0) 60%);border:1px solid rgba(255,255,255,.25);box-shadow:inset 0 1px 1px rgba(255,255,255,.35), 0 2px 8px rgba(20,40,45,.18)}.logo-text h1{font-size:18px}.logo-text span{font-size:10px;opacity:.7;color:var(--text-secondary)}
+  .logo{display:flex;align-items:center;gap:12px;color:var(--text);text-decoration:none}.logo-icon{width:40px;height:40px;background-color:var(--primary-dark);border-radius:12px;display:grid;place-items:center;font-size:20px;background-image:radial-gradient(circle at 30% 25%, rgba(255,255,255,.42), rgba(255,255,255,0) 60%);border:1px solid rgba(255,255,255,.25);box-shadow:inset 0 1px 1px rgba(255,255,255,.35), 0 2px 8px rgba(20,40,45,.18)}.logo-text h1{font-size:18px}.logo-text span{font-size:11px;opacity:.82;color:var(--text-secondary)}
   .user-badge{background:var(--user-badge);color:#fff;padding:6px 12px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap}.user-selector{display:flex;gap:8px;align-items:center;flex-wrap:wrap;flex-shrink:0}.user-select{padding:7px 10px;border-radius:8px;border:1px solid rgba(20,30,40,.12);background:rgba(20,30,40,.05);color:var(--text)}.user-select option{background:var(--card);color:var(--text)}
   button,.field,select,textarea{font-family:inherit}.nav-btn,.add-user-btn{background:rgba(20,30,40,.06);border:1px solid rgba(20,30,40,.1);color:var(--text);padding:8px 14px;border-radius:999px;cursor:pointer;font-size:12px;font-weight:700;flex-shrink:0;white-space:nowrap}.nav-btn:hover,.add-user-btn:hover{background:rgba(20,30,40,.11)}.theme-toggle:hover{background:rgba(20,30,40,.11)}
   .nav-btn{transition:transform .15s ease, background .15s ease, box-shadow .15s ease, opacity .15s ease;user-select:none;position:relative}
@@ -90,9 +90,11 @@ body::before{
   .user-info-section{display:none;background:rgba(43,90,156,0.05);border:1px solid rgba(43,90,156,.15);border-radius:var(--radius);padding:16px 24px;margin-bottom:24px;align-items:center;gap:16px}.user-avatar{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;background:var(--primary);color:white;font-weight:800}.user-details{flex:1}.user-name{font-weight:800;text-transform:capitalize}.data-badge{display:inline-block;margin-top:6px;margin-right:8px;padding:4px 10px;border-radius:6px;background:rgba(43,90,156,.1);color:var(--primary);font-size:11px;font-weight:800}
   .upload-section{display:grid;grid-template-columns:1fr 320px;gap:24px;margin-bottom:32px}@media(max-width:860px){.upload-section{grid-template-columns:1fr}.container{padding:16px}.hero h2{font-size:25px}}
   .card{background:var(--card);backdrop-filter:blur(var(--glass-blur)) saturate(var(--glass-sat));-webkit-backdrop-filter:blur(var(--glass-blur)) saturate(var(--glass-sat));border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}.card:hover{box-shadow:var(--shadow-lg)}.card-header{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;gap:12px;align-items:center}.card-header-icon{width:40px;height:40px;border-radius:10px;display:grid;place-items:center}.card-header h3{font-size:16px}.card-header p{font-size:12px;color:var(--text-secondary)}
-  .drop-zone{padding:8px;text-align:center;cursor:pointer}.drop-zone-inner{border:2px dashed var(--border);border-radius:var(--radius-sm);padding:34px 20px;margin:16px;transition:.2s}.drop-zone:hover .drop-zone-inner,.drop-zone.drag-over .drop-zone-inner{border-color:var(--primary);background:rgba(43,90,156,.05)}.drop-icon{width:64px;height:64px;margin:0 auto 16px;border-radius:16px;display:grid;place-items:center;background:rgba(43,90,156,.1);font-size:28px}.drop-zone p{color:var(--text-secondary);font-size:13px}.file-types{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:12px}.file-type-badge{background:var(--bg);padding:4px 10px;border-radius:6px;color:var(--text-secondary);font-size:11px;font-weight:700}
+  .drop-zone{padding:8px;text-align:center;cursor:pointer}.drop-zone-inner{border:2px dashed var(--border);border-radius:var(--radius-sm);padding:30px 20px 24px;margin:16px;transition:.2s}.drop-zone:hover .drop-zone-inner,.drop-zone.drag-over .drop-zone-inner{border-color:var(--primary);background:rgba(43,90,156,.05)}.drop-icon{width:64px;height:64px;margin:0 auto 16px;border-radius:16px;display:grid;place-items:center;background:rgba(43,90,156,.1);font-size:28px}.drop-zone p{color:var(--text-secondary);font-size:13px}.file-types{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:12px}.file-type-badge{background:var(--bg);padding:4px 10px;border-radius:6px;color:var(--text-secondary);font-size:11px;font-weight:700}
+  .capture-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px;max-width:420px;margin-inline:auto}.capture-choice{min-height:48px;border:1px solid var(--border);border-radius:10px;background:var(--card);color:var(--text);font-weight:850;font-size:13px;cursor:pointer;padding:10px 14px}.capture-choice.primary{background:var(--primary-dark);border-color:var(--primary-dark);color:#fff}.capture-choice:hover{border-color:var(--primary)}
   .action-buttons{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 16px 16px}.action-btn{padding:12px 14px;border-radius:10px;border:1px solid var(--border);background:var(--card);backdrop-filter:blur(var(--glass-blur)) saturate(var(--glass-sat));-webkit-backdrop-filter:blur(var(--glass-blur)) saturate(var(--glass-sat));color:var(--text);cursor:pointer;font-weight:700}.action-btn:hover{border-color:var(--primary);background:rgba(43,90,156,.04)}
-  .file-list-container{margin:0 16px 16px;padding:12px;background:var(--bg);border-radius:var(--radius-sm);max-height:250px;overflow:auto}.file-list-header{display:flex;justify-content:space-between;margin-bottom:10px}.file-list-count{font-size:12px;color:var(--primary);font-weight:800}.clear-btn{background:transparent;border:none;color:var(--danger);cursor:pointer;font-size:12px}.file-item{display:flex;gap:12px;align-items:center;background:var(--card);backdrop-filter:blur(var(--glass-blur)) saturate(var(--glass-sat));-webkit-backdrop-filter:blur(var(--glass-blur)) saturate(var(--glass-sat));border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:8px}.file-item-icon{width:40px;height:40px;border-radius:8px;display:grid;place-items:center;font-size:13px;font-weight:900}.pdf{background:rgba(178,74,61,.1);color:var(--danger)}.image{background:rgba(78,110,142,.1);color:var(--info)}.file-item-info{flex:1;min-width:0}.file-item-name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:13px;font-weight:800}.file-item-meta{font-size:11px;color:var(--text-secondary)}.remove-file-btn{border:none;background:var(--bg);color:var(--text-secondary);width:30px;height:30px;border-radius:6px;cursor:pointer}.remove-file-btn:hover{color:var(--danger)}
+  .file-list-container{margin:0 16px 16px;padding:12px;background:var(--bg);border-radius:var(--radius-sm);max-height:320px;overflow:auto}.file-list-header{display:flex;justify-content:space-between;margin-bottom:10px}.file-list-count{font-size:12px;color:var(--primary);font-weight:800}.clear-btn{min-height:44px;background:transparent;border:none;color:var(--danger);cursor:pointer;font-size:12px;padding:6px 8px}.file-item{display:flex;gap:12px;align-items:flex-start;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:8px}.file-item.quality-poor{border-color:rgba(183,67,53,.5);background:rgba(183,67,53,.06)}.file-item-icon{width:40px;height:40px;border-radius:8px;display:grid;place-items:center;font-size:13px;font-weight:900;flex:0 0 auto}.pdf{background:rgba(178,74,61,.1);color:var(--danger)}.image{background:rgba(78,110,142,.1);color:var(--info)}.file-item-info{flex:1;min-width:0}.file-item-name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:13px;font-weight:800}.file-item-meta{font-size:12px;line-height:1.45;color:var(--text-secondary);margin-top:2px}.quality-line{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:7px}.quality-badge{display:inline-flex;align-items:center;min-height:24px;padding:3px 8px;border-radius:999px;font-size:11px;font-weight:900}.quality-badge.good{background:rgba(33,117,74,.12);color:var(--success)}.quality-badge.warn{background:rgba(154,91,8,.12);color:var(--warning)}.quality-badge.poor{background:rgba(183,67,53,.12);color:var(--danger)}.quality-detail{font-size:12px;color:var(--text-secondary);overflow-wrap:anywhere}.quality-override{min-height:36px;border:1px solid var(--border);background:var(--card);color:var(--primary);border-radius:8px;padding:6px 10px;font-weight:800;cursor:pointer}.remove-file-btn{border:none;background:var(--bg);color:var(--text-secondary);width:44px;height:44px;border-radius:8px;cursor:pointer;flex:0 0 auto}.remove-file-btn:hover{color:var(--danger)}
+  @media(max-width:520px){.capture-actions{grid-template-columns:1fr}.drop-zone-inner{padding:24px 14px 18px;margin:10px}.file-item{gap:9px;padding:10px}.file-item-icon{width:36px;height:36px}}
   .step-row{display:flex;gap:14px;margin-bottom:18px}.step-num{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;color:#fff;font-weight:900;flex-shrink:0}.t{font-size:14px;font-weight:800}.d{font-size:12px;color:var(--text-secondary)}.test-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.test-pill{background:var(--bg);border-radius:8px;padding:8px;font-size:12px;font-weight:700}
   .analyze-section{text-align:center;margin-top:18px;padding:18px 0 0;border-top:1px dashed var(--border)}.type-picker{display:flex;justify-content:center;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}.type-picker-select{padding:8px 12px;border-radius:99px;border:1px solid var(--border);background:var(--card);backdrop-filter:blur(var(--glass-blur)) saturate(var(--glass-sat));-webkit-backdrop-filter:blur(var(--glass-blur)) saturate(var(--glass-sat));color:var(--text);font-weight:800}.group-toggle{display:none;flex-direction:column;align-items:center;gap:8px;margin-bottom:16px}.group-toggle.show{display:flex}.gt-options{display:inline-flex;gap:6px;background:var(--bg);border:1px solid var(--border);border-radius:99px;padding:4px}.gt-opt{border:none;background:transparent;color:var(--text-secondary);padding:8px 16px;border-radius:99px;cursor:pointer;font-weight:800}.gt-opt.active{background:var(--card);backdrop-filter:blur(var(--glass-blur)) saturate(var(--glass-sat));-webkit-backdrop-filter:blur(var(--glass-blur)) saturate(var(--glass-sat));color:var(--primary);box-shadow:var(--shadow)}.analyze-btn{padding:16px 48px;border:none;border-radius:14px;background:var(--primary-dark);color:white;font-size:16px;font-weight:900;cursor:pointer;box-shadow:var(--shadow)}.analyze-btn:disabled{opacity:.6;cursor:not-allowed}
   .progress-container{display:none;margin-bottom:32px}.progress-container.active{display:block}.progress-card{background:var(--card);backdrop-filter:blur(var(--glass-blur)) saturate(var(--glass-sat));-webkit-backdrop-filter:blur(var(--glass-blur)) saturate(var(--glass-sat));border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-lg);padding:38px;text-align:center}.spinner{width:56px;height:56px;margin:0 auto 20px;border:4px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin 1s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}.progress-text{font-weight:900}.progress-sub{color:var(--text-secondary);font-size:13px;margin-top:6px}.progress-bar-track{height:8px;background:var(--bg);border-radius:999px;margin:20px auto 8px;max-width:380px;overflow:hidden;border:1px solid var(--border)}.progress-bar-fill{height:100%;background:var(--primary);width:0}.progress-bar-pct{font-size:11px;color:var(--text-secondary);font-weight:800}
@@ -240,6 +242,12 @@ body::before{
 
   .analysis-audit{background:rgba(78,110,142,.08);border:1px solid rgba(78,110,142,.22);border-radius:10px;padding:12px 14px;margin-bottom:16px;font-size:12.5px;line-height:1.55}
   .analysis-audit strong{color:var(--primary)}
+  .verification-card{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:15px 16px;margin-bottom:16px;border:1px solid rgba(184,134,62,.35);border-radius:12px;background:rgba(184,134,62,.08)}
+  .verification-card.ready{border-color:rgba(46,142,93,.3);background:rgba(46,142,93,.08)}
+  .verification-copy{display:flex;gap:11px;min-width:0}.verification-icon{width:34px;height:34px;display:grid;place-items:center;flex:0 0 auto;border-radius:10px;background:var(--card);font-size:18px}.verification-title{font-size:14px;font-weight:900;margin-bottom:3px}.verification-detail{font-size:12px;line-height:1.55;color:var(--text-secondary)}
+  .verification-action{flex:0 0 auto;min-height:44px;padding:9px 14px;border-radius:10px;border:0;background:var(--primary-dark);color:#fff;font-family:inherit;font-size:12px;font-weight:800;cursor:pointer}
+  .review-badge{display:inline-flex;align-items:center;gap:4px;margin-top:6px;padding:4px 8px;border-radius:999px;background:rgba(184,134,62,.12);color:var(--warning);font-size:11px;font-weight:900}.review-confirm{margin-left:7px;min-height:44px;border:0;background:transparent;color:var(--primary);font-family:inherit;font-size:11px;font-weight:800;text-decoration:underline;cursor:pointer;padding:8px 4px}
+  @media(max-width:600px){.verification-card{flex-direction:column}.verification-action{width:100%}}
 
   .trend-empty-prompt{grid-column:1/-1;background:rgba(43,90,156,0.06);border:1px solid rgba(43,90,156,.18);border-radius:12px;padding:18px;text-align:center;color:var(--text-secondary);font-size:13px;line-height:1.6}
   .trend-default-btn{font-size:12px;padding:6px 10px;border-radius:999px;border:1px solid var(--border);background:var(--card);backdrop-filter:blur(var(--glass-blur)) saturate(var(--glass-sat));-webkit-backdrop-filter:blur(var(--glass-blur)) saturate(var(--glass-sat));color:var(--text-secondary);cursor:pointer;font-weight:800}.trend-default-btn.active{background:rgba(46,142,93,.12);color:var(--success);border-color:rgba(46,142,93,.3)}
@@ -345,6 +353,7 @@ body::before{
     .hero h2{ font-size:22px; letter-spacing:-.5px; }
     .hero p{ font-size:13.5px; }
     .container{ padding:14px; }
+    input,select,textarea{font-size:16px!important}
   }
 
   /* ================= §6: Metric Detail View & Lasso Select Mode =================
@@ -500,7 +509,7 @@ body::before{
     background: transparent !important;
     border: none !important;
     box-shadow: none !important;
-    padding: 18px 0 0 !important;
+    padding: 18px 12px 0 !important;
     border-top: 1px dashed var(--border) !important;
     border-radius: 0 !important;
     backdrop-filter: none !important;
@@ -525,8 +534,9 @@ body::before{
 <div class="upcoming" id="upcomingStrip" style="display:none"></div>
 <section class="upload-section" id="uploadSection">
 <div class="card"><div class="card-header"><div class="card-header-icon" style="background:rgba(43,90,156,.1);color:var(--primary)">⬆️</div><div><h3>Upload Reports &amp; Scans</h3><p>Lab PDFs or clear images of blood/urine panels (PNG/JPG/WEBP/BMP)</p></div></div>
-<div class="drop-zone" id="dropZone"><div class="drop-zone-inner"><div class="drop-icon">📄</div><h4>Click here to upload your file for analysis</h4><p>or click to browse — multiple files supported</p><div class="file-types"><span class="file-type-badge">PDF</span><span class="file-type-badge">PNG</span><span class="file-type-badge">JPG</span><span class="file-type-badge">WEBP</span><span class="file-type-badge">BMP</span></div></div></div>
+<div aria-label="Add a lab report" class="drop-zone" id="dropZone" role="button" tabindex="0"><div class="drop-zone-inner"><div class="drop-icon" aria-hidden="true">📄</div><h4>Add a lab report</h4><p>Use a PDF when available—the original text is usually more accurate than a photo.</p><div class="capture-actions"><button class="capture-choice primary" id="takePhotoBtn" type="button">Take a clear photo</button><button class="capture-choice" id="browseFilesBtn" type="button">Choose PDF or image</button></div><div class="file-types"><span class="file-type-badge">PDF</span><span class="file-type-badge">PNG</span><span class="file-type-badge">JPG</span><span class="file-type-badge">WEBP</span><span class="file-type-badge">BMP</span></div></div></div>
 <input accept=".pdf,.png,.jpg,.jpeg,.webp,.bmp,image/*,application/pdf" id="fileInput" multiple="" style="display:none" type="file"/>
+<input accept="image/*" capture="environment" id="captureInput" style="display:none" type="file"/>
 <div id="previewArea" style="display:none"><div class="file-list-container"><div class="file-list-header"><span class="file-list-count" id="fileListCount"></span><button class="clear-btn" onclick="clearAllFiles()">🗑 Clear all</button></div><div id="fileList"></div></div></div>
 <section class="analyze-section" id="analyzeSection" style="display:none"><div class="type-picker"><span style="font-size:12px;color:var(--text-secondary);font-weight:800">Report type:</span><select class="type-picker-select" id="uploadCatSelect" onchange="setUploadCategory(this.value)"><option value="auto">✨ Auto-detect</option></select><span id="typePickerHint" style="font-size:11px;color:var(--text-secondary)">We'll guess from the content unless you choose.</span></div><div class="group-toggle" id="groupToggle"><span style="font-size:12px;color:var(--text-secondary);font-weight:800">When analyzing multiple files:</span><div class="gt-options"><button class="gt-opt" id="gtCombine" onclick="setGroupMode('combine')">📚 Merge into one report</button><button class="gt-opt active" id="gtSeparate" onclick="setGroupMode('separate')">🗂 Separate report per file (recommended)</button></div></div><button class="analyze-btn" id="analyzeBtn" onclick="analyzeReport()">✨ Analyze</button></section>
 <section class="progress-container" id="progressSection"><div class="progress-card"><div class="spinner"></div><div class="progress-text" id="progressText">Extracting information...</div><div class="progress-sub" id="progressSub">Reading files, running OCR, and interpreting parameters...</div><div class="progress-bar-track"><div class="progress-bar-fill" id="progressBarFill"></div></div><div class="progress-bar-pct" id="progressBarPct">0%</div></div></section>
@@ -564,7 +574,7 @@ body::before{
 </div></section></div>
 
 <section class="results-section" id="resultsSection"><div class="result-header" id="resultHeader"><div><h3>✓ Analysis Complete!</h3><p id="resultDate">Analyzed</p></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="download-btn" onclick="exportReportPDF()">📄 Save / PDF</button><button class="download-btn" onclick="printResults()">🖨 Print</button></div></div><div class="tier-legend"><span class="tier-legend-item"><span class="tier-dot" style="background:var(--neon-concern)"></span>Red — outside the normal reference range</span><span class="tier-legend-item"><span class="tier-dot" style="background:var(--neon-borderline)"></span>Yellow — borderline, close to one edge of the range</span><span class="tier-legend-item"><span class="tier-dot" style="background:var(--neon-safe)"></span>Green — safely within the normal range</span><span class="tier-legend-item"><span class="tier-dot" style="background:var(--neon-unknown)"></span>Grey — no reference range available (informational only)</span></div><div class="results-body"><div class="tabs" id="resultTabs"><button class="tab-btn active" data-tab="summary" onclick="switchTab('summary',this)">📋 Summary</button><button class="tab-btn" data-tab="detailed" onclick="switchTab('detailed',this)">📑 Details</button><button class="tab-btn" data-tab="document" onclick="switchTab('document',this)">📄 Document</button><button class="tab-btn" data-tab="comparison" onclick="switchTab('comparison',this)">⇄ Trends</button><button class="tab-btn" data-tab="recommendations" onclick="switchTab('recommendations',this)">💡 Tips</button></div>
-<div class="tab-content active" id="tab-summary"><div class="report-type-bar" id="reportTypeBar"></div><div id="demoNote"></div><div class="health-status-card" id="healthStatusDisplay"></div><div class="layman" id="laymanCard"></div><div id="aiReviewCard"></div><div class="tags-notes-card" id="tagsNotesCard"></div><div class="section-title">⚡ Quick Overview</div><div class="quick-metrics-summary" id="quickMetricsSummary"></div></div>
+<div class="tab-content active" id="tab-summary"><div class="report-type-bar" id="reportTypeBar"></div><div id="demoNote"></div><div id="verificationCard"></div><div class="health-status-card" id="healthStatusDisplay"></div><div class="layman" id="laymanCard"></div><div id="aiReviewCard"></div><div class="tags-notes-card" id="tagsNotesCard"></div><div class="section-title">⚡ Quick Overview</div><div class="quick-metrics-summary" id="quickMetricsSummary"></div></div>
 <div class="tab-content" id="tab-detailed"><div class="section-title">🧫 Detailed Health Parameters</div><div id="metricsList"></div></div>
 <div class="tab-content" id="tab-document"><div class="section-title">📄 Captured Text</div><div id="documentView"></div></div>
 <div class="tab-content" id="tab-comparison"><div class="section-title">⇄ Comparison with Previous Reports</div><div class="comparison-grid" id="comparisonList"></div></div>
@@ -613,7 +623,7 @@ body::before{
 </div>
 <div id="idClarifyStage" style="display:none">
 <div class="identity-clarify">
-<h5>🧭 Which details should we trust?</h5>
+<h4>Which details should we trust?</h4>
 <div id="idChoices"></div>
 <div class="identity-note">Choose whether to keep what you entered in your profile or use what the report shows. Your choice updates the active profile, and this report is saved to it.</div>
 </div>
@@ -812,6 +822,7 @@ const STANDARD_RANGES = {
   'absolute monocyte':{name:'Absolute Monocyte Count',min:0.2,max:1.0,unit:'10^3/uL',group:'blood',abbr:['amc']},
   'absolute eosinophil':{name:'Absolute Eosinophil Count',min:0.02,max:0.5,unit:'10^3/uL',group:'blood',abbr:['aec']},
   'absolute basophil':{name:'Absolute Basophil Count',min:0,max:0.1,unit:'10^3/uL',group:'blood',abbr:[]},
+  'neutrophil lymphocyte ratio':{name:'Neutrophil/Lymphocyte Ratio',min:null,max:null,unit:'ratio',group:'blood',abbr:['nlr']},
   'platelet':{name:'Platelet Count',min:150,max:410,unit:'10^3/uL',group:'blood',abbr:['plt']},
   'mean platelet volume':{name:'Mean Platelet Volume',min:7.2,max:11.7,unit:'fL',group:'blood',abbr:['mpv']},
   'plateletcrit':{name:'Plateletcrit',min:0.2,max:0.36,unit:'%',group:'blood',abbr:['pct']},
@@ -1307,6 +1318,8 @@ const ALIASES = {
   'gamma gt (ggtp)':'gamma gt','ggtp':'gamma gt','ggt':'gamma gt',
   'alkaline phosphatase, serum':'alkaline phosphatase',
   'proteins, serum':'total protein','total proteins':'total protein','serum protein':'total protein',
+  'platelet count':'platelet',
+  'neutrophil lymphocyte ratio':'neutrophil lymphocyte ratio',
   'serum albumin':'albumin',
   'thyroid stimulating hormone':'tsh',
   'glycosylated hemoglobin':'hba1c','glycated haemoglobin':'hba1c','glycosylated haemoglobin':'hba1c',
@@ -1559,7 +1572,7 @@ function colonValue(dataStr){
 }
 
 // Lines that are annotations, not data — skip while assembling a record.
-const METHOD_RE=/^\(?\s*(serum|plasma|calculated|diazo|biuret|method|bromocresol|enzymatic|ifcc|turbidimetry|citrated|bpb|pnpp|bcg|w\/o|p-nitrophenyl|capillary electrophoresis|electrochemiluminescence|according to|first trimester|second and|reference ranges are)/i;
+const METHOD_RE=/^\(?\s*(serum|plasma|calculated|diazo|biuret|method|multipoint|bromocresol|enzymatic|ifcc|turbidimetry|citrated|bpb|pnpp|bcg|w\/o|p-nitrophenyl|capillary electrophoresis|electrochemiluminescence|according to|first trimester|second and|reference ranges are)/i;
 const STOP_RE=/^\s*(interpretation|note|remark|caution|comment|method|test done|kindly|increased|reports? to follow|end of report|instant\s*:|page\s*:|\d+\.\s|\*|-{3,})/i;
 // Header / demographic / specimen / timestamp lines. These contain numbers (dates, IDs,
 // lab numbers) that must NEVER be picked up as a test result.
@@ -1671,6 +1684,47 @@ function assembleWrappedResultLabels(inputLines){
   }
   return out.filter((_,i)=>!consumed.has(i));
 }
+// Some laboratory PDF generators place the analyte label on one visual row and
+// its value/range on the next. Rejoin only a recognized label with an adjacent
+// measurement row. This is deliberately stricter than the parser's forward
+// scan: it cannot turn arbitrary prose or a section heading into a result.
+function assembleSplitResultRows(inputLines){
+  const out=inputLines.slice(), consumed=new Set();
+  const measurement=/[<>]?\s*-?\d+(?:\.\d+)?\s*(?:10\s*(?:\^|[³⁶⁹])|[a-zµ%/])|[<>]?\s*-?\d+(?:\.\d+)?\s+[-–—]?\s*-?\d+(?:\.\d+)?/i;
+  for(let i=0;i<out.length-1;i++){
+    if(consumed.has(i)||/\d/.test(out[i]))continue;
+    const genericProtein=/^protein$/i.test(out[i]);
+    const std=matchTest(out[i])||(genericProtein?std_('total protein'):null);
+    if(!std)continue;
+    for(let j=i+1;j<=Math.min(out.length-1,i+2);j++){
+      const next=out[j];
+      if(!next||HEADER_RE.test(next)||STOP_RE.test(next))break;
+      if(!measurement.test(next)){
+        if(METHOD_RE.test(next))continue;
+        break;
+      }
+      // A following row that already names a known analyte belongs to itself
+      // (for example a section heading "HbA1c" before "HBA1C# 5.5 %").
+      const firstNumber=next.search(/[<>]?\s*-?\d/);
+      const nextLabel=firstNumber>0?next.slice(0,firstNumber):'';
+      if(nextLabel && matchTest(nextLabel) && !METHOD_RE.test(next))break;
+      let valueRow=next;
+      if(METHOD_RE.test(next)){
+        // Method names can contain numbers ("Pyridoxal-5-") before the real
+        // result. Retain only the first number that is directly followed by a
+        // measurement unit, plus the reference range after it.
+        const measured=/(?:^|\s)([<>]?\s*-?\d+(?:\.\d+)?)(?=\s+(?:10\s*(?:\^|[³⁶⁹])|[a-zµ%/]))/i.exec(next);
+        if(!measured)break;
+        valueRow=next.slice(measured.index).trim();
+      }
+      const label=genericProtein?'Total Protein':out[i];
+      out[i]=`${label} ${valueRow}`.replace(/\s+/g,' ').trim();
+      consumed.add(j);
+      break;
+    }
+  }
+  return out.filter((_,i)=>!consumed.has(i));
+}
 function parseReportText(text,profile){
   text=flattenMarkdownTableRows(text);
   const P=profile||{sex:null,age:null};
@@ -1688,7 +1742,9 @@ function parseReportText(text,profile){
     if(/^[A-Z]{1,3}$/.test(t))continue;               // watermark shards: PR, OV, AL, N…
     lines.push(t);
   }
-  lines=assembleWrappedResultLabels(lines);
+  // Resolve the explicit "label on row A, value on row B" shape first so a
+  // numeric method row cannot be mistaken for the first half of the next label.
+  lines=assembleWrappedResultLabels(assembleSplitResultRows(lines));
 
   const PROSE_START=/^\s*(interpretation|note\b|notes\b|remark|comment|caution|reference\b|interference|increased .* may be due to|decreased .* may be due to|clinical significance|test done|kindly)/i;
   // A line that genuinely looks like a result row: a number carrying a unit or a range.
@@ -1762,6 +1818,7 @@ function parseReportText(text,profile){
     const hasMeasure=/\d\s*(?:g\/|mg|gm|ng|pg|pmol|nmol|umol|u\/|miu|uiu|mmol|ug|iu|%|fL|sec|mil|cell|10\s*\^|\/u?l|\/m[lL]|mm\/hr)/i.test(line)||/\d\s*[-–]\s*\d/.test(line)||/[<>]\s*=?\s*\d/.test(line);
     if(wordCount>=9 && !hasMeasure)continue;   // prose, not a result row
     if(/electrophoresis|examination|profile|panel|\bmini\b|chemical|capillary|routine exam/i.test(line)&&!hasMeasure)continue;
+    if(/\b(?:indicative|suggestive|associated|consistent)\s+(?:of|with)\b|\bindicates?\b/i.test(line))continue;
 
     // A few PDF encodings lose the comparison glyph in "Normal: > 90" and
     // expose it as "Normal: - 90". The measured value is still unambiguous;
@@ -1832,7 +1889,7 @@ function parseReportText(text,profile){
     // value = a number followed by (whitespace then) a unit token or end-of-string.
     // Unit token may itself start with a digit (e.g. "10^3/ul"), so allow that.
     // value = number followed by its unit, by end-of-line, or by a "--" no-range placeholder
-    const vRe=/(?:^|[\sHLA:])(-?\d+(?:\.\d+)?)(?=\s+(?:10\s*\^|[a-zµ%\/])|\s*(?:<=|>=|=<|=>|<|>|≤|≥)|\s*[-–—]{0,3}\s*$)/gi;
+    const vRe=/(?:^|[\sHLA:])(-?\d+(?:\.\d+)?)(?=\s+(?:10\s*(?:\^|[³⁶⁹])|[a-zµ%\/])|\s*(?:<=|>=|=<|=>|<|>|≤|≥)|\s*[-–—]{0,3}\s*$)/gi;
     let vm, lastS=-1,lastE=-1, unitS=-1,unitE=-1;
     while((vm=vRe.exec(preRange))){
       const s0=vm.index+vm[0].indexOf(vm[1]), e0=s0+vm[1].length;
@@ -2379,7 +2436,7 @@ function recommendations(high,low){
   add('Verify before acting','OCR and automatic parsing can misread values. Always check these numbers against your original report before making any decision.');
   return rec;
 }
-function layman(metrics,high,low){if(!metrics.length)return"I couldn't identify specific lab values. Try a clearer scan or a text-based PDF.";let out=[];if(high.length+low.length)out.push(`⚠️ Out of <strong>${metrics.length}</strong> recognized results, <strong>${high.length+low.length}</strong> are outside range: ${esc([...high,...low].map(m=>m.name).join(', '))}.`);else out.push(`✅ Great news: all <strong>${metrics.length}</strong> recognized results are within the expected range.`);out.push('<br><br>📌 <strong>Bottom line:</strong> '+(high.length+low.length?'Please review the out-of-range values with a qualified healthcare provider.':'Keep maintaining your healthy habits and routine follow-ups.'));return out.join('')}
+function layman(metrics,high,low){if(!metrics.length)return"I couldn't identify specific lab values. Try a clearer scan or a text-based PDF.";let out=[];if(high.length+low.length)out.push(`Out of <strong>${metrics.length}</strong> recognized results, <strong>${high.length+low.length}</strong> are outside range: ${esc([...high,...low].map(m=>m.name).join(', '))}.`);else out.push(`None of the <strong>${metrics.length}</strong> recognized results are outside the selected reference ranges.`);out.push('<br><br><strong>What this means:</strong> '+(high.length+low.length?'Review the out-of-range values against the original report and discuss them with a qualified healthcare provider.':'This is an extraction summary, not a diagnosis. Verify the values against the original report and continue routine follow-up.'));return out.join('')}
 let currentUser=null,users=[],uploadedFiles=[],currentAnalysis=null,groupMode='separate',uploadCategory='auto',historyFilter={q:'',status:'all'},activeResultTab='summary',selectedTrendKey=null,defaultTrendKey=LS.get('defaultTrendKey_'+(currentUser||'guest'),null),metricsFilter=null;
 const historyKey=()=>`health_reports_${currentUser||'guest'}`;function getHistory(){return LS.get(historyKey(),[])}function setHistory(arr){LS.set(historyKey(),arr)}
 
@@ -2477,10 +2534,42 @@ function profileContext(reportDate){
 function logoutUser(){switchUser('');$('userSelect').value='';showToast('Logged out','info')}
 function toggleTheme(){const next=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',next);LS.set('healthTheme',next);updateThemeIcon()}function updateThemeIcon(){$('themeIcon').textContent=document.documentElement.getAttribute('data-theme')==='dark'?'☀️':'🌙'}
 function classifyType(file){return file.type==='application/pdf'||/\.pdf$/i.test(file.name)?'pdf':'image'}
-function handleFiles(list){const arr=Array.from(list||[]);let added=0;for(const file of arr){if(!(file.type==='application/pdf'||file.type.startsWith('image/')||/\.(pdf|png|jpe?g|webp|bmp)$/i.test(file.name)))continue;if(file.size>50*1024*1024){showToast(`${file.name} is too large`,'error');continue}uploadedFiles.push({file,type:classifyType(file),name:file.name,size:file.size});added++}if(added){updateFilePreview();showToast(`${added} file${added===1?'':'s'} added`,'success')}else showToast('No supported files were added','error')}
-function updateFilePreview(){const has=uploadedFiles.length>0;$('previewArea').style.display=has?'block':'none';$('analyzeSection').style.display=has?'block':'none';$('fileListCount').textContent=`${uploadedFiles.length} file${uploadedFiles.length===1?'':'s'} selected`;$('fileList').innerHTML=uploadedFiles.map((f,i)=>`<div class="file-item"><div class="file-item-icon ${f.type==='pdf'?'pdf':'image'}">${f.type==='pdf'?'PDF':'IMG'}</div><div class="file-item-info"><div class="file-item-name">${esc(f.name)}</div><div class="file-item-meta">${(f.size/1024).toFixed(1)} KB</div></div><button class="remove-file-btn" onclick="removeFile(${i})">✕</button></div>`).join('');$('groupToggle').classList.toggle('show',uploadedFiles.length>1);$('analyzeBtn').textContent=uploadedFiles.length>1?(groupMode==='separate'?`✨ Analyze ${uploadedFiles.length} files → ${uploadedFiles.length} reports`:`✨ Analyze ${uploadedFiles.length} files → 1 report`):'✨ Analyze';updateUserInfoDisplay()}
+function gradeImageQualityStats({width,height,mean,contrast,sharpness}){
+  const issues=[],blocking=[],shortEdge=Math.min(width,height),ratio=width/Math.max(1,height);
+  if(shortEdge<700)blocking.push('image resolution is too low');else if(shortEdge<1000)issues.push('resolution is lower than ideal');
+  if(mean<38)blocking.push('photo is too dark');else if(mean<58)issues.push('photo may be too dark');
+  if(mean>242)blocking.push('photo is overexposed');else if(mean>228)issues.push('photo may be overexposed');
+  if(contrast<16)blocking.push('text contrast is too low');else if(contrast<27)issues.push('text contrast is low');
+  if(sharpness<8)issues.push('photo may be blurred');
+  if(ratio<.48||ratio>2.05)issues.push('report may be cropped');
+  const all=[...blocking,...issues];
+  return {level:blocking.length?'poor':(issues.length?'warn':'good'),blocking:blocking.length>0,issues:all,width,height,overridden:false,
+    summary:all.length?all.join('; '):'clear enough for on-device OCR'};
+}
+async function assessImageQuality(file){
+  const url=URL.createObjectURL(file);
+  try{
+    const img=await new Promise((resolve,reject)=>{const el=new Image();el.onload=()=>resolve(el);el.onerror=reject;el.src=url});
+    const width=img.naturalWidth||img.width,height=img.naturalHeight||img.height;
+    const scale=Math.min(1,480/Math.max(width,height));
+    const canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.round(width*scale));canvas.height=Math.max(1,Math.round(height*scale));
+    const ctx=canvas.getContext('2d',{willReadFrequently:true});ctx.drawImage(img,0,0,canvas.width,canvas.height);
+    const data=ctx.getImageData(0,0,canvas.width,canvas.height).data,gray=new Float32Array(canvas.width*canvas.height);
+    let sum=0,sumSq=0;
+    for(let p=0,j=0;p<data.length;p+=4,j++){const g=.299*data[p]+.587*data[p+1]+.114*data[p+2];gray[j]=g;sum+=g;sumSq+=g*g}
+    const count=gray.length,mean=sum/count,contrast=Math.sqrt(Math.max(0,sumSq/count-mean*mean));
+    let edge=0,edgeN=0;
+    for(let y=1;y<canvas.height-1;y+=2)for(let x=1;x<canvas.width-1;x+=2){const i=y*canvas.width+x;const lap=Math.abs(4*gray[i]-gray[i-1]-gray[i+1]-gray[i-canvas.width]-gray[i+canvas.width]);edge+=lap;edgeN++}
+    return gradeImageQualityStats({width,height,mean,contrast,sharpness:edge/Math.max(1,edgeN)});
+  }catch(e){return{level:'warn',blocking:false,issues:['quality check unavailable'],width:0,height:0,overridden:false,summary:'quality check unavailable—verify OCR carefully'}}
+  finally{URL.revokeObjectURL(url)}
+}
+async function handleFiles(list,options={}){const arr=Array.from(list||[]);let added=0;for(const file of arr){if(!(file.type==='application/pdf'||file.type.startsWith('image/')||/\.(pdf|png|jpe?g|webp|bmp)$/i.test(file.name)))continue;if(file.size>50*1024*1024){showToast(`${file.name} is too large`,'error');continue}const entry={file,type:classifyType(file),name:file.name,size:file.size,captured:!!options.camera};if(entry.type==='image'){entry.quality={level:'checking',blocking:true,issues:[],summary:'checking photo quality…'};uploadedFiles.push(entry);updateFilePreview();entry.quality=await assessImageQuality(file)}else uploadedFiles.push(entry);added++;updateFilePreview()}if(added){const blocked=blockingImageFiles().length;showToast(blocked?`${blocked} photo${blocked===1?'':'s'} need attention before analysis`:`${added} file${added===1?'':'s'} ready` ,blocked?'error':'success')}else showToast('No supported files were added','error')}
+function blockingImageFiles(){return uploadedFiles.filter(f=>f.type==='image'&&f.quality&&f.quality.blocking&&!f.quality.overridden)}
+function overrideImageQuality(i){const f=uploadedFiles[i];if(!f||!f.quality)return;f.quality.overridden=true;updateFilePreview();showToast('Photo will be analyzed—verify every extracted value','info')}
+function updateFilePreview(){const has=uploadedFiles.length>0,blocked=blockingImageFiles();$('previewArea').style.display=has?'block':'none';$('analyzeSection').style.display=has?'block':'none';$('fileListCount').textContent=`${uploadedFiles.length} file${uploadedFiles.length===1?'':'s'} selected${blocked.length?` · ${blocked.length} needs a retake`:''}`;$('fileList').innerHTML=uploadedFiles.map((f,i)=>{const q=f.quality;const qHtml=q?`<div class="quality-line"><span class="quality-badge ${q.level==='checking'?'warn':q.level}">${q.level==='good'?'Ready':q.level==='poor'?'Retake recommended':q.level==='checking'?'Checking…':'Check photo'}</span>${q.overridden?'<span class="quality-badge warn">Using anyway</span>':''}</div><div class="quality-detail">${esc(q.summary||'')}</div>${q.blocking&&!q.overridden?`<button class="quality-override" type="button" onclick="event.stopPropagation();overrideImageQuality(${i})">Use anyway</button>`:''}`:'';return`<div class="file-item ${q&&q.level==='poor'&&!q.overridden?'quality-poor':''}"><div class="file-item-icon ${f.type==='pdf'?'pdf':'image'}">${f.type==='pdf'?'PDF':'IMG'}</div><div class="file-item-info"><div class="file-item-name">${esc(f.name)}</div><div class="file-item-meta">${(f.size/1024).toFixed(1)} KB${q&&q.width?` · ${q.width}×${q.height}px`:''}</div>${qHtml}</div><button aria-label="Remove ${esc(f.name)}" class="remove-file-btn" onclick="removeFile(${i})">✕</button></div>`}).join('');$('groupToggle').classList.toggle('show',uploadedFiles.length>1);const btn=$('analyzeBtn');btn.disabled=blocked.length>0;btn.title=blocked.length?'Retake the photo or choose Use anyway first':'';btn.textContent=blocked.length?`Fix ${blocked.length} photo${blocked.length===1?'':'s'} before analysis`:(uploadedFiles.length>1?(groupMode==='separate'?`Analyze ${uploadedFiles.length} files → ${uploadedFiles.length} reports`:`Analyze ${uploadedFiles.length} files → 1 report`):'Analyze report');updateUserInfoDisplay()}
 function removeFile(i){uploadedFiles.splice(i,1);updateFilePreview()}function clearAllFiles(){uploadedFiles=[];updateFilePreview()}function setGroupMode(m){groupMode=m;$('gtCombine').classList.toggle('active',m==='combine');$('gtSeparate').classList.toggle('active',m==='separate');updateFilePreview()}function setUploadCategory(k){uploadCategory=k||'auto';LS.set('uploadCategory_'+(currentUser||'guest'),uploadCategory);$('typePickerHint').textContent=uploadCategory==='auto'?"We'll guess from the content unless you choose.":`Forcing: ${catMeta(uploadCategory).label}`}
-function wireUpload(){const dz=$('dropZone'),inp=$('fileInput');dz.onclick=()=>inp.click();inp.onchange=e=>{handleFiles(e.target.files);inp.value=''};['dragenter','dragover'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.add('drag-over')}));['dragleave','drop'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.remove('drag-over')}));dz.addEventListener('drop',e=>handleFiles(e.dataTransfer.files))}
+function wireUpload(){const dz=$('dropZone'),inp=$('fileInput'),capture=$('captureInput'),browse=$('browseFilesBtn'),take=$('takePhotoBtn');const openBrowse=()=>inp.click();dz.onclick=e=>{if(e.target.closest('button'))return;openBrowse()};dz.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openBrowse()}};browse.onclick=e=>{e.stopPropagation();openBrowse()};take.onclick=e=>{e.stopPropagation();capture.click()};inp.onchange=async e=>{await handleFiles(e.target.files);inp.value=''};capture.onchange=async e=>{await handleFiles(e.target.files,{camera:true});capture.value=''};['dragenter','dragover'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.add('drag-over')}));['dragleave','drop'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.remove('drag-over')}));dz.addEventListener('drop',e=>handleFiles(e.dataTransfer.files))}
 async function fileToDataURL(file){return new Promise((res,rej)=>{const fr=new FileReader();fr.onload=()=>res(fr.result);fr.onerror=()=>rej(fr.error);fr.readAsDataURL(file)})}
 function setProgress(p,text,sub){$('progressBarFill').style.width=Math.round(p*100)+'%';$('progressBarPct').textContent=Math.round(p*100)+'%';if(text)$('progressText').textContent=text;if(sub)$('progressSub').textContent=sub}
 let ocrWorker=null,ocrWorkerPromise=null,ocrProgressCb=null;
@@ -2783,7 +2872,7 @@ async function extractPdfText(file,fileObj){
     }
   }
   if(ocrPages)showToast(`OCR used on ${ocrPages} scanned PDF page${ocrPages===1?'':'s'}`,'info');
-  if(fileObj)fileObj.docPages=docPages;
+  if(fileObj){fileObj.docPages=docPages;fileObj.ocrPages=ocrPages;}
   if(!text.trim()){
     const err=new Error('No readable text could be extracted. Try a clearer scan or export the PDF again.');
     err.code='PDF_TEXT_EMPTY';
@@ -2818,12 +2907,28 @@ function attachMetricBoxes(metrics,docPages){
     }
   });
 }
-function buildAnalysis(metrics,fileName,rawText,cat,opts={}){attachMetricBoxes(metrics,opts.docPages);const normal=metrics.filter(m=>m.status==='normal'),high=metrics.filter(m=>m.status==='high'),low=metrics.filter(m=>m.status==='low');const _safe=metrics.filter(m=>severityTier(m)==='tier-safe'),_borderline=metrics.filter(m=>severityTier(m)==='tier-borderline'),_concern=metrics.filter(m=>severityTier(m)==='tier-concern');const picked=extractReportDate(rawText,fileName);const now=new Date().toISOString();const isImageOnly=!!(opts.scanImages&&opts.scanImages.length)&&metrics.length===0;const keepText=textLooksMeaningful(rawText,metrics,cat,isImageOnly);const cleanText=keepText?(rawText||'').slice(0,20000):'';cat=cat&&cat!=='auto'?cat:(keepText?detectCategory(cleanText,metrics.length>0,metrics):'other');
+function reviewMetricExtraction(m,sourceMode){
+  const reasons=[];
+  if(sourceMode==='ocr')reasons.push('read with OCR');
+  if(m.qualifier)reasons.push('comparison symbol matters');
+  if(m.valueText&&String(m.valueText)!==String(m.value))reasons.push('result is an interval');
+  if(m.status==='unknown')reasons.push('no comparable reference range');
+  if(m.status==='classifier')reasons.push('screening cutoff, not a normal range');
+  m.reviewReasons=reasons;
+  m.needsReview=reasons.length>0&&!m.verified;
+}
+function refreshVerification(a){
+  (a.metrics||[]).forEach(m=>reviewMetricExtraction(m,a.sourceMode||'digital'));
+  const pending=(a.metrics||[]).filter(m=>m.needsReview&&!m.flaggedWrong);
+  a.verification={pendingCount:pending.length,totalCount:(a.metrics||[]).filter(m=>!m.flaggedWrong).length,sourceMode:a.sourceMode||'digital'};
+  return a.verification;
+}
+function buildAnalysis(metrics,fileName,rawText,cat,opts={}){attachMetricBoxes(metrics,opts.docPages);const sourceMode=opts.sourceMode||'digital';metrics.forEach(m=>reviewMetricExtraction(m,sourceMode));const normal=metrics.filter(m=>m.status==='normal'),high=metrics.filter(m=>m.status==='high'),low=metrics.filter(m=>m.status==='low');const _safe=metrics.filter(m=>severityTier(m)==='tier-safe'),_borderline=metrics.filter(m=>severityTier(m)==='tier-borderline'),_concern=metrics.filter(m=>severityTier(m)==='tier-concern');const picked=extractReportDate(rawText,fileName);const now=new Date().toISOString();const isImageOnly=!!(opts.scanImages&&opts.scanImages.length)&&metrics.length===0;const keepText=textLooksMeaningful(rawText,metrics,cat,isImageOnly);const cleanText=keepText?(rawText||'').slice(0,20000):'';cat=cat&&cat!=='auto'?cat:(keepText?detectCategory(cleanText,metrics.length>0,metrics):'other');
 const _date=picked?picked.iso:now;
 const _meds=[];
 const _fu=extractFollowUp(rawText,cat,_date);
 const _rx=null;
-return{medDrafts:_meds,followUp:_fu,opticalRx:_rx,id:Date.now()+Math.floor(Math.random()*9999),date:picked?picked.iso:now,analyzedAt:now,reportDateSource:picked?picked.label:'analysis date',fileName,category:cat,rawText:cleanText,ocrTextDiscarded:!keepText&&!!(rawText||'').trim(),scanImages:opts.scanImages||[],docPages:(opts.docPages||[]).map(p=>({image:p.image})),imageInterpretations:opts.imageInterpretations||[],metrics,totalMetrics:metrics.length,normalCount:normal.length,highCount:high.length,lowCount:low.length,outOfRangeCount:high.length+low.length,safeCount:_safe.length,borderlineCount:_borderline.length,concernCount:_concern.length,laymanSummary:cat==='lab'?layman(metrics,high,low):nonLabSummary(cat,cleanText,_meds,_fu,metrics),recommendations:cat==='lab'?recommendations(high,low):[{title:'Discuss with your clinician',desc:'Medical documents need clinical context. Share this report with the doctor who ordered it.'},{title:'Keep prior records',desc:'Previous reports and original images help clinicians compare changes over time.'}]}}
+const analysis={medDrafts:_meds,followUp:_fu,opticalRx:_rx,id:Date.now()+Math.floor(Math.random()*9999),date:picked?picked.iso:now,analyzedAt:now,reportDateSource:picked?picked.label:'analysis date',fileName,category:cat,sourceMode,rawText:cleanText,ocrTextDiscarded:!keepText&&!!(rawText||'').trim(),scanImages:opts.scanImages||[],docPages:(opts.docPages||[]).map(p=>({image:p.image})),imageInterpretations:opts.imageInterpretations||[],metrics,totalMetrics:metrics.length,normalCount:normal.length,highCount:high.length,lowCount:low.length,outOfRangeCount:high.length+low.length,safeCount:_safe.length,borderlineCount:_borderline.length,concernCount:_concern.length,laymanSummary:cat==='lab'?layman(metrics,high,low):nonLabSummary(cat,cleanText,_meds,_fu,metrics),recommendations:cat==='lab'?recommendations(high,low):[{title:'Discuss with your clinician',desc:'Medical documents need clinical context. Share this report with the doctor who ordered it.'},{title:'Keep prior records',desc:'Previous reports and original images help clinicians compare changes over time.'}]};refreshVerification(analysis);return analysis}
 
 
 
@@ -3271,6 +3376,8 @@ function closeIdentityModal(){
 
 async function analyzeReport(){
   if(!uploadedFiles.length)return showToast('Add at least one file first','error');
+  const blocked=blockingImageFiles();
+  if(blocked.length)return showToast(`Retake ${blocked.length} photo${blocked.length===1?'':'s'} or choose Use anyway before analysis`,'error');
   window.__aiOcrUsed=false;
   $('resultsSection').classList.remove('active');
   $('historySection').style.display='none';
@@ -3312,7 +3419,8 @@ async function analyzeReport(){
           const metrics=parseReportText(text,profileContext(dGuess?dGuess.iso:null));
           const scanImages=f.imageDataURL?[{name:f.name,dataURL:f.imageDataURL,tags:[]}]:[];
           const docPages=f.docPages||[];
-          let a=attachAnalysisAudit(buildAnalysis(metrics,f.name,text,uploadCategory,{scanImages,docPages}),1,0,0);
+          const sourceMode=(f.type==='image'||f.ocrPages>0)?'ocr':'digital';
+          let a=attachAnalysisAudit(buildAnalysis(metrics,f.name,text,uploadCategory,{scanImages,docPages,sourceMode}),1,0,0);
           
           // Strict Lab-Only Guard Rail Check:
           // A valid report MUST be detected as 'lab' and carry at least 1 numeric lab metric!
@@ -3330,7 +3438,7 @@ async function analyzeReport(){
             if(idResult&&idResult.action==='continue-newuser'){
               const d2=extractReportDate(text,f.name);
               const metrics2=parseReportText(text,profileContext(d2?d2.iso:null));
-              a=attachAnalysisAudit(buildAnalysis(metrics2,f.name,text,uploadCategory,{scanImages,docPages}),1,0,0);
+              a=attachAnalysisAudit(buildAnalysis(metrics2,f.name,text,uploadCategory,{scanImages,docPages,sourceMode}),1,0,0);
             }
             const savedA=await saveAnalysis(a);
             created.push(savedA); last=savedA;
@@ -3390,7 +3498,8 @@ async function analyzeReport(){
         for(const f of uploadedFiles){
           if(f.imageDataURL)scanImages.push({name:f.name,dataURL:f.imageDataURL,tags:[]});
         }
-        let a=attachAnalysisAudit(buildAnalysis(metrics,`Merged ${N} files`,all,uploadCategory,{scanImages}),1,0,0);
+        const sourceMode=uploadedFiles.some(f=>f.type==='image'||f.ocrPages>0)?'ocr':'digital';
+        let a=attachAnalysisAudit(buildAnalysis(metrics,`Merged ${N} files`,all,uploadCategory,{scanImages,sourceMode}),1,0,0);
         
         const isValidLabReport = a.category==='lab' && metrics.length >= 1;
         
@@ -3401,7 +3510,7 @@ async function analyzeReport(){
           if(idResult&&idResult.action==='continue-newuser'){
             const d2=extractReportDate(all,'merged_report');
             const metrics2=parseReportText(all,profileContext(d2?d2.iso:null));
-            a=attachAnalysisAudit(buildAnalysis(metrics2,`Merged ${N} files`,all,uploadCategory,{scanImages}),1,0,0);
+            a=attachAnalysisAudit(buildAnalysis(metrics2,`Merged ${N} files`,all,uploadCategory,{scanImages,sourceMode}),1,0,0);
           }
           const savedA=await saveAnalysis(a);
           displayResults(savedA);
@@ -3514,7 +3623,8 @@ function displayResults(a){currentAnalysis=a;LS.set('currentAnalysisId_'+(curren
   }
   $('demoNote').innerHTML=patientHtml+(renderAnalysisAudit(a)+(a.rawText?'<div class="layman" style="margin-bottom:16px">🔎 Text was captured from your file. OCR can make mistakes — verify against the original report.</div>':''));
 metricsFilter=null; // a freshly displayed report never inherits a stale filter
-const ok=(a.outOfRangeCount||0)===0;$('healthStatusDisplay').innerHTML=`<div class="status-row"><div class="status-icon ${ok?'good':'attention'}">${ok?'👍':'❗'}</div><div><h4>${ok?'All Healthy':'Needs Attention'}</h4><p style="color:var(--text-secondary);font-size:12px;margin-top:4px">${ok?'No recognized values are outside range.':`${a.outOfRangeCount} value(s) outside range.`}</p></div></div><div class="stat-grid"><div class="stat-box" onclick="setMetricsFilter(null)" title="Show all"><div class="v" style="color:var(--primary)">${a.totalMetrics}</div><div class="l">Tests</div></div><div class="stat-box" onclick="setMetricsFilter('tier-safe')" title="Show only Normal"><div class="v" style="color:var(--success)">${a.safeCount}</div><div class="l">Normal</div></div><div class="stat-box" onclick="setMetricsFilter('tier-concern')" title="Show only High/Low"><div class="v" style="color:var(--danger)">${a.concernCount}</div><div class="l">High/Low</div></div><div class="stat-box" onclick="setMetricsFilter('tier-borderline')" title="Show only Borderline"><div class="v" style="color:var(--warning)">${a.borderlineCount}</div><div class="l">Borderline</div></div></div>`;
+renderVerificationCard(a);
+const ok=(a.outOfRangeCount||0)===0;$('healthStatusDisplay').innerHTML=`<div class="status-row"><div class="status-icon ${ok?'good':'attention'}">${ok?'✓':'!'}</div><div><h4>${ok?'No recognized values outside range':'Review out-of-range values'}</h4><p style="color:var(--text-secondary);font-size:12px;margin-top:4px">${ok?'This describes extracted values only; it is not a diagnosis.':`${a.outOfRangeCount} extracted value(s) are outside the selected reference range.`}</p></div></div><div class="stat-grid"><div class="stat-box" onclick="setMetricsFilter(null)" title="Show all"><div class="v" style="color:var(--primary)">${a.totalMetrics}</div><div class="l">Tests</div></div><div class="stat-box" onclick="setMetricsFilter('tier-safe')" title="Show only Normal"><div class="v" style="color:var(--success)">${a.safeCount}</div><div class="l">Normal</div></div><div class="stat-box" onclick="setMetricsFilter('tier-concern')" title="Show only High/Low"><div class="v" style="color:var(--danger)">${a.concernCount}</div><div class="l">High/Low</div></div><div class="stat-box" onclick="setMetricsFilter('tier-borderline')" title="Show only Borderline"><div class="v" style="color:var(--warning)">${a.borderlineCount}</div><div class="l">Borderline</div></div></div>`;
 $('laymanCard').innerHTML=`<h5>🤖 Plain-Language Summary</h5><div>${a.laymanSummary}</div>`;renderAIReviewCard(a);renderTagsNotes(a);
 renderQuickMetricsSummary(a);
 renderMetricsList(a);
@@ -3529,6 +3639,16 @@ function renderAIReviewCard(a){
   const hasData=(Array.isArray(a.metrics)&&a.metrics.length)||a.rawText;
   if(!hasData){el.innerHTML='';return;}
   el.innerHTML=`<div class="ai-review-card"><h5>🌐 AI Explain</h5><p>Send your out-of-range values to Google AI Mode for a plain-language explanation. Your name, age, and file name are never sent — only the labeled numeric values you can preview before confirming.</p><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn-primary" onclick="explainWithGoogleAI(null)">🌐 Explain with AI</button></div></div>`;
+}
+
+function renderVerificationCard(a){
+  const el=$('verificationCard');if(!el)return;
+  const v=refreshVerification(a),pending=v.pendingCount,ocr=v.sourceMode==='ocr';
+  const source=ocr?'OCR from a scan or image':'the PDF text layer';
+  const detail=pending
+    ?`${pending} of ${v.totalCount} values need a closer check because of OCR, a comparison symbol, an interval, or a non-standard reference range.`
+    :`Values were read from ${source}. Open Details at any time to compare a value with its source line.`;
+  el.innerHTML=`<div class="verification-card ${pending?'':'ready'}"><div class="verification-copy"><div class="verification-icon">${pending?'⚠':'✓'}</div><div><div class="verification-title">${pending?`${pending} value${pending===1?'':'s'} to verify`:'Extraction ready to review'}</div><div class="verification-detail">${detail}</div></div></div><button class="verification-action" onclick="setMetricsFilter(${pending?"'review'":'null'})">${pending?'Review flagged values':'Open all values'}</button></div>`;
 }
 
 function runAIReview(){
@@ -4065,6 +4185,7 @@ function sortMetricsForDisplay(metrics){
 function filteredMetricPairs(metrics){
   const sorted=sortMetricsForDisplay(metrics);
   if(!metricsFilter)return sorted;
+  if(metricsFilter==='review')return sorted.filter(x=>x.m.needsReview&&!x.m.flaggedWrong);
   return sorted.filter(x=>severityTier(x.m)===metricsFilter);
 }
 // Clicking a Tests/Normal/High/Low stat box filters the Details tab to just
@@ -4084,7 +4205,14 @@ function renderQuickMetricsSummary(a){
   const pairs=sortMetricsForDisplay(a.metrics).slice(0,8);
   el.innerHTML=pairs.length?pairs.map(({m})=>`<div class="metric-status-item" onclick="openMetricSheet('${m.key}')" tabindex="0" role="button" aria-label="View details for ${esc(m.name)}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openMetricSheet('${m.key}')}"><div class="status-indicator ${severityTier(m)}"></div><div class="metric-text"><h5>${esc(m.name)}</h5><p>${m.status} · ${esc(metricValueText(m))} ${esc(m.unit)}</p></div></div>`).join(''):'<div class="empty-state" style="grid-column:1/-1"><div class="ic">📭</div><p>No lab parameters detected.</p></div>';
 }
-const TIER_FILTER_LABELS={'tier-safe':'Normal','tier-borderline':'Borderline','tier-concern':'High/Low'};
+const TIER_FILTER_LABELS={'tier-safe':'Normal','tier-borderline':'Borderline','tier-concern':'High/Low','review':'Needs verification'};
+function confirmMetric(key){
+  if(!currentAnalysis)return;
+  const m=(currentAnalysis.metrics||[]).find(x=>x.key===key);if(!m)return;
+  m.verified=true;m.needsReview=false;refreshVerification(currentAnalysis);persistCurrent();
+  renderVerificationCard(currentAnalysis);renderMetricsList(currentAnalysis);
+  showToast(`${m.name} marked as checked`,'success');
+}
 function renderMetricsList(a){
   const el=$('metricsList'); if(!el)return;
   const pairs=filteredMetricPairs(a.metrics);
@@ -4099,7 +4227,7 @@ function renderMetricsList(a){
   }
   if(!a.metrics.length){ el.innerHTML='<div class="empty-state"><div class="ic">📭</div><p>No parameters could be extracted.</p></div>'; return; }
   if(!pairs.length){ el.innerHTML=filterChip+'<div class="empty-state"><div class="ic">📭</div><p>No parameters match this filter.</p></div>'; return; }
-  el.innerHTML=filterChip+pairs.map(({m,i})=>`<div class="metric-card" onclick="openMetricSheet('${m.key}')" tabindex="0" role="button" aria-label="View details for ${esc(m.name)}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openMetricSheet('${m.key}')}"><div class="metric-icon ${severityTier(m)}"></div><div><div style="font-weight:900;font-size:13px">${esc(m.name)}</div><div class="metric-reference">${m.status==='classifier'?`Cutoffs: ${esc(m.normal_range)}${m.classifierLabel?` <span class="range-src">· pattern: ${esc(m.classifierLabel)}</span>`:''}`:`Normal: ${esc(m.normal_range)}${m.rangeNote?` <span class="range-src">· ${esc(m.rangeNote)}</span>`:''}`}</div>${m.srcLine?`<div class="prov"><button class="prov-toggle" onclick="event.stopPropagation();toggleProv(${i})">🔎 Where did this come from?</button><div class="prov-body" id="prov-${i}"><div class="prov-label">Read from this line of your report:</div><code class="prov-line">${esc(m.srcLine)}</code><button class="prov-flag" onclick="event.stopPropagation();flagMetric(${i})">⚑ This value is wrong</button></div></div>`:''}</div><div class="metric-value-badge">${esc(metricValueText(m))} <span style="font-size:10px;color:var(--text-secondary)">${esc(m.unit)}</span><span class="flag" style="${m.status==='unknown'||m.status==='classifier'?'color:var(--text-secondary)':''}">${m.status==='unknown'?'NO REF. RANGE':m.status==='classifier'?'SCREENING INDEX':m.status.toUpperCase()}</span></div></div>`).join('');
+  el.innerHTML=filterChip+pairs.map(({m,i})=>`<div class="metric-card" onclick="openMetricSheet('${m.key}')" tabindex="0" role="button" aria-label="View details for ${esc(m.name)}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openMetricSheet('${m.key}')}"><div class="metric-icon ${severityTier(m)}"></div><div><div style="font-weight:900;font-size:13px">${esc(m.name)}</div><div class="metric-reference">${m.status==='classifier'?`Cutoffs: ${esc(m.normal_range)}${m.classifierLabel?` <span class="range-src">· pattern: ${esc(m.classifierLabel)}</span>`:''}`:`Normal: ${esc(m.normal_range)}${m.rangeNote?` <span class="range-src">· ${esc(m.rangeNote)}</span>`:''}`}</div>${m.needsReview?`<span class="review-badge">Check: ${esc((m.reviewReasons||[]).join(' · '))}</span><button class="review-confirm" onclick="event.stopPropagation();confirmMetric('${m.key}')">Mark checked</button>`:''}${m.srcLine?`<div class="prov"><button class="prov-toggle" onclick="event.stopPropagation();toggleProv(${i})">🔎 Where did this come from?</button><div class="prov-body" id="prov-${i}"><div class="prov-label">Read from this line of your report:</div><code class="prov-line">${esc(m.srcLine)}</code><button class="prov-flag" onclick="event.stopPropagation();flagMetric(${i})">⚑ This value is wrong</button></div></div>`:''}</div><div class="metric-value-badge">${esc(metricValueText(m))} <span style="font-size:10px;color:var(--text-secondary)">${esc(m.unit)}</span><span class="flag" style="${m.status==='unknown'||m.status==='classifier'?'color:var(--text-secondary)':''}">${m.status==='unknown'?'NO REF. RANGE':m.status==='classifier'?'SCREENING INDEX':m.status.toUpperCase()}</span></div></div>`).join('');
 }
 function switchTab(name,btn){activeResultTab=name;document.querySelectorAll('#resultTabs .tab-btn').forEach(b=>b.classList.toggle('active',btn?b===btn:b.dataset.tab===name));document.querySelectorAll('.results-body>.tab-content').forEach(c=>c.classList.toggle('active',c.id==='tab-'+name));if(name==='comparison')displayComparison()}
 function setDefaultTrendParam(key){defaultTrendKey=key;selectedTrendKey=key;LS.set('defaultTrendKey_'+(currentUser||'guest'),key);showToast('Default trend parameter saved','success');displayComparison()}
@@ -4680,7 +4808,7 @@ function closeFeedbackModal(){
   $('feedbackModal').classList.remove('active');
   $('feedbackForm').reset();
   $('fbScreenshotPreview').style.display='none';
-  $('fbPreviewImg').src='';
+  $('fbPreviewImg').removeAttribute('src');
 }
 function previewFeedbackScreenshot(e){
   const file=e.target.files[0];
@@ -4770,7 +4898,7 @@ async function sendFeedback(e){
     submitBtn.textContent='✉️ Send Feedback';
   }
 }
-Object.assign(window,{showHome,resetAll,showHistory,toggleTheme,openAddUserModal,closeAddUserModal,addUser,switchUser,logoutUser,removeFile,clearAllFiles,setGroupMode,setUploadCategory,analyzeReport,switchTab,loadHistoryReport,openHistoryItem,deleteHistoryItem,clearHistory,printResults,setHistoryFilter,addTagFromInput,removeTag,onNoteInput,runAIReview,setTrendParam,setDefaultTrendParam,clearDefaultTrendParam,showCurrentAnalysis,exportReportPDF,changeReportCategory,firstRunAdd,firstRunSkip,toggleProv,flagMetric,setHistoryView,initMedViewer,medZoom,medReset,medRotate,medInvert,medRedraw,idAnswerYes,idAnswerNew,idAnswerSkip,idCancelClarify,idConfirmClarify,idPickField,idCancelNew,idCreateNewProfile,closeIdentityModal,renderNav,setMetricsFilter,openMetricSheet,closeMetricSheet,metricSheetPick,toggleSheetProv,flagMetricByKey,askAIAboutMetrics,setDocMode,onDocPageImgLoad,onDocHitTap,openSelectedMetricsSheet,explainMetricsNow,explainWithGoogleAI,openFeedbackModal,closeFeedbackModal,previewFeedbackScreenshot,sendFeedback,showTrends,exportBackup,importBackup,getOcrDiagnostics});if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+Object.assign(window,{showHome,resetAll,showHistory,toggleTheme,openAddUserModal,closeAddUserModal,addUser,switchUser,logoutUser,removeFile,clearAllFiles,overrideImageQuality,setGroupMode,setUploadCategory,analyzeReport,switchTab,loadHistoryReport,openHistoryItem,deleteHistoryItem,clearHistory,printResults,setHistoryFilter,addTagFromInput,removeTag,onNoteInput,runAIReview,setTrendParam,setDefaultTrendParam,clearDefaultTrendParam,showCurrentAnalysis,exportReportPDF,changeReportCategory,firstRunAdd,firstRunSkip,toggleProv,flagMetric,confirmMetric,setHistoryView,initMedViewer,medZoom,medReset,medRotate,medInvert,medRedraw,idAnswerYes,idAnswerNew,idAnswerSkip,idCancelClarify,idConfirmClarify,idPickField,idCancelNew,idCreateNewProfile,closeIdentityModal,renderNav,setMetricsFilter,openMetricSheet,closeMetricSheet,metricSheetPick,toggleSheetProv,flagMetricByKey,askAIAboutMetrics,setDocMode,onDocPageImgLoad,onDocHitTap,openSelectedMetricsSheet,explainMetricsNow,explainWithGoogleAI,openFeedbackModal,closeFeedbackModal,previewFeedbackScreenshot,sendFeedback,showTrends,exportBackup,importBackup,getOcrDiagnostics});if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 
 // ---- PWA: register the service worker ----
 // Only runs on a real http(s) origin — service workers are unavailable (and
@@ -4836,7 +4964,7 @@ if('serviceWorker' in navigator && location.protocol.startsWith('http')){
       <input type="file" id="fbScreenshot" accept="image/*" class="field" style="padding:6px 10px;font-size:11.5px;background:var(--card);margin-bottom:10px" onchange="previewFeedbackScreenshot(event)" />
       
       <div id="fbScreenshotPreview" style="display:none;margin-top:4px;margin-bottom:14px;text-align:center">
-        <img id="fbPreviewImg" src="" style="max-height:100px;border-radius:6px;border:1px solid var(--border);box-shadow:var(--shadow)" />
+        <img alt="Feedback screenshot preview" id="fbPreviewImg" src="./icons/favicon-32.png" style="max-height:100px;border-radius:6px;border:1px solid var(--border);box-shadow:var(--shadow)" />
       </div>
       
       <div class="modal-actions" style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px">

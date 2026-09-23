@@ -91,3 +91,36 @@ Serum CMIA ng/mL`);
   assert.equal(vitaminD.min,30);
   assert.equal(vitaminD.max,100);
 });
+
+test('joins split analyte rows without reading a digit from the method name',()=>{
+  const rows=parse(`Test Results Units Biological Reference
+Aspartate Aminotransferase -AST-
+Multipoint-Rate/UV with Pyridoxal-5- 23 U/L 14 - 36
+Alkaline Phosphatase -ALP-
+Multipoint-Rate/UV with Pyridoxal-5- 108 U/L 38 - 126`);
+  const ast=rows.find(row=>row.key==='sgot');
+  const alp=rows.find(row=>row.key==='alkaline phosphatase');
+  assert.equal(ast.value,23);
+  assert.equal(ast.min,14);
+  assert.equal(alp.value,108);
+  assert.equal(alp.min,38);
+});
+
+test('extracts split protein, NLR, and superscript platelet-count rows',()=>{
+  const rows=parse(`Test Results Units Biological Reference
+Protein
+6.5 g/dL 6 - 8.3
+Neutrophil Lymphocyte Ratio -NLR-
+2.4 Ratio 1 - 3
+Platelet Count
+155 10³/μL 150 - 450`);
+  assert.equal(rows.find(row=>row.key==='total protein')?.value,6.5);
+  assert.equal(rows.find(row=>row.key==='neutrophil lymphocyte ratio')?.value,2.4);
+  assert.equal(rows.find(row=>row.key==='platelet')?.value,155);
+});
+
+test('does not parse explanatory ratio prose as a result',()=>{
+  const rows=parse(`AST/ALT Ratio > 2-1 is indicative of liver disease.
+AST/ALT Ratio < 1-1 indicates another clinical pattern.`);
+  assert.equal(rows.length,0);
+});
