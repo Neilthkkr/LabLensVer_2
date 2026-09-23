@@ -1,5 +1,7 @@
 # Real patient PDFs used for local parser/OCR testing — never push PHI.
 test-fixtures/lab-reports/
+test-fixtures/ocr/private/
+test-fixtures/ocr/results/
 
 # Local dev/test scratch output
 .playwright-mcp/

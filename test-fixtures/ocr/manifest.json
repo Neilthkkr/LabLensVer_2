@@ -1,0 +1,15 @@
+{
+  "schemaVersion": "1.0.0",
+  "description": "Only deidentified or synthetic OCR fixtures may be listed here.",
+  "fixtures": [
+    {
+      "id": "synthetic-cbc-digital",
+      "inputKind": "digital-pdf",
+      "deidentified": true,
+      "containsPhi": false,
+      "expected": "expected/synthetic-cbc.json",
+      "actual": "actual/synthetic-cbc-pdfjs.json",
+      "tags": ["synthetic", "cbc", "clean"]
+    }
+  ]
+}

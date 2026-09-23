@@ -1,0 +1,12 @@
+{
+  "name": "lablens",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Private, on-device lab report extraction and review",
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "benchmark:ocr": "node scripts/run-ocr-benchmark.mjs",
+    "probe:parser": "node scripts/run-report-parser.mjs",
+    "probe:pdf": "node scripts/probe-pdf-parser.mjs"
+  }
+}

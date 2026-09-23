@@ -649,8 +649,8 @@ body::before{
 <div class="modal-overlay sheet-mode" id="metricSheetOverlay"><div class="metric-sheet" id="metricSheetBody"></div></div>
 <div class="modal-overlay" id="confirmDialogOverlay"><div class="modal" style="max-width:400px;padding:22px"><div id="confirmDialogText" style="font-size:14px;line-height:1.65;white-space:pre-line;margin-bottom:18px"></div><div style="display:flex;gap:10px;justify-content:flex-end"><button class="btn-secondary" id="confirmDialogCancel">Cancel</button><button class="btn-primary" id="confirmDialogOk">Continue</button></div></div></div>
 <div class="toast" id="toast"></div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" onerror="this.onerror=null; this.src='https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.min.js';"></script>
-<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.0/dist/tesseract.min.js" onerror="this.onerror=null; this.src='https://unpkg.com/tesseract.js@5.1.0/dist/tesseract.min.js';"></script>
+<script src="./vendor/pdfjs/pdf.min.js"></script>
+<script src="./vendor/tesseract/tesseract.min.js"></script>
 <script>
 
 /* ============================================================================
@@ -662,27 +662,29 @@ body::before{
 
 (function(){
 'use strict';
-if (location.search.includes('clear=1') || location.search.includes('reset=1')) {
-  if (navigator.serviceWorker) {
-    navigator.serviceWorker.getRegistrations().then(regs => {
-      for (let reg of regs) reg.unregister();
-    });
+// Never let a link or bookmark erase local health records. Older builds accepted
+// ?clear=1 and ?reset=1 as destructive commands; strip those parameters safely.
+try{
+  const startupUrl=new URL(location.href);
+  const hadUnsafeReset=startupUrl.searchParams.has('clear')||startupUrl.searchParams.has('reset');
+  if(hadUnsafeReset){
+    startupUrl.searchParams.delete('clear');
+    startupUrl.searchParams.delete('reset');
+    history.replaceState(null,'',startupUrl.pathname+(startupUrl.search||'')+startupUrl.hash);
+    console.warn('[LabLens] Ignored unsafe URL reset request. Local data was not changed.');
   }
-  if (window.caches) {
-    caches.keys().then(names => {
-      for (let name of names) caches.delete(name);
-    });
-  }
-  localStorage.clear();
-  sessionStorage.clear();
-  setTimeout(() => {
-    location.href = location.origin + location.pathname;
-  }, 400);
-  return;
+}catch(e){}
+function configurePdfEngine(){
+  if(!window.pdfjsLib)return false;
+  try{
+    pdfjsLib.GlobalWorkerOptions.workerSrc=new URL('./vendor/pdfjs/pdf.worker.min.js',document.baseURI).href;
+    return true;
+  }catch(e){return false;}
 }
-if(window.pdfjsLib){try{pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'}catch(e){}}
+configurePdfEngine();
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const metricValueText=m=>m&&m.valueText?String(m.valueText):`${m&&m.qualifier||''}${m&&m.value!=null?m.value:''}`;
 
 let __statsLastSend=0;
 function pingStats(reason){
@@ -836,11 +838,14 @@ const STANDARD_RANGES = {
   'vldl':{name:'VLDL Cholesterol',min:0,max:30,unit:'mg/dL',group:'chol',abbr:['vldl']},
   'non-hdl':{name:'Non-HDL Cholesterol',min:0,max:130,unit:'mg/dL',group:'chol',abbr:[]},
   'cholesterol hdl ratio':{name:'Total Cholesterol/HDL Ratio',min:0,max:5.0,unit:'ratio',group:'chol',abbr:[]},
+  'ldl hdl ratio':{name:'LDL/HDL Ratio',min:0.5,max:3.0,unit:'ratio',group:'chol',abbr:['ldl/hdl ratio']},
+  'hdl ldl ratio':{name:'HDL/LDL Ratio',min:0.3,max:2.0,unit:'ratio',group:'chol',abbr:['hdl/ldl ratio']},
 
   // ---------- Kidney ----------
   'creatinine':{name:'Serum Creatinine',min:0.6,max:1.3,unit:'mg/dL',group:'kidney',abbr:['creat']},
   'urea':{name:'Blood Urea',min:13,max:43,unit:'mg/dL',group:'kidney',abbr:[]},
   'blood urea nitrogen':{name:'Blood Urea Nitrogen (BUN)',min:7,max:20,unit:'mg/dL',group:'kidney',abbr:['bun']},
+  'bun creatinine ratio':{name:'BUN/Creatinine Ratio',min:10,max:20,unit:'ratio',group:'kidney',abbr:['bun/creatinine ratio']},
   'uric acid':{name:'Uric Acid',min:3.5,max:7.2,unit:'mg/dL',group:'kidney',abbr:[]},
   'egfr':{name:'eGFR',min:90,max:200,unit:'mL/min/1.73m2',group:'kidney',abbr:['egfr','gfr']},
 
@@ -852,6 +857,7 @@ const STANDARD_RANGES = {
   'total bilirubin':{name:'Bilirubin Total',min:0,max:1.2,unit:'mg/dL',group:'liver',abbr:[]},
   'sgpt':{name:'SGPT / ALT',min:0,max:50,unit:'U/L',group:'liver',abbr:['alt','sgpt']},
   'sgot':{name:'SGOT / AST',min:0,max:50,unit:'U/L',group:'liver',abbr:['ast','sgot']},
+  'ast alt ratio':{name:'AST/ALT Ratio',min:0,max:1.0,unit:'ratio',group:'liver',abbr:['ast/alt ratio','sgot/sgpt ratio']},
   'alkaline phosphatase':{name:'Alkaline Phosphatase',min:35,max:120,unit:'U/L',group:'liver',abbr:['alp']},
   'gamma gt':{name:'Gamma GT (GGT)',min:0,max:55,unit:'U/L',group:'liver',abbr:['ggt','ggtp']},
   'gamma glutamyl':{name:'Gamma GT (GGT)',min:0,max:55,unit:'U/L',group:'liver',abbr:[]},
@@ -908,6 +914,7 @@ const STANDARD_RANGES = {
   'ferritin':{name:'Ferritin',min:22,max:322,unit:'ng/mL',group:'iron',abbr:[]},
   'transferrin':{name:'Transferrin Saturation',min:20,max:50,unit:'%',group:'iron',abbr:[]},
   'tibc':{name:'Total Iron Binding Capacity',min:250,max:450,unit:'ug/dL',group:'iron',abbr:['tibc']},
+  'uibc':{name:'Unsaturated Iron Binding Capacity',min:111,max:343,unit:'ug/dL',group:'iron',abbr:['uibc']},
 
   // ---------- Cardiac / inflammation ----------
   'troponin':{name:'Troponin I',min:0,max:0.04,unit:'ng/mL',group:'cardiac',abbr:[]},
@@ -1346,7 +1353,14 @@ const ALIASES = {
   // built for the opposite order: name completing BEFORE the value).
   'estimated average':'estimated average glucose',
   'total cholestrol/hdlc ratio':'cholesterol hdl ratio','total cholesterol/hdl ratio':'cholesterol hdl ratio',
-  'chol/hdl ratio':'cholesterol hdl ratio','tc/hdl ratio':'cholesterol hdl ratio'
+  'chol/hdl ratio':'cholesterol hdl ratio','tc/hdl ratio':'cholesterol hdl ratio',
+  'ldl/hdl ratio':'ldl hdl ratio','hdl/ldl ratio':'hdl ldl ratio',
+  'ast/alt ratio':'ast alt ratio','sgot/sgpt ratio':'ast alt ratio',
+  'bun/creatinine ratio':'bun creatinine ratio',
+  'estimated glomerular filtration rate':'egfr',
+  'unbound iron binding capacity':'uibc','unsaturated iron binding capacity':'uibc',
+  'very low density lipoprotein':'vldl','alanine transaminase':'sgpt',
+  'triiodothyronine t3 total':'total t3','thyroxine t4 total':'total t4'
 };
 
 // Several spellings/synonyms exist as separate library keys (e.g. 'tsh' and
@@ -1402,6 +1416,14 @@ function cleanLabel(raw){
 }
 function matchTest(rawName){
   const loose=looseName(rawName);
+  // Ratio labels often contain the full component analyte names, which would
+  // otherwise win the generic longest-phrase lookup before the trailing ratio
+  // abbreviation is considered.
+  if(/\b(?:total\s+)?cholesterol\s*\/\s*(?:high\s+density\s+lipoprotein|hdl)|\bchol\s*\/\s*hdl\b/i.test(loose))return std_('cholesterol hdl ratio');
+  if(/\bldl\s*\/\s*hdl\b/i.test(loose))return std_('ldl hdl ratio');
+  if(/\bhdl\s*\/\s*ldl\b/i.test(loose))return std_('hdl ldl ratio');
+  if(/\b(?:ast\s*\/\s*alt|sgot\s*\/\s*sgpt)\b/i.test(loose))return std_('ast alt ratio');
+  if(/\bbun[-\s]*\/\s*creatinine\b/i.test(loose))return std_('bun creatinine ratio');
   if(loose.length>=2){
     if(STANDARD_RANGES[loose])return std_(loose);
     for(const e of LOOKUP){if(e.p.includes('(')&&loose.includes(e.p))return std_(e.key)}
@@ -1438,6 +1460,10 @@ function parseRefRange(txt){
   if(m&&!/^\s*<|>/.test(t))return{min:parseFloat(m[1]),max:parseFloat(m[2])};
   m=/<\s*=?\s*(-?\d+(?:\.\d+)?)/.exec(t); if(m)return{min:0,max:parseFloat(m[1])};
   m=/>\s*=?\s*(-?\d+(?:\.\d+)?)/.exec(t); if(m)return{min:parseFloat(m[1]),max:Infinity};
+  // Some lab PDFs decode a printed comparison glyph as NUL; the PDF reader
+  // normalizes that glyph to "-". In an isolated trailing reference token,
+  // "- 50" means an upper limit, not a negative result.
+  m=/^\s*[-–—]\s*(\d+(?:\.\d+)?)\s*$/.exec(t); if(m)return{min:0,max:parseFloat(m[1])};
   return null;
 }
 // A "classifier" line prints category LABELS, each with its own comparison
@@ -1498,7 +1524,7 @@ const UNIT_RE=/(?:^|\s)10\s*\^?\s*\d+\s*\/\s*u?l\b|mil\s*\/\s*cu\.?\s*mm|cells?\
 // reports put the tiered description AFTER the value, each tier line having
 // its OWN colon, so that rule was grabbing a tier boundary instead of the
 // real result. Removed.
-const TIER_WORDS_RE=/\b(desirable|borderline|optimal|near\/above|very high|very low|pre-?diabetes|uncontrolled|less than|more than|up ?to)\b/i;
+const TIER_WORDS_RE=/\b(desirable|borderline|optimal|near\/above|very high|very low|pre-?diabetes|uncontrolled|deficient|insufficient|sufficient|toxicity|toxic|less than|more than|up ?to)\b/i;
 // Organism/parasite-positive smear findings — deliberately independent of digit
 // content (see call site) because a positive result is usually printed WITH an
 // embedded parasite index/count that must never be read as "the value".
@@ -1615,13 +1641,43 @@ function flattenMarkdownTableRows(text){
   }
   return out.join('\n');
 }
+
+// PDF generators commonly wrap a long test label onto the next visual baseline
+// while leaving VALUE and RANGE on the first one. Rejoin only when the combined
+// label resolves to a *more specific* known analyte. This avoids broad, report-
+// specific exceptions and leaves ordinary method/unit continuation lines alone.
+function assembleWrappedResultLabels(inputLines){
+  const out=inputLines.slice(), consumed=new Set();
+  for(let i=0;i<out.length-1;i++){
+    if(consumed.has(i))continue;
+    const line=out[i], next=out[i+1];
+    const nums=line.match(/-?\d+(?:\.\d+)?/g)||[];
+    if(nums.length<2||/\d/.test(next)||STOP_RE.test(next)||HEADER_RE.test(next))continue;
+    const firstNum=line.search(/[<>]?\s*-?\d+(?:\.\d+)?/);
+    if(firstNum<=1)continue;
+    const label=line.slice(0,firstNum).trim(), tail=line.slice(firstNum).trim();
+    const current=matchTest(label);
+    const continuation=next.replace(METHOD_RE,'').replace(/^[-–—:\s]+/,'').trim();
+    if(!continuation||continuation.length>80||!/\b(concentration|ratio|rate|cholesterol|lipoprotein|filtration|capacity)\b|\b[A-Z]{2,6}\b/.test(continuation))continue;
+    const joined=`${label} ${continuation}`.replace(/\s+/g,' ').trim();
+    const improved=matchTest(joined);
+    if(!improved)continue;
+    // Merge when it discovers a different analyte (MCH -> MCHC), or when the
+    // first fragment was not recognized at all (wrapped ratio/eGFR labels).
+    if(!current||improved.key!==current.key){
+      out[i]=`${joined} ${tail}`;
+      consumed.add(i+1);
+    }
+  }
+  return out.filter((_,i)=>!consumed.has(i));
+}
 function parseReportText(text,profile){
   text=flattenMarkdownTableRows(text);
   const P=profile||{sex:null,age:null};
   const metrics=[], seen=new Set();
   const rawLines=String(text||'').split(/\r?\n/);
   // Pre-clean: trim, drop blank & header & watermark-fragment lines.
-  const lines=[];
+  let lines=[];
   for(let ln of rawLines){
     let t=ln.replace(/\u00a0/g,' ').replace(/[ \t]+/g,' ').trim();
     if(!t)continue;
@@ -1632,6 +1688,7 @@ function parseReportText(text,profile){
     if(/^[A-Z]{1,3}$/.test(t))continue;               // watermark shards: PR, OV, AL, N…
     lines.push(t);
   }
+  lines=assembleWrappedResultLabels(lines);
 
   const PROSE_START=/^\s*(interpretation|note\b|notes\b|remark|comment|caution|reference\b|interference|increased .* may be due to|decreased .* may be due to|clinical significance|test done|kindly)/i;
   // A line that genuinely looks like a result row: a number carrying a unit or a range.
@@ -1706,11 +1763,67 @@ function parseReportText(text,profile){
     if(wordCount>=9 && !hasMeasure)continue;   // prose, not a result row
     if(/electrophoresis|examination|profile|panel|\bmini\b|chemical|capillary|routine exam/i.test(line)&&!hasMeasure)continue;
 
+    // A few PDF encodings lose the comparison glyph in "Normal: > 90" and
+    // expose it as "Normal: - 90". The measured value is still unambiguous;
+    // keep it and fall back to the analyte library rather than reversing it.
+    const brokenNormalLimit=/^(.*?)\s+(-?\d+(?:\.\d+)?)\s+Normal\s*:\s*[-–—]\s*(\d+(?:\.\d+)?)\s*$/i.exec(line);
+    if(brokenNormalLimit){
+      const normalStd=matchTest(brokenNormalLimit[1]);
+      if(normalStd&&!seen.has(normalStd.key)){
+        const value=parseFloat(brokenNormalLimit[2]);
+        const ov=rangeForProfile(normalStd.key,P.sex,P.age);
+        const min=ov?ov.min:normalStd.min,max=ov?ov.max:normalStd.max;
+        seen.add(normalStd.key);
+        metrics.push({key:normalStd.key,name:cleanLabel(brokenNormalLimit[1])||normalStd.name,canonicalName:normalStd.name,
+          group:normalStd.group||'other',value,unit:normalStd.unit||'',min,max,
+          normal_range:(isFinite(max)?`${min} - ${max}`:`> ${min}`)+(normalStd.unit?` ${normalStd.unit}`:''),
+          refFromReport:false,rangeNote:ov?ov.note:'general adult range',known:true,status:statusFor(value,min,max),
+          srcLine:line.slice(0,180),srcIndex:i});
+        continue;
+      }
+    }
+
+    // Microscopy rows often express both the observed count and reference as
+    // intervals ("Pus Cells 2-3 0-5"). Preserve the printed result while using
+    // its upper bound for conservative status/trend calculations.
+    const intervalRow=/^(.*?)\s+(-?\d+(?:\.\d+)?)\s*[-–—]\s*(-?\d+(?:\.\d+)?)\s+(-?\d+(?:\.\d+)?)\s*[-–—]\s*(-?\d+(?:\.\d+)?)\s*$/.exec(line);
+    if(intervalRow){
+      let intervalStd=matchTest(intervalRow[1]);
+      const nearby=lines.slice(Math.max(0,i-12),i+1).join(' ');
+      const intervalLabel=normName(intervalRow[1]);
+      if(/urine/i.test(nearby)){
+        if(/^pus cells?$/.test(intervalLabel))intervalStd=std_('urine pus cells');
+        else if(/^epithelial cells?$/.test(intervalLabel))intervalStd=std_('urine epithelial cells');
+        else if(/^(?:red blood cells?(?: rbc)?|rbc)$/.test(intervalLabel))intervalStd=std_('urine rbc');
+      }
+      if(intervalStd&&!seen.has(intervalStd.key)){
+        let unit=intervalStd.unit||'';
+        for(let k=i+1;k<=Math.min(lines.length-1,i+2);k++){
+          if(/\d/.test(lines[k]))break;
+          const u=lines[k].match(/\/(?:hpf|lpf|cu\.?mm)|cells?\/(?:cu\.?mm|cumm|[uµ]?[lL])/i);
+          if(u){unit=u[0];break;}
+        }
+        const resultLow=parseFloat(intervalRow[2]),resultHigh=parseFloat(intervalRow[3]);
+        const refLow=parseFloat(intervalRow[4]),refHigh=parseFloat(intervalRow[5]);
+        seen.add(intervalStd.key);
+        metrics.push({key:intervalStd.key,name:cleanLabel(intervalRow[1])||intervalStd.name,canonicalName:intervalStd.name,
+          group:intervalStd.group||'other',value:resultHigh,valueText:`${resultLow}-${resultHigh}`,unit,min:refLow,max:refHigh,
+          normal_range:`${refLow} - ${refHigh}${unit?` ${unit}`:''}`,refFromReport:true,rangeNote:'from this report',known:true,
+          status:(resultLow>refHigh?'high':resultHigh<refLow?'low':'normal'),srcLine:line.slice(0,180),srcIndex:i});
+        continue;
+      }
+    }
+
     // Locate the VALUE: a number that is the measurement, not part of the name and
     // not part of the reference range. Strategy: find the name by locating where the
     // reference range / unit block begins, take the number just before it (if any).
     // First, isolate the reference-range span so we never mistake it for the value.
-    const rangeMatch=/(-?\d+(?:\.\d+)?\s*[-–]\s*-?\d+(?:\.\d+)?|[<>]\s*=?\s*\d+(?:\.\d+)?)/.exec(line);
+    // Prefer a two-sided reference interval wherever it appears. A comparator
+    // before it is often the RESULT itself ("TSH <0.0083  0.35-4.94"), not the
+    // reference range. Only fall back to a comparator when no interval exists.
+    const trailingLimit=!/\bnormal\s*:/i.test(line)?/\s[-–—]\d+(?:\.\d+)?\s*$/.exec(line):null;
+    const intervalMatch=trailingLimit?null:/-?\d+(?:\.\d+)?\s*[-–—]\s*-?\d+(?:\.\d+)?/.exec(line);
+    const rangeMatch=trailingLimit||intervalMatch||/(?:<=|>=|=<|=>|<|>|≤|≥)\s*-?\d+(?:\.\d+)?(?![\d.])/.exec(line);
     const rangeStart=rangeMatch?rangeMatch.index:line.length;
     // Candidate value = last standalone number BEFORE the range span (skips name-digits
     // like Alpha 2 because those are followed by more name text, not a unit/range/end).
@@ -1719,7 +1832,7 @@ function parseReportText(text,profile){
     // value = a number followed by (whitespace then) a unit token or end-of-string.
     // Unit token may itself start with a digit (e.g. "10^3/ul"), so allow that.
     // value = number followed by its unit, by end-of-line, or by a "--" no-range placeholder
-    const vRe=/(?:^|[\sHLA:])(-?\d+(?:\.\d+)?)(?=\s+(?:10\s*\^|[a-zµ%\/])|\s*[-–—]{0,3}\s*$)/gi;
+    const vRe=/(?:^|[\sHLA:])(-?\d+(?:\.\d+)?)(?=\s+(?:10\s*\^|[a-zµ%\/])|\s*(?:<=|>=|=<|=>|<|>|≤|≥)|\s*[-–—]{0,3}\s*$)/gi;
     let vm, lastS=-1,lastE=-1, unitS=-1,unitE=-1;
     while((vm=vRe.exec(preRange))){
       const s0=vm.index+vm[0].indexOf(vm[1]), e0=s0+vm[1].length;
@@ -1736,9 +1849,23 @@ function parseReportText(text,profile){
     // Clearing lastS forces the forward scan to run, where colonValue() finds the real value.
     // Guard: when the value sits BEFORE the tier text on the same line (e.g.
     // "245 mg/dL Desirable: <200 …"), unitS>=0 is already set and we keep it untouched.
-    if(TIER_WORDS_RE.test(line)&&unitS<0){lastS=-1;lastE=-1;}
+    if(TIER_WORDS_RE.test(line.slice(Math.max(0,line.search(/\d/))))&&unitS<0){
+      const tierPos=line.search(TIER_WORDS_RE);
+      const hasMeasuredValue=lastS>=0&&lastS<tierPos&&!!matchTest(line.slice(0,lastS));
+      if(!hasMeasuredValue){lastS=-1;lastE=-1;}
+    }
     if(unitS>=0){valStart=unitS;valEnd=unitE} else {valStart=lastS;valEnd=lastE}
+    // A censored/limit result can legitimately have no unit on the same line.
+    // Accept it only when it is the first numeric token after a recognizable
+    // label; this does not confuse trailing reference captions such as
+    // "Deficient: <20" with the measured value.
+    const cmpResult=/^(.*?)(<=|>=|=<|=>|<|>|≤|≥)\s*(-?\d+(?:\.\d+)?)(?=\s|$)/.exec(preRange);
+    if(cmpResult && matchTest(cmpResult[1]) && !/\d/.test(cmpResult[1])){
+      valStart=cmpResult.index+cmpResult[0].lastIndexOf(cmpResult[3]);
+      valEnd=valStart+cmpResult[3].length;
+    }
     const numPos=valStart>=0?valStart:-1;
+    const qualifier=numPos>=0?((line.slice(Math.max(0,numPos-4),numPos).match(/(<=|>=|=<|=>|<|>|≤|≥)\s*$/)||[])[1]||''):'';
     // Name = text before the value if the value is on this line, else the whole line.
     const namePart=numPos>0?line.slice(0,numPos):(rangeMatch?line.slice(0,rangeStart):line);
     let std=matchTest(namePart);
@@ -1779,7 +1906,7 @@ function parseReportText(text,profile){
         // reference-range captions are not parameters:
         // "Follicular Phase: 114-332 | Ovulation", "Normal Population : 0.8 - 1.2",
         // "Standard Therapy: 2.0-3.0", "Increased risk for Diabetes: 5.7-6.4"
-        && !/\b(phase|trimester|ovulation|luteal|follicular|postmenopausal|post menopausal|menopausal|population|therapy|normal|increased|decreased|uncontrolled|indicate|risk|pregnant|women|adults?|children|male|female|range|interval|method|caution|remark)\b/i.test(lbl);
+        && !/\b(phase|trimester|ovulation|luteal|follicular|postmenopausal|post menopausal|menopausal|population|therapy|normal|high|low|borderline|optimal|desirable|diabetes|increased|decreased|uncontrolled|indicate|risk|pregnant|women|adults?|children|male|female|range|interval|method|caution|remark)\b/i.test(lbl);
       // NOTE: the word-units need \b, but "%" must NOT (there is no word boundary
       // after a percent sign), which previously made "Index 84.21 %" fail this test.
       const hasUnitOrRange=!!rangeMatch
@@ -1869,7 +1996,19 @@ function parseReportText(text,profile){
     // falling outside a library-default-based ceiling, when the report happens
     // to use a different unit scale than the library assumes (e.g. a raw
     // cells/cmm count vs. the library's 10^3/uL default for the same marker).
-    const ref=parseRefRange(rangeTxt);
+    // Collect adjacent interpretation tiers even when the value was already on
+    // the current line. This prevents a single "Deficient: <20" fragment from
+    // being mistaken for the whole normal range when "Insufficient: 20-30" and
+    // "Sufficient: 30-100" follow on later baselines.
+    if(TIER_WORDS_RE.test(rangeTxt)){
+      for(let k=i+1,b=4;k<lines.length&&b-->0;k++){
+        if(STOP_RE.test(lines[k]))break;
+        if(/\d/.test(lines[k])&&matchTest(lines[k]))break;
+        rangeTxt+=' '+lines[k];
+      }
+    }
+    const refSource=rangeMatch?line.slice(rangeStart):rangeTxt;
+    const ref=parseRefRange(TIER_WORDS_RE.test(rangeTxt)?rangeTxt:refSource);
     // A multi-line discriminant/classifier block ("Beta Thalassemia trait: < 14"
     // / "Iron deficiency anaemia: >= 14") often prints across SEVERAL pdf rows.
     // Once val resolves above (usually from the first of those rows, since it
@@ -1879,12 +2018,13 @@ function parseReportText(text,profile){
     // purely to enrich the text used for classifier detection; this never touches
     // `val`, never marks lines consumed, and only widens what detectClassifier sees.
     let classifierScanTxt=rangeTxt;
-    let classifier=detectClassifier(classifierScanTxt,val);
+    const classifierEligible=/\b(index|ratio|score)\b/i.test(`${labelForDisplay} ${std.name||''}`);
+    let classifier=classifierEligible?detectClassifier(classifierScanTxt,val):null;
     // Stop the INSTANT a valid 2-segment classifier is found -- not after a
     // fixed number of lines. A fixed budget over-consumes past the real second
     // segment into the NEXT metric's own row (confirmed: it swallowed a whole
     // neighbouring "Sehgal Index" block once and produced a garbled label).
-    if(!classifier){
+    if(classifierEligible&&!classifier){
       let k=j,budget2=4;
       while(!classifier&&budget2-->0&&k<lines.length){
         const nx=lines[k];
@@ -1911,7 +2051,14 @@ function parseReportText(text,profile){
       // We do not know a trustworthy reference range for this marker, so we report the
       // value faithfully and make NO high/low claim. Guessing here would be worse than
       // saying nothing.
-      const um0=rangeTxt.match(/g\/d[lL]|mg\/d[lL]|mg\/L|gm\/d[lL]|ng\/m[lL]|pg\/m[lL]|u?IU\/m[lL]|mmol\/L|U\/L|%|fL|pg|sec|ratio/i);
+      let um0=rangeTxt.match(/[uµμ]g\/d[lL]|g\/d[lL]|mg\/d[lL]|mg\/L|gm\/d[lL]|ng\/m[lL]|pg\/m[lL]|[uµμ]?IU\/m[lL]|mmol\/L|U\/L|%|fL|pg|sec|ratio|\/(?:hpf|lpf|mm[³3])/i);
+      if(!um0){
+        for(let k=i+1;k<=Math.min(lines.length-1,i+2);k++){
+          if(/\d/.test(lines[k])||STOP_RE.test(lines[k]))break;
+          um0=lines[k].match(/[uµμ]g\/d[lL]|g\/d[lL]|mg\/d[lL]|mg\/L|gm\/d[lL]|ng\/m[lL]|pg\/m[lL]|[uµμ]?IU\/m[lL]|mmol\/L|U\/L|%|fL|pg|sec|ratio|\/(?:hpf|lpf|mm[³3])/i);
+          if(um0)break;
+        }
+      }
       const u0=um0?um0[0]:'';
       if(!isFinite(val))continue;
       if(String(Math.trunc(Math.abs(val))).length>7)continue;
@@ -1919,7 +2066,7 @@ function parseReportText(text,profile){
       if(classifier){
         metrics.push({
           key:std.key, name:std.name, canonicalName:std.name, group:'other',
-          value:val, unit:u0, min:null, max:null,
+          value:val, qualifier, unit:u0, min:null, max:null,
           normal_range:classifierScanTxt.replace(/\s+/g,' ').trim().slice(0,140),
           classifierLabel:classifier.label,
           refFromReport:false, known:false, status:'classifier',
@@ -1929,7 +2076,7 @@ function parseReportText(text,profile){
       }
       metrics.push({
         key:std.key, name:std.name, canonicalName:std.name, group:'other',
-        value:val, unit:u0, min:(ref?ref.min:null), max:(ref?ref.max:null),
+        value:val, qualifier, unit:u0, min:(ref?ref.min:null), max:(ref?ref.max:null),
         normal_range:ref?((isFinite(ref.max)?`${ref.min} - ${ref.max}`:`> ${ref.min}`)+(u0?` ${u0}`:'')):'Not stated on the report',
         refFromReport:!!ref, known:false,
         status:ref?statusFor(val,ref.min,ref.max):'unknown',
@@ -1938,7 +2085,17 @@ function parseReportText(text,profile){
       continue;
     }
     // Unit: keep report's if recognizable, else library default.
-    const um=rangeTxt.match(/g\/d[lL]|mg\/d[lL]|mg\/L|gm\/d[lL]|ng\/m[lL]|pg\/m[lL]|ng\/d[lL]|u?iu\/m[lL]|mmol\/L|ug\/d[lL]|10\^?\d\/u?[lL]|U\/L|mil\/cu\.?mm|cells?\/cu\.?mm|mm\/hr|%|fL|pg|sec/i);
+    const unitPattern=/[uµμ]g\/d[lL]|g\/d[lL]|mg\/d[lL]|mg\/L|gm\/d[lL]|ng\/m[lL]|pg\/m[lL]|ng\/d[lL]|[uµμ]?iu\/m[lL]|mmol\/L|10\^?\d\/[uµμ]?[lL]|U\/L|mil\/cu\.?mm|cells?\/(?:cu\.?mm|cumm|[uµμ]?[lL])|\/(?:hpf|lpf|mm[³3])|mm\/hr|%|fL|pg|sec|ratio/i;
+    let um=rangeTxt.match(unitPattern);
+    // Unit/method text is often placed on the next PDF baseline. Peek without
+    // consuming it, and never cross into a numeric result row.
+    if(!um){
+      for(let k=i+1;k<=Math.min(lines.length-1,i+2);k++){
+        if(/\d/.test(lines[k])||STOP_RE.test(lines[k]))break;
+        um=lines[k].match(unitPattern);
+        if(um)break;
+      }
+    }
     const unitOut=um?um[0]:std.unit;
 
     seen.add(std.key);
@@ -1948,7 +2105,7 @@ function parseReportText(text,profile){
       name:(numPos>0?cleanLabel(labelForDisplay):'')||std.name,
       canonicalName:std.name,
       group:std.group||'other',
-      value:val, unit:unitOut, min:null, max:null,
+      value:val, qualifier, unit:unitOut, min:null, max:null,
       normal_range:classifierScanTxt.replace(/\s+/g,' ').trim().slice(0,140),
       classifierLabel:classifier.label,
       refFromReport:false, known:true, status:'classifier',
@@ -1961,7 +2118,7 @@ function parseReportText(text,profile){
       name:(numPos>0?cleanLabel(labelForDisplay):'')||std.name,
       canonicalName:std.name,
       group:std.group||'other',
-      value:val, unit:unitOut, min, max,
+      value:val, qualifier, unit:unitOut, min, max,
       normal_range:(isFinite(max)?`${min} - ${max}`:`> ${min}`)+(unitOut?` ${unitOut}`:'')+(phased?' (varies by cycle phase)':''),
       refFromReport:!!ref, rangeNote, phased, known:true, status:statusFor(val,min,max),
       // PROVENANCE: the exact text this number was read from. Lets the user check us.
@@ -1981,7 +2138,7 @@ function parseReportText(text,profile){
 // Scans prefix lengths from SHORTEST to LONGEST so "Red Cell Morphology" (3 words) is
 // preferred over "Red Cell Morphology Hypochromic" (4 words, also a fuzzy-match hit).
 function parseQualitativeFindings(lines,metrics,seen){
-  const QUAL_OUTCOMES = /^(reactive|non\s*reactive|non-reactive|positive|negative|present|absent|detected|not\s*detected|weakly\s*reactive|weakly\s*positive|no\s*growth|growth|normal|abnormal|nil|none\s*seen|rare|few|moderate|many|trace|small|large|clear|hazy|cloudy|turbid)\b/i;
+  const QUAL_OUTCOMES = /^(reactive|non\s*reactive|non-reactive|positive|negative|present|absent|detected|not\s*detected|weakly\s*reactive|weakly\s*positive|no\s*growth|growth|normal|abnormal|nil|none\s*seen|rare|few|moderate|many|trace|small|large|clear|hazy|cloudy|turbid|pale\s+yellow|straw(?:\s+yellow)?|yellow|amber|colourless|colorless)\b/i;
   for(const line of lines){
     if(/\d/.test(line))continue;                           // numeric rows: main loop's job
     const t=line.trim();
@@ -1995,7 +2152,7 @@ function parseQualitativeFindings(lines,metrics,seen){
     if(words.length<2)continue;   // need at least one test word + one finding word
     
     let std=null, findingPart='', nameWords=0, qualKey='', isKnownOutcome=false;
-    for(let w=2;w<words.length;w++){
+    for(let w=1;w<words.length;w++){
       const prefix=words.slice(0,w).join(' ');
       // Strip leading separator punctuation (":", "-") left over from splitting
       // on whitespace, e.g. "Morphology : Normal" -> suffix word 0 is ":" --
@@ -2023,6 +2180,12 @@ function parseQualitativeFindings(lines,metrics,seen){
       if(seen.has(qk))break;                              // already captured this finding
 
       std=matchTest(prefix);
+      // Qualitative extraction must still be anchored to a known clinical
+      // analyte. Otherwise ordinary prose such as "...conditions. Low urea..."
+      // can be split into a plausible-looking label plus an outcome word.
+      if(!std)continue;
+      const prefixWords=(prefix.match(/[A-Za-z]{2,}/g)||[]).length;
+      if(prefixWords>5||/\b(is|are|was|were|may|can|from|than|the|of|and|with|for|diagnose|monitor|conditions?|levels?)\b/i.test(prefix))continue;
       findingPart=match[0];
       nameWords=w;
       qualKey=qk;
@@ -2036,7 +2199,7 @@ function parseQualitativeFindings(lines,metrics,seen){
     const status = (function(f){
       const v = String(f).toLowerCase().trim();
       if(/^(reactive|positive|present|detected|abnormal|weakly reactive|weakly positive|reactive\s*\(positive\)|growth|trace|small|large|few|moderate|many|hazy|cloudy|turbid)\b/i.test(v)) return 'high';
-      if(/^(non reactive|non-reactive|negative|absent|not detected|nil|normal|no\s*growth|none\s*seen|clear)\b/i.test(v)) return 'normal';
+      if(/^(non reactive|non-reactive|negative|absent|not detected|nil|normal|no\s*growth|none\s*seen|clear|pale yellow|straw(?: yellow)?|yellow|amber|colourless|colorless)\b/i.test(v)) return 'normal';
       return 'unknown';
     })(findingPart);
     
@@ -2046,7 +2209,7 @@ function parseQualitativeFindings(lines,metrics,seen){
       canonicalName:std?std.name:resolvedName,
       group:std?std.group:'other',
       value:findingPart,   // qualitative string
-      unit:'', min:null, max:null, normal_range:isKnownOutcome ? (status === 'high' ? 'Non Reactive / Negative' : 'Negative') : '',
+      unit:'', min:null, max:null, normal_range:std&&std.key==='urine colour'?'Pale yellow / yellow':(isKnownOutcome ? (status === 'high' ? 'Non Reactive / Negative' : 'Negative') : ''),
       refFromReport:false, known:!!std, status:status,
       srcLine:line.slice(0,180), srcIndex:-1
     });
@@ -2321,6 +2484,31 @@ function wireUpload(){const dz=$('dropZone'),inp=$('fileInput');dz.onclick=()=>i
 async function fileToDataURL(file){return new Promise((res,rej)=>{const fr=new FileReader();fr.onload=()=>res(fr.result);fr.onerror=()=>rej(fr.error);fr.readAsDataURL(file)})}
 function setProgress(p,text,sub){$('progressBarFill').style.width=Math.round(p*100)+'%';$('progressBarPct').textContent=Math.round(p*100)+'%';if(text)$('progressText').textContent=text;if(sub)$('progressSub').textContent=sub}
 let ocrWorker=null,ocrWorkerPromise=null,ocrProgressCb=null;
+// Privacy-safe OCR diagnostics. This never records report text, file names,
+// images, profile data, or extracted values, and it is never transmitted.
+window.__ocrRunLog=[];
+function recordOcrRun(entry){
+  try{
+    const safe={
+      at:new Date().toISOString(),
+      engine:String(entry.engine||''),
+      outcome:String(entry.outcome||''),
+      sourceType:String(entry.sourceType||''),
+      sourceBytes:Number.isFinite(entry.sourceBytes)?entry.sourceBytes:null,
+      durationMs:Number.isFinite(entry.durationMs)?Math.round(entry.durationMs):null,
+      preprocessingMs:Number.isFinite(entry.preprocessingMs)?Math.round(entry.preprocessingMs):null,
+      confidence:Number.isFinite(entry.confidence)?Math.max(0,Math.min(1,entry.confidence)):null,
+      wordCount:Number.isInteger(entry.wordCount)?entry.wordCount:null,
+      heapDeltaBytes:Number.isFinite(entry.heapDeltaBytes)?entry.heapDeltaBytes:null,
+      logicalProcessors:Number(navigator.hardwareConcurrency)||null,
+      deviceMemoryGiB:Number(navigator.deviceMemory)||null,
+      webgpu:!!navigator.gpu
+    };
+    window.__ocrRunLog.push(safe);
+    if(window.__ocrRunLog.length>50)window.__ocrRunLog.splice(0,window.__ocrRunLog.length-50);
+  }catch(e){}
+}
+function getOcrDiagnostics(){return JSON.parse(JSON.stringify(window.__ocrRunLog||[]))}
 
 
 function dataUrlFromAny(input){return new Promise(async resolve=>{try{if(typeof input==='string')return resolve(input);resolve(await fileToDataURL(input))}catch(e){resolve('')}})}
@@ -2391,41 +2579,10 @@ function preprocessImageForOCR(fileOrUrl,maxDim=1800){
     }catch(e){resolve(fileOrUrl)}
   })
 }
-/* ---------------- OCR: PaddleOCR (PP-OCRv5) primary, Tesseract fallback ----------------
-   PaddleOCR is a Python toolkit, but the PP-OCRv5 models have ONNX exports that run in
-   the browser on onnxruntime-web (WebGPU/WASM). Everything stays on-device — no upload.
-   Crucially it returns BOUNDING BOXES, so we can rebuild proper rows the same way we do
-   for PDFs; lab reports are column layouts and row order is what our parser depends on.  */
-const PADDLE_CDNS=[
-  'https://esm.run/ppu-paddle-ocr/web',
-  'https://cdn.jsdelivr.net/npm/ppu-paddle-ocr/web/+esm'
-];
-let paddleOCR=null, paddleState='idle';   // idle | loading | ready | unavailable
+/* ---------------- OCR: locally vendored Tesseract ----------------
+   OCR executes entirely in this origin. Do not reintroduce runtime imports from
+   package CDNs: imported code can read the same local health data as this app. */
 window.__ocrEngineUsed='';
-
-async function getPaddleOCR(){
-  if(paddleState==='ready')return paddleOCR;
-  if(paddleState==='unavailable')return null;
-  if(paddleState==='loading'){                       // wait for the in-flight load
-    for(let i=0;i<200 && paddleState==='loading';i++)await new Promise(r=>setTimeout(r,100));
-    return paddleState==='ready'?paddleOCR:null;
-  }
-  paddleState='loading';
-  for(const url of PADDLE_CDNS){
-    try{
-      const mod=await import(/* webpackIgnore: true */ url);
-      const OCR=mod.PaddleOcrService||mod.default||mod;
-      const inst=(typeof OCR==='function')?new OCR():OCR;
-      if(inst&&typeof inst.initialize==='function')await inst.initialize();
-      else if(inst&&typeof inst.init==='function')await inst.init();
-      if(!inst||typeof inst.recognize!=='function')throw new Error('unexpected PaddleOCR API');
-      paddleOCR=inst; paddleState='ready';
-      return paddleOCR;
-    }catch(e){ console.warn('PaddleOCR load failed from '+url+':',e&&e.message); }
-  }
-  paddleState='unavailable';
-  return null;
-}
 
 // Rebuild reading order from OCR boxes: group by baseline (y), sort left-to-right (x).
 // Without this, PP-OCR returns detected regions in confidence/detection order, which
@@ -2468,37 +2625,39 @@ function dataUrlToCanvas(dataUrl){
   });
 }
 async function ocrImage(fileOrUrl,onProgress){
+  const runStarted=performance.now();
+  const heapBefore=performance.memory&&Number(performance.memory.usedJSHeapSize);
+  const sourceType=(fileOrUrl&&fileOrUrl.type)||(/^data:image\//.test(String(fileOrUrl||''))?'image-data-url':typeof fileOrUrl);
+  const sourceBytes=fileOrUrl&&Number.isFinite(fileOrUrl.size)?fileOrUrl.size:null;
+  const preprocessStarted=performance.now();
   const input=await preprocessImageForOCR(fileOrUrl);
-  // ---- 1) PaddleOCR PP-OCRv5 (better on dense/low-quality lab tables) ----
-  try{
-    if(onProgress)onProgress(0.05);
-    const p=await getPaddleOCR();
-    if(p){
-      if(onProgress)onProgress(0.35);
-      const canvasInput=await dataUrlToCanvas(input);
-      const res=await p.recognize(canvasInput);
-      const items=Array.isArray(res)?res:(res&&(res.results||res.data||res.lines))||[];
-      let text='';
-      if(items.length && (items[0].points||items[0].box||items[0].boundingBox)) text=linesFromOcrBoxes(items);
-      else if(res&&typeof res.text==='string') text=res.text;
-      else if(items.length) text=items.map(i=>i.text||'').join('\n');
-      if(onProgress)onProgress(1);
-      if(text&&text.replace(/\s/g,'').length>=12){ window.__ocrEngineUsed='PaddleOCR PP-OCRv5'; return text; }
-    }
-  }catch(e){ console.warn('PaddleOCR recognise failed, falling back to Tesseract:',e&&e.message); }
-
-  // ---- 2) Tesseract fallback (Direct Simple-API call - 100% robust!) ----
+  const preprocessingMs=performance.now()-preprocessStarted;
   if(!window.Tesseract)throw new Error('OCR library not loaded');
   try{
-    console.log('[PWA] Running Tesseract global OCR engine...');
+    console.log('[PWA] Running locally vendored Tesseract OCR engine...');
     const {data}=await Tesseract.recognize(input, 'eng', {
-      workerPath: 'https://cdn.jsdelivr.net/npm/tesseract.js@5.1.0/dist/worker.min.js',
-      corePath: 'https://cdn.jsdelivr.net/npm/tesseract.js-core@5.1.0/tesseract-core.wasm.js',
+      workerPath: new URL('./vendor/tesseract/worker.min.js',document.baseURI).href,
+      corePath: new URL('./vendor/tesseract/tesseract-core.wasm.js',document.baseURI).href,
+      langPath: new URL('./vendor/tessdata',document.baseURI).href,
       logger: m=>{if(onProgress && m && m.status==='recognizing text')onProgress(m.progress||0)}
     });
     window.__ocrEngineUsed='Tesseract';
+    const heapAfter=performance.memory&&Number(performance.memory.usedJSHeapSize);
+    recordOcrRun({
+      engine:'Tesseract 5.1.0',outcome:'success',sourceType,sourceBytes,
+      durationMs:performance.now()-runStarted,preprocessingMs,
+      confidence:Number(data&&data.confidence)/100,
+      wordCount:Array.isArray(data&&data.words)?data.words.length:null,
+      heapDeltaBytes:Number.isFinite(heapBefore)&&Number.isFinite(heapAfter)?heapAfter-heapBefore:null
+    });
     return data&&data.text?data.text:'';
   }catch(err){
+    const heapAfter=performance.memory&&Number(performance.memory.usedJSHeapSize);
+    recordOcrRun({
+      engine:'Tesseract 5.1.0',outcome:'error',sourceType,sourceBytes,
+      durationMs:performance.now()-runStarted,preprocessingMs,
+      heapDeltaBytes:Number.isFinite(heapBefore)&&Number.isFinite(heapAfter)?heapAfter-heapBefore:null
+    });
     console.error('[PWA] Tesseract global OCR failed:', err);
     throw err;
   }
@@ -2580,7 +2739,11 @@ function reconstructPdfLinesBoxed(items,pageW,pageH){
 // beyond this page, Browse/parsing/trends are unaffected.
 const DOC_PAGE_CAP=10;
 async function extractPdfText(file,fileObj){
-  if(!window.pdfjsLib)return '';
+  if(!configurePdfEngine()){
+    const err=new Error('The on-device PDF reader did not load. Refresh LabLens and try again.');
+    err.code='PDF_ENGINE_UNAVAILABLE';
+    throw err;
+  }
   const buf=await file.arrayBuffer();const pdf=await pdfjsLib.getDocument({data:buf}).promise;let text='',ocrPages=0;
   const docPages=[];
   for(let i=1;i<=pdf.numPages;i++){
@@ -2621,6 +2784,11 @@ async function extractPdfText(file,fileObj){
   }
   if(ocrPages)showToast(`OCR used on ${ocrPages} scanned PDF page${ocrPages===1?'':'s'}`,'info');
   if(fileObj)fileObj.docPages=docPages;
+  if(!text.trim()){
+    const err=new Error('No readable text could be extracted. Try a clearer scan or export the PDF again.');
+    err.code='PDF_TEXT_EMPTY';
+    throw err;
+  }
   return text;
 }
 
@@ -3153,7 +3321,8 @@ async function analyzeReport(){
           if(!isValidLabReport){
             rejectedFiles.push({
               name: f.name, 
-              reason: metrics.length === 0 ? 'No numeric lab metrics identified' : 'Non-lab document type'
+              reason: metrics.length === 0 ? 'No numeric lab metrics identified' : 'Non-lab document type',
+              kind:'unsupported'
             });
             setRow(i,'❌','rejected','err');
           } else {
@@ -3171,7 +3340,8 @@ async function analyzeReport(){
           console.error('file failed:',f.name,err);
           rejectedFiles.push({
             name: f.name, 
-            reason: (err && err.message) ? err.message : String(err || 'Unreadable document format or scanning error')
+            reason: (err && err.message) ? err.message : String(err || 'Unreadable document format or scanning error'),
+            kind:'processing'
           });
           setRow(i,'❌', 'rejected','err');
         }
@@ -3251,6 +3421,9 @@ async function analyzeReport(){
 }
 
 function showRejectionModal(files){
+  const previous=document.getElementById('rejectionModal');
+  if(previous)previous.remove();
+  const processingFailure=files.length>0&&files.every(f=>f.kind==='processing');
   const overlay=document.createElement('div');
   overlay.className='modal-overlay active';
   overlay.id='rejectionModal';
@@ -3265,15 +3438,29 @@ function showRejectionModal(files){
   modal.style.border='1px solid var(--border)';
   modal.style.boxShadow='var(--shadow-lg)';
   
-  modal.innerHTML=`
-    <h3 style="margin-top:0;display:flex;align-items:center;gap:8px;font-size:15px;font-weight:900;color:var(--danger)">❌ Upload Rejected — Lab Reports Only</h3>
+  modal.innerHTML=processingFailure?`
+    <h3 style="margin-top:0;display:flex;align-items:center;gap:8px;font-size:15px;font-weight:900;color:var(--danger)">Couldn’t read this report</h3>
     <p style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;line-height:1.5">
-      LabLens has rejected the following files as they do not match our standard numeric lab report format:
+      The file was not classified as unsupported. The on-device PDF/OCR reader failed before LabLens could check its contents.
     </p>
     <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 12px;margin-bottom:14px;max-height:100px;overflow-y:auto;font-size:11.5px;color:var(--text)">
       ${files.map(f=>`<div style="margin-bottom:4px">📄 <strong>${esc(f.name)}</strong>: <span style="color:var(--danger)">${esc(f.reason)}</span></div>`).join('')}
     </div>
-    
+    <div style="font-size:12px;color:var(--text);background:rgba(209,88,74,0.06);border:1px solid rgba(209,88,74,0.22);border-radius:10px;padding:12px;margin-bottom:16px;line-height:1.5">
+      <strong>No report was saved.</strong> Refresh once to load the latest offline reader, then retry. If it still fails, reopen LabLens while online so the local PDF assets can be refreshed.
+    </div>
+    <div class="modal-actions" style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px;flex-wrap:wrap">
+      <button class="btn-secondary" id="btnRejectionClose" style="padding:8px 16px;font-size:12px">Close</button>
+      <button class="btn-primary" id="btnRejectionRetry" style="padding:8px 16px;font-size:12px">Try again</button>
+    </div>
+  `:`
+    <h3 style="margin-top:0;display:flex;align-items:center;gap:8px;font-size:15px;font-weight:900;color:var(--danger)">Upload not supported</h3>
+    <p style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;line-height:1.5">
+      LabLens could read the file, but could not identify a supported numeric lab report:
+    </p>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 12px;margin-bottom:14px;max-height:100px;overflow-y:auto;font-size:11.5px;color:var(--text)">
+      ${files.map(f=>`<div style="margin-bottom:4px">📄 <strong>${esc(f.name)}</strong>: <span style="color:var(--danger)">${esc(f.reason)}</span></div>`).join('')}
+    </div>
     <div style="font-size:12px;color:var(--text);background:rgba(209,88,74,0.06);border:1px solid rgba(209,88,74,0.22);border-radius:10px;padding:12px;margin-bottom:16px;line-height:1.5">
       <div style="font-weight:900;color:var(--danger);margin-bottom:6px">📋 LabLens Rejection Policy:</div>
       <div style="margin-bottom:6px">This specialized version of LabLens is optimized <strong>exclusively</strong> for numeric clinical lab reports. To preserve your database's integrity, we do not accept or save non-lab reports.</div>
@@ -3288,7 +3475,7 @@ function showRejectionModal(files){
     </p>
     
     <div class="modal-actions" style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px">
-      <button class="btn-primary" id="btnRejectionClose" style="padding:8px 16px;font-size:12px">I Understand</button>
+      <button class="btn-primary" id="btnRejectionClose" style="padding:8px 16px;font-size:12px">Close</button>
     </div>
   `;
   
@@ -3297,11 +3484,10 @@ function showRejectionModal(files){
   
   overlay.querySelector('#btnRejectionClose').addEventListener('click', ()=>{
     overlay.remove();
-    // Restore upload section if no files succeeded
-    if(!uploadedFiles.length){
-      $('analyzeSection').style.display='block';
-    }
+    $('analyzeSection').style.display='block';
   });
+  const retry=overlay.querySelector('#btnRejectionRetry');
+  if(retry)retry.addEventListener('click',()=>{overlay.remove();$('analyzeSection').style.display='block';analyzeReport();});
 }
 function renderAnalysisAudit(a){
   const au=a.audit||{}; const unitNote=au.unitStandardized?` · <strong>${au.unitStandardized}</strong> unit conversion${au.unitStandardized===1?'':'s'} standardized`:'';
@@ -3356,7 +3542,7 @@ function toggleProv(i){const el=$('prov-'+i);if(el)el.classList.toggle('open')}
 async function flagMetric(i){
   if(!currentAnalysis||!currentAnalysis.metrics[i])return;
   const m=currentAnalysis.metrics[i];
-  if(!await confirmDialog(`Mark "${m.name} = ${m.value}" as misread?\n\nIt will be excluded from your summary and trends until you re-check it.`))return;
+  if(!await confirmDialog(`Mark "${m.name} = ${metricValueText(m)}" as misread?\n\nIt will be excluded from your summary and trends until you re-check it.`))return;
   m.flaggedWrong=true; m.status='unknown'; m.excluded=true;
   currentAnalysis.metrics=currentAnalysis.metrics.filter(x=>!x.excluded||x===m);
   // recompute the counts so a value the user distrusts stops driving the summary
@@ -3378,7 +3564,7 @@ async function flagMetric(i){
     const report=[
       `Parsing issue: a value was misread.`,
       `Report type: ${(currentAnalysis.category||'lab')}`,
-      `Parsed as: ${m.name} = ${m.value} ${m.unit||''}`.trim(),
+      `Parsed as: ${m.name} = ${metricValueText(m)} ${m.unit||''}`.trim(),
       `Read from this line: "${m.srcLine||'(not available)'}"`,
       ``,
       `(Add any extra context below)`
@@ -3438,7 +3624,7 @@ function renderMetricSheet(){
     <button class="ai-close sheet-close" onclick="closeMetricSheet()">✕</button>
     ${chips}
     <div class="metric-hero">
-      <div class="metric-hero-value tier-text-${tier}">${esc(m.value)}<span class="metric-hero-unit">${esc(m.unit||'')}</span></div>
+      <div class="metric-hero-value tier-text-${tier}">${esc(metricValueText(m))}<span class="metric-hero-unit">${esc(m.unit||'')}</span></div>
       <div><span class="status-pill ${tier}">${esc(tierLabel)}</span></div>
       <div class="metric-hero-name">${esc(m.name)}</div>
     </div>
@@ -3541,7 +3727,7 @@ function buildExplainPrompt(keys){
     }[tier]||'flagged';
     return `I'd like you to explain **${m.name}** from my report using this exact 3-part structure:\n\n`+
       `**1. What is it?** — Explain in plain, friendly language what ${m.name} measures and why it matters. What organ or body system is involved? What does this marker tell a doctor?\n\n`+
-      `**2. Where do I stand?** — My result is **${m.value} ${m.unit||''}**. The reference range for this report is **${m.normal_range||'not stated'}**. My value is ${standDesc}. `+
+      `**2. Where do I stand?** — My result is **${metricValueText(m)} ${m.unit||''}**. The reference range for this report is **${m.normal_range||'not stated'}**. My value is ${standDesc}. `+
       (isFinite(m.min)&&isFinite(m.max)?`To give me a sense of scale: the normal band runs from ${m.min} to ${m.max}. `:'')+'Tell me clearly — is this a little off or a lot? Should I be worried?\n\n'+
       `**3. What should I do next?** — Given where my ${m.name} sits, what are 2–3 practical, realistic things I can do? These could be lifestyle changes, things to discuss with my doctor, or just reassurance if everything looks fine. Be specific and actionable, not generic.`;
   }
@@ -3557,7 +3743,7 @@ function buildExplainPrompt(keys){
       'tier-concern':m.status==='high'?'above the normal range':'below the normal range',
       'tier-unknown':'no reference range available for comparison'
     }[tier]||'flagged';
-    return `- **${m.name}**: my result is ${m.value} ${m.unit||''} (reference: ${m.normal_range||'not stated'}) — ${standDesc}`;
+    return `- **${m.name}**: my result is ${metricValueText(m)} ${m.unit||''} (reference: ${m.normal_range||'not stated'}) — ${standDesc}`;
   }).join('\n');
   return `${intro}\n\nFor each one, please cover:\n1. What it measures and why it matters (in plain language)\n2. Where my result stands and whether I should be concerned\n3. One or two practical next steps\n\nUse a **### header for each parameter** so I can scan the response easily.\n\nHere are the values:\n${perMetric}`;
 }
@@ -3896,7 +4082,7 @@ function renderQuickMetricsSummary(a){
   // "Quick Overview" is a short preview -- show the first 8 AFTER sorting so
   // an abnormal result never gets buried behind a page of normal CBC values.
   const pairs=sortMetricsForDisplay(a.metrics).slice(0,8);
-  el.innerHTML=pairs.length?pairs.map(({m})=>`<div class="metric-status-item" onclick="openMetricSheet('${m.key}')" tabindex="0" role="button" aria-label="View details for ${esc(m.name)}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openMetricSheet('${m.key}')}"><div class="status-indicator ${severityTier(m)}"></div><div class="metric-text"><h5>${esc(m.name)}</h5><p>${m.status} · ${m.value} ${esc(m.unit)}</p></div></div>`).join(''):'<div class="empty-state" style="grid-column:1/-1"><div class="ic">📭</div><p>No lab parameters detected.</p></div>';
+  el.innerHTML=pairs.length?pairs.map(({m})=>`<div class="metric-status-item" onclick="openMetricSheet('${m.key}')" tabindex="0" role="button" aria-label="View details for ${esc(m.name)}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openMetricSheet('${m.key}')}"><div class="status-indicator ${severityTier(m)}"></div><div class="metric-text"><h5>${esc(m.name)}</h5><p>${m.status} · ${esc(metricValueText(m))} ${esc(m.unit)}</p></div></div>`).join(''):'<div class="empty-state" style="grid-column:1/-1"><div class="ic">📭</div><p>No lab parameters detected.</p></div>';
 }
 const TIER_FILTER_LABELS={'tier-safe':'Normal','tier-borderline':'Borderline','tier-concern':'High/Low'};
 function renderMetricsList(a){
@@ -3913,7 +4099,7 @@ function renderMetricsList(a){
   }
   if(!a.metrics.length){ el.innerHTML='<div class="empty-state"><div class="ic">📭</div><p>No parameters could be extracted.</p></div>'; return; }
   if(!pairs.length){ el.innerHTML=filterChip+'<div class="empty-state"><div class="ic">📭</div><p>No parameters match this filter.</p></div>'; return; }
-  el.innerHTML=filterChip+pairs.map(({m,i})=>`<div class="metric-card" onclick="openMetricSheet('${m.key}')" tabindex="0" role="button" aria-label="View details for ${esc(m.name)}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openMetricSheet('${m.key}')}"><div class="metric-icon ${severityTier(m)}"></div><div><div style="font-weight:900;font-size:13px">${esc(m.name)}</div><div class="metric-reference">${m.status==='classifier'?`Cutoffs: ${esc(m.normal_range)}${m.classifierLabel?` <span class="range-src">· pattern: ${esc(m.classifierLabel)}</span>`:''}`:`Normal: ${esc(m.normal_range)}${m.rangeNote?` <span class="range-src">· ${esc(m.rangeNote)}</span>`:''}`}</div>${m.srcLine?`<div class="prov"><button class="prov-toggle" onclick="event.stopPropagation();toggleProv(${i})">🔎 Where did this come from?</button><div class="prov-body" id="prov-${i}"><div class="prov-label">Read from this line of your report:</div><code class="prov-line">${esc(m.srcLine)}</code><button class="prov-flag" onclick="event.stopPropagation();flagMetric(${i})">⚑ This value is wrong</button></div></div>`:''}</div><div class="metric-value-badge">${m.value} <span style="font-size:10px;color:var(--text-secondary)">${esc(m.unit)}</span><span class="flag" style="${m.status==='unknown'||m.status==='classifier'?'color:var(--text-secondary)':''}">${m.status==='unknown'?'NO REF. RANGE':m.status==='classifier'?'SCREENING INDEX':m.status.toUpperCase()}</span></div></div>`).join('');
+  el.innerHTML=filterChip+pairs.map(({m,i})=>`<div class="metric-card" onclick="openMetricSheet('${m.key}')" tabindex="0" role="button" aria-label="View details for ${esc(m.name)}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openMetricSheet('${m.key}')}"><div class="metric-icon ${severityTier(m)}"></div><div><div style="font-weight:900;font-size:13px">${esc(m.name)}</div><div class="metric-reference">${m.status==='classifier'?`Cutoffs: ${esc(m.normal_range)}${m.classifierLabel?` <span class="range-src">· pattern: ${esc(m.classifierLabel)}</span>`:''}`:`Normal: ${esc(m.normal_range)}${m.rangeNote?` <span class="range-src">· ${esc(m.rangeNote)}</span>`:''}`}</div>${m.srcLine?`<div class="prov"><button class="prov-toggle" onclick="event.stopPropagation();toggleProv(${i})">🔎 Where did this come from?</button><div class="prov-body" id="prov-${i}"><div class="prov-label">Read from this line of your report:</div><code class="prov-line">${esc(m.srcLine)}</code><button class="prov-flag" onclick="event.stopPropagation();flagMetric(${i})">⚑ This value is wrong</button></div></div>`:''}</div><div class="metric-value-badge">${esc(metricValueText(m))} <span style="font-size:10px;color:var(--text-secondary)">${esc(m.unit)}</span><span class="flag" style="${m.status==='unknown'||m.status==='classifier'?'color:var(--text-secondary)':''}">${m.status==='unknown'?'NO REF. RANGE':m.status==='classifier'?'SCREENING INDEX':m.status.toUpperCase()}</span></div></div>`).join('');
 }
 function switchTab(name,btn){activeResultTab=name;document.querySelectorAll('#resultTabs .tab-btn').forEach(b=>b.classList.toggle('active',btn?b===btn:b.dataset.tab===name));document.querySelectorAll('.results-body>.tab-content').forEach(c=>c.classList.toggle('active',c.id==='tab-'+name));if(name==='comparison')displayComparison()}
 function setDefaultTrendParam(key){defaultTrendKey=key;selectedTrendKey=key;LS.set('defaultTrendKey_'+(currentUser||'guest'),key);showToast('Default trend parameter saved','success');displayComparison()}
@@ -3954,9 +4140,9 @@ function displayComparison(){
   if(defaultTrendKey&&keys.some(k=>k.key===defaultTrendKey)&&!selectedTrendKey)selectedTrendKey=defaultTrendKey;
   const graph=(selectedTrendKey&&keys.some(k=>k.key===selectedTrendKey))?renderTrendGraph(trendSeriesFor(selectedTrendKey)):`<div class="trend-empty-prompt">📈 Select a clinical parameter below to draw its graph. If you follow one marker regularly, click <strong>Make default</strong> on its graph so it appears automatically next time.</div>`;
   const latest=reports[reports.length-1],prev=reports[reports.length-2];
-  const latestCards=(latest.metrics||[]).map(m=>{const p=(prev.metrics||[]).find(x=>x.key===m.key);let delta='<span style="font-size:11px;color:var(--text-secondary)">No value in previous dated report</span>';const bothNumeric=typeof m.value==='number'&&isFinite(m.value)&&p&&typeof p.value==='number'&&isFinite(p.value);if(p&&bothNumeric){const d=+(m.value-p.value).toFixed(2);delta=`<span style="font-weight:900;color:${d>0?'var(--danger)':d<0?'var(--success)':'var(--text-secondary)'}">${d>0?'▲':d<0?'▼':'▬'} ${Math.abs(d)} ${esc(m.unit)}</span><br><small style="color:var(--text-secondary)">vs ${p.value} on ${fmtDate(prev.date,{month:'short',day:'numeric',year:'2-digit'})}</small>`}else if(p){delta=`<small style="color:var(--text-secondary)">vs ${esc(String(p.value))} on ${fmtDate(prev.date,{month:'short',day:'numeric',year:'2-digit'})}</small>`}return`<div class="comparison-card"><div style="display:flex;justify-content:space-between;gap:8px"><strong><span class="trend-param-link" onclick="setTrendParam('${m.key}')">${esc(m.name)}</span></strong><span class="history-status ${m.status==='normal'?'ok':'warn'}">${m.status}</span></div><div style="font-size:22px;font-weight:900;margin:8px 0">${m.value} <small style="font-size:11px;color:var(--text-secondary)">${esc(m.unit)}</small></div>${delta}</div>`}).join('');
+  const latestCards=(latest.metrics||[]).map(m=>{const p=(prev.metrics||[]).find(x=>x.key===m.key);let delta='<span style="font-size:11px;color:var(--text-secondary)">No value in previous dated report</span>';const bothNumeric=typeof m.value==='number'&&isFinite(m.value)&&p&&typeof p.value==='number'&&isFinite(p.value);if(p&&bothNumeric){const d=+(m.value-p.value).toFixed(2);delta=`<span style="font-weight:900;color:${d>0?'var(--danger)':d<0?'var(--success)':'var(--text-secondary)'}">${d>0?'▲':d<0?'▼':'▬'} ${Math.abs(d)} ${esc(m.unit)}</span><br><small style="color:var(--text-secondary)">vs ${p.value} on ${fmtDate(prev.date,{month:'short',day:'numeric',year:'2-digit'})}</small>`}else if(p){delta=`<small style="color:var(--text-secondary)">vs ${esc(String(p.value))} on ${fmtDate(prev.date,{month:'short',day:'numeric',year:'2-digit'})}</small>`}return`<div class="comparison-card"><div style="display:flex;justify-content:space-between;gap:8px"><strong><span class="trend-param-link" onclick="setTrendParam('${m.key}')">${esc(m.name)}</span></strong><span class="history-status ${m.status==='normal'?'ok':'warn'}">${m.status}</span></div><div style="font-size:22px;font-weight:900;margin:8px 0">${metricValueText(m)} <small style="font-size:11px;color:var(--text-secondary)">${esc(m.unit)}</small></div>${delta}</div>`}).join('');
   let table=`<div style="grid-column:1/-1;margin-top:8px"><div class="section-title" style="margin:10px 0">📊 Trend table by report date</div><div style="overflow-x:auto;border:1px solid var(--border);border-radius:10px"><table style="width:100%;border-collapse:collapse;font-size:12px;min-width:${Math.max(520,reports.length*110+180)}px"><thead><tr><th style="position:sticky;left:0;background:var(--bg);z-index:1;text-align:left;padding:9px;border-bottom:1px solid var(--border)">Parameter</th>${reports.map(r=>`<th style="padding:9px;text-align:center;border-bottom:1px solid var(--border)">${fmtDate(r.date,{month:'short',day:'numeric',year:'2-digit'})}<br><span style="font-weight:500;color:var(--text-secondary)">${esc((r.fileName||'Report').slice(0,18))}</span></th>`).join('')}</tr></thead><tbody>`;
-  keys.forEach(k=>{table+=`<tr><td style="position:sticky;left:0;background:var(--card);backdrop-filter:blur(var(--glass-blur)) saturate(var(--glass-sat));-webkit-backdrop-filter:blur(var(--glass-blur)) saturate(var(--glass-sat));font-weight:800;padding:9px;border-bottom:1px solid var(--border)"><span class="trend-param-link" onclick="setTrendParam('${k.key}')">${esc(k.name)}</span>${k.unit?` <span style="font-weight:500;color:var(--text-secondary)">(${esc(k.unit)})</span>`:''}</td>`;reports.forEach(r=>{const m=(r.metrics||[]).find(x=>x.key===k.key);if(!m)table+='<td style="text-align:center;color:var(--text-secondary);padding:9px;border-bottom:1px solid var(--border)">—</td>';else{const col=m.status==='normal'?'var(--success)':m.status==='high'?'var(--danger)':'#5A7A9E';table+=`<td style="text-align:center;padding:9px;border-bottom:1px solid var(--border)"><span style="font-weight:900;color:${col}">${m.value}</span></td>`}});table+='</tr>'});
+  keys.forEach(k=>{table+=`<tr><td style="position:sticky;left:0;background:var(--card);backdrop-filter:blur(var(--glass-blur)) saturate(var(--glass-sat));-webkit-backdrop-filter:blur(var(--glass-blur)) saturate(var(--glass-sat));font-weight:800;padding:9px;border-bottom:1px solid var(--border)"><span class="trend-param-link" onclick="setTrendParam('${k.key}')">${esc(k.name)}</span>${k.unit?` <span style="font-weight:500;color:var(--text-secondary)">(${esc(k.unit)})</span>`:''}</td>`;reports.forEach(r=>{const m=(r.metrics||[]).find(x=>x.key===k.key);if(!m)table+='<td style="text-align:center;color:var(--text-secondary);padding:9px;border-bottom:1px solid var(--border)">—</td>';else{const col=m.status==='normal'?'var(--success)':m.status==='high'?'var(--danger)':'#5A7A9E';table+=`<td style="text-align:center;padding:9px;border-bottom:1px solid var(--border)"><span style="font-weight:900;color:${col}">${metricValueText(m)}</span></td>`}});table+='</tr>'});
   table+='</tbody></table></div><p style="font-size:11px;color:var(--text-secondary);margin-top:8px">Click any parameter name to update the graph. Reports are sorted by extracted report date.</p></div>';
   el.innerHTML=graph+latestCards+table;
 }
@@ -4025,7 +4211,7 @@ function trendContext(){
   const keys=[];hist.forEach(r=>r.metrics.forEach(m=>{if(!keys.some(k=>k.key===m.key))keys.push({key:m.key,name:m.name,unit:m.unit})}));
   const lines=keys.slice(0,25).map(k=>{
     const pts=hist.filter(r=>r.metrics.some(m=>m.key===k.key))
-      .map(r=>{const m=r.metrics.find(x=>x.key===k.key);return `${fmtDate(r.date,{month:'short',year:'2-digit'})}=${m.value}`});
+      .map(r=>{const m=r.metrics.find(x=>x.key===k.key);return `${fmtDate(r.date,{month:'short',year:'2-digit'})}=${metricValueText(m)}`});
     return pts.length>1?`${k.name} (${k.unit||''}): ${pts.join(' → ')}`:null;
   }).filter(Boolean);
   return lines.length?`TRENDS ACROSS ${hist.length} SAVED REPORTS (oldest → newest):\n`+lines.join('\n'):'TRENDS: no repeated parameters across reports yet.';
@@ -4081,7 +4267,7 @@ function reportContext(){
   const changes=prev?ms.map(m=>{
     const p=(prev.metrics||[]).find(x=>x.key===m.key); if(!p)return null;
     const d=+(m.value-p.value).toFixed(2);
-    return `${m.name}: was ${p.value} on ${fmtDate(prev.date,{month:'short',year:'2-digit'})}, now ${m.value} (${d>0?'up':d<0?'down':'no change'}${d?' '+Math.abs(d):''})`;
+    return `${m.name}: was ${p.value} on ${fmtDate(prev.date,{month:'short',year:'2-digit'})}, now ${metricValueText(m)} (${d>0?'up':d<0?'down':'no change'}${d?' '+Math.abs(d):''})`;
   }).filter(Boolean):[];
 
   // Build a structured <analysis> block with explicit <Normal> / <Not normal> tags
@@ -4090,9 +4276,9 @@ function reportContext(){
   // Values with no trustworthy reference range are wrapped in <Unknown> so the AI
   // can refuse to classify them rather than guess.
   const analysisLines=ms.map(m=>{
-    if(m.status==='normal')       return `  <value name="${m.name}">${m.value} ${m.unit||''} <Normal/></value>`;
-    if(m.status==='high'||m.status==='low') return `  <value name="${m.name}">${m.value} ${m.unit||''} <Not normal/></value>`;
-    return `  <value name="${m.name}">${m.value} ${m.unit||''} <Unknown/></value>`; // 'unknown' = no reference range
+    if(m.status==='normal')       return `  <value name="${m.name}">${metricValueText(m)} ${m.unit||''} <Normal/></value>`;
+    if(m.status==='high'||m.status==='low') return `  <value name="${m.name}">${metricValueText(m)} ${m.unit||''} <Not normal/></value>`;
+    return `  <value name="${m.name}">${metricValueText(m)} ${m.unit||''} <Unknown/></value>`; // 'unknown' = no reference range
   }).join('\n');
 
   return `REPORT: ${a.fileName}
@@ -4107,11 +4293,11 @@ ${analysisLines || '  (no values were extracted)'}
 PLAIN-LANGUAGE SUMMARY (for you to rewrite, not to copy):
 ${ms.length} values were read from the report (this includes ANY reading OCR could pull from the file — lab values, imaging, cardiac, eye, vital signs, etc., not just lab tests). ${bad.length} are flagged as not normal, ${ok.length} are flagged as normal. Values without a <Normal> or <Not normal> tag have no reference range and you must not classify them.
 
-${bad.length?'VALUES FLAGGED <Not normal>:\n'+bad.map(m=>`- ${m.name}: ${m.value} ${m.unit} | normal is ${m.min} to ${isFinite(m.max)?m.max:'+'} | ${severityOf(m)}${m.phased?' | NOTE: the normal range for this hormone changes with the menstrual cycle phase and menopause, so this comparison is only a rough guide':''}`).join('\n'):'VALUES FLAGGED <Not normal>: none'}
+${bad.length?'VALUES FLAGGED <Not normal>:\n'+bad.map(m=>`- ${m.name}: ${metricValueText(m)} ${m.unit} | normal is ${m.min} to ${isFinite(m.max)?m.max:'+'} | ${severityOf(m)}${m.phased?' | NOTE: the normal range for this hormone changes with the menstrual cycle phase and menopause, so this comparison is only a rough guide':''}`).join('\n'):'VALUES FLAGGED <Not normal>: none'}
 
-${ok.length?'VALUES FLAGGED <Normal>:\n'+ok.map(m=>`- ${m.name}: ${m.value} ${m.unit} (normal ${m.min}-${isFinite(m.max)?m.max:'+'})`).join('\n'):'VALUES FLAGGED <Normal>: none'}
+${ok.length?'VALUES FLAGGED <Normal>:\n'+ok.map(m=>`- ${m.name}: ${metricValueText(m)} ${m.unit} (normal ${m.min}-${isFinite(m.max)?m.max:'+'})`).join('\n'):'VALUES FLAGGED <Normal>: none'}
 
-${ms.some(m=>m.status==='unknown')?'VALUES WITH NO REFERENCE RANGE (<Unknown>) — do not call these normal or not:\n'+ms.filter(m=>m.status==='unknown').map(m=>`- ${m.name}: ${m.value} ${m.unit} (range not stated on the report)`).join('\n'):''}
+${ms.some(m=>m.status==='unknown')?'VALUES WITH NO REFERENCE RANGE (<Unknown>) — do not call these normal or not:\n'+ms.filter(m=>m.status==='unknown').map(m=>`- ${m.name}: ${metricValueText(m)} ${m.unit} (range not stated on the report)`).join('\n'):''}
 
 ${changes.length?'CHANGE SINCE THE PREVIOUS REPORT:\n'+changes.map(c=>'- '+c).join('\n')+'\n':''}
 ${trendContext()}`;
@@ -4216,7 +4402,7 @@ function buildOutOfRangeSummaryCompact(){
   if(!bad.length)return {lines:[],allNormal:true};
   const lines=bad.map(m=>{
     const rangeTxt=m.normal_range||(isFinite(m.min)&&isFinite(m.max)?`${m.min}-${m.max}`:'n/a');
-    return `- ${m.name}: ${m.value}${m.unit?' '+m.unit:''} (normal range: ${rangeTxt}) — ${m.status==='high'?'HIGH':'LOW'}`;
+    return `- ${m.name}: ${metricValueText(m)}${m.unit?' '+m.unit:''} (normal range: ${rangeTxt}) — ${m.status==='high'?'HIGH':'LOW'}`;
   });
   return {lines,allNormal:false};
 }
@@ -4246,7 +4432,7 @@ function googleHandoffValueList(keys){
   return ms.map(m=>{
     const rangeTxt=m.normal_range||(isFinite(m.min)&&isFinite(m.max)?`${m.min}-${m.max}`:'n/a');
     const st=(m.status==='high'||m.status==='low')?` — ${m.status.toUpperCase()}`:'';
-    return `• ${m.name}: ${m.value}${m.unit?' '+m.unit:''} (range ${rangeTxt})${st}`;
+    return `• ${m.name}: ${metricValueText(m)}${m.unit?' '+m.unit:''} (range ${rangeTxt})${st}`;
   }).join('\n');
 }
 // Opens Google Search's AI Mode (the &udm=50 parameter) with the prompt
@@ -4584,14 +4770,14 @@ async function sendFeedback(e){
     submitBtn.textContent='✉️ Send Feedback';
   }
 }
-Object.assign(window,{showHome,resetAll,showHistory,toggleTheme,openAddUserModal,closeAddUserModal,addUser,switchUser,logoutUser,removeFile,clearAllFiles,setGroupMode,setUploadCategory,analyzeReport,switchTab,loadHistoryReport,openHistoryItem,deleteHistoryItem,clearHistory,printResults,setHistoryFilter,addTagFromInput,removeTag,onNoteInput,runAIReview,setTrendParam,setDefaultTrendParam,clearDefaultTrendParam,showCurrentAnalysis,exportReportPDF,changeReportCategory,firstRunAdd,firstRunSkip,toggleProv,flagMetric,setHistoryView,initMedViewer,medZoom,medReset,medRotate,medInvert,medRedraw,idAnswerYes,idAnswerNew,idAnswerSkip,idCancelClarify,idConfirmClarify,idPickField,idCancelNew,idCreateNewProfile,closeIdentityModal,renderNav,setMetricsFilter,openMetricSheet,closeMetricSheet,metricSheetPick,toggleSheetProv,flagMetricByKey,askAIAboutMetrics,setDocMode,onDocPageImgLoad,onDocHitTap,openSelectedMetricsSheet,explainMetricsNow,explainWithGoogleAI,openFeedbackModal,closeFeedbackModal,previewFeedbackScreenshot,sendFeedback,showTrends,exportBackup,importBackup});if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+Object.assign(window,{showHome,resetAll,showHistory,toggleTheme,openAddUserModal,closeAddUserModal,addUser,switchUser,logoutUser,removeFile,clearAllFiles,setGroupMode,setUploadCategory,analyzeReport,switchTab,loadHistoryReport,openHistoryItem,deleteHistoryItem,clearHistory,printResults,setHistoryFilter,addTagFromInput,removeTag,onNoteInput,runAIReview,setTrendParam,setDefaultTrendParam,clearDefaultTrendParam,showCurrentAnalysis,exportReportPDF,changeReportCategory,firstRunAdd,firstRunSkip,toggleProv,flagMetric,setHistoryView,initMedViewer,medZoom,medReset,medRotate,medInvert,medRedraw,idAnswerYes,idAnswerNew,idAnswerSkip,idCancelClarify,idConfirmClarify,idPickField,idCancelNew,idCreateNewProfile,closeIdentityModal,renderNav,setMetricsFilter,openMetricSheet,closeMetricSheet,metricSheetPick,toggleSheetProv,flagMetricByKey,askAIAboutMetrics,setDocMode,onDocPageImgLoad,onDocHitTap,openSelectedMetricsSheet,explainMetricsNow,explainWithGoogleAI,openFeedbackModal,closeFeedbackModal,previewFeedbackScreenshot,sendFeedback,showTrends,exportBackup,importBackup,getOcrDiagnostics});if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 
 // ---- PWA: register the service worker ----
 // Only runs on a real http(s) origin — service workers are unavailable (and
 // this call fails silently) on file://, which is fine: the app still works
 // there, it just won't be installable or offline-capable until it's hosted.
 if('serviceWorker' in navigator && location.protocol.startsWith('http')){
-   navigator.serviceWorker.register('/service-worker.js')
+   navigator.serviceWorker.register('./service-worker.js')
    .then(reg=>{
      console.log('Service worker registered:',reg.scope);
      reg.addEventListener('updatefound',()=>{

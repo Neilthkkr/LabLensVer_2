@@ -1,0 +1,25 @@
+{
+  "schemaVersion": "1.0.0",
+  "documentId": "synthetic-cbc-digital",
+  "inputKind": "digital-pdf",
+  "createdAt": "2026-01-01T00:00:00.000Z",
+  "pages": [{
+    "pageNumber": 1,
+    "width": 1200,
+    "height": 1600,
+    "method": "ground-truth",
+    "engine": "human-verified",
+    "text": "Haemoglobin 12.2 g/dL 12.0-15.0 Platelet Count 268000 /uL 150000-410000",
+    "words": [],
+    "confidence": 1,
+    "durationMs": null,
+    "preprocessing": [],
+    "warnings": []
+  }],
+  "metrics": [
+    {"name":"Haemoglobin","value":"12.2","unit":"g/dL","referenceRange":"12.0-15.0","pageNumber":1,"polygon":null,"confidence":1,"verification":"manually-confirmed","sources":{"groundTruth":"12.2"},"warnings":[]},
+    {"name":"Platelet Count","value":"268000","unit":"/uL","referenceRange":"150000-410000","pageNumber":1,"polygon":null,"confidence":1,"verification":"manually-confirmed","sources":{"groundTruth":"268000"},"warnings":[]}
+  ],
+  "deviceProfile": null,
+  "warnings": []
+}

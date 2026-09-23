@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <title>LabLens OCR Benchmark</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.0/dist/tesseract.min.js"></script>
+<script src="/vendor/pdfjs/pdf.min.js"></script>
+<script src="/vendor/tesseract/tesseract.min.js"></script>
 </head>
 <body>
 <pre id="log" style="white-space:pre-wrap;font:12px monospace"></pre>
 <script>
-if(window.pdfjsLib){try{pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'}catch(e){}}
+if(window.pdfjsLib){try{pdfjsLib.GlobalWorkerOptions.workerSrc='/vendor/pdfjs/pdf.worker.min.js'}catch(e){}}
 const logEl=document.getElementById('log');
 function log(s){logEl.textContent+=s+'\n';console.log(s)}
 
@@ -71,32 +71,7 @@ function preprocessImageForOCR(fileOrUrl,maxDim=1800){
     }catch(e){resolve(fileOrUrl)}
   })
 }
-const PADDLE_CDNS=['https://esm.run/ppu-paddle-ocr/web','https://cdn.jsdelivr.net/npm/ppu-paddle-ocr/web/+esm'];
-let paddleOCR=null, paddleState='idle';
 window.__ocrEngineUsed='';
-async function getPaddleOCR(){
-  if(paddleState==='ready')return paddleOCR;
-  if(paddleState==='unavailable')return null;
-  if(paddleState==='loading'){
-    for(let i=0;i<200 && paddleState==='loading';i++)await new Promise(r=>setTimeout(r,100));
-    return paddleState==='ready'?paddleOCR:null;
-  }
-  paddleState='loading';
-  for(const url of PADDLE_CDNS){
-    try{
-      const mod=await import(/* webpackIgnore: true */ url);
-      const OCR=mod.PaddleOcrService||mod.default||mod;
-      const inst=(typeof OCR==='function')?new OCR():OCR;
-      if(inst&&typeof inst.initialize==='function')await inst.initialize();
-      else if(inst&&typeof inst.init==='function')await inst.init();
-      if(!inst||typeof inst.recognize!=='function')throw new Error('unexpected PaddleOCR API');
-      paddleOCR=inst; paddleState='ready';
-      return paddleOCR;
-    }catch(e){ log('PaddleOCR load failed from '+url+': '+(e&&e.message)); }
-  }
-  paddleState='unavailable';
-  return null;
-}
 function linesFromOcrBoxes(items){
   const its=items.filter(o=>o.text&&o.text.trim()).map(o=>{
     const pts=o.points||o.box||o.boundingBox||[];
@@ -133,27 +108,12 @@ function dataUrlToCanvas(dataUrl){
 }
 async function ocrImage(fileOrUrl,onProgress){
   const input=await preprocessImageForOCR(fileOrUrl);
-  try{
-    if(onProgress)onProgress(0.05);
-    const p=await getPaddleOCR();
-    if(p){
-      if(onProgress)onProgress(0.35);
-      const canvasInput=await dataUrlToCanvas(input);
-      const res=await p.recognize(canvasInput);
-      const items=Array.isArray(res)?res:(res&&(res.results||res.data||res.lines))||[];
-      let text='';
-      if(items.length && (items[0].points||items[0].box||items[0].boundingBox)) text=linesFromOcrBoxes(items);
-      else if(res&&typeof res.text==='string') text=res.text;
-      else if(items.length) text=items.map(i=>i.text||'').join('\n');
-      if(onProgress)onProgress(1);
-      if(text&&text.replace(/\s/g,'').length>=12){ window.__ocrEngineUsed='PaddleOCR PP-OCRv5'; return text; }
-    }
-  }catch(e){ log('PaddleOCR recognise failed, falling back to Tesseract: '+(e&&e.message)); }
   if(!window.Tesseract)throw new Error('OCR library not loaded');
   try{
     const {data}=await Tesseract.recognize(input, 'eng', {
-      workerPath: 'https://cdn.jsdelivr.net/npm/tesseract.js@5.1.0/dist/worker.min.js',
-      corePath: 'https://cdn.jsdelivr.net/npm/tesseract.js-core@5.1.0/tesseract-core.wasm.js',
+      workerPath: '/vendor/tesseract/worker.min.js',
+      corePath: '/vendor/tesseract/tesseract-core.wasm.js',
+      langPath: '/vendor/tessdata',
       logger: m=>{if(onProgress && m && m.status==='recognizing text')onProgress(m.progress||0)}
     });
     window.__ocrEngineUsed='Tesseract';
