@@ -37,3 +37,33 @@ test('mobile capture uses the rear camera and blocks clearly unusable photos',()
   assert.equal(context.grade({width:500,height:700,mean:25,contrast:10,sharpness:3}).level,'poor');
   assert.equal(context.grade({width:1000,height:1600,mean:180,contrast:40,sharpness:5}).level,'warn');
 });
+
+test('every button is wired and every inline handler resolves',()=>{
+  const buttonTags=[...html.matchAll(/<button\b[^>]*>/gi)].map(match=>match[0]);
+  const deliberatelyWired=new Set(['takePhotoBtn','browseFilesBtn','confirmDialogCancel','confirmDialogOk','btnRejectionClose','btnRejectionRetry','btnSubmitFeedback']);
+  const unwired=buttonTags.filter(tag=>{
+    if(/\bonclick\s*=|\btype\s*=\s*["']submit["']/i.test(tag))return false;
+    const id=tag.match(/\bid=["']([^"']+)["']/i)?.[1];
+    return !deliberatelyWired.has(id);
+  });
+  assert.deepEqual(unwired,[],'buttons must submit a form, have an inline action, or be explicitly wired in JavaScript');
+
+  const declared=new Set([
+    ...[...html.matchAll(/\bfunction\s+([A-Za-z_$][\w$]*)\s*\(/g)].map(match=>match[1]),
+    ...[...html.matchAll(/\b(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*=/g)].map(match=>match[1])
+  ]);
+  const platformCalls=new Set(['catch','execCommand','function','getElementById','join','map','open','remove','select','setTimeout','stopPropagation','then','writeText']);
+  const handlerCalls=new Set(
+    [...html.matchAll(/onclick=(?:"([^"]*)"|'([^']*)')/g)]
+      .flatMap(match=>[...(match[1]??match[2]).matchAll(/\b([A-Za-z_$][\w$]*)\s*\(/g)].map(call=>call[1]))
+      .filter(name=>!platformCalls.has(name))
+  );
+  assert.deepEqual([...handlerCalls].filter(name=>!declared.has(name)).sort(),[],'inline handler functions must exist');
+});
+
+test('result actions and tabs use one clear action with accessible state',()=>{
+  assert.equal((html.match(/class="download-btn"/g)||[]).length,1,'avoid duplicate print and PDF actions');
+  assert.match(html,/>Save or print report<\/button>/);
+  assert.equal((html.match(/\brole="tab"/g)||[]).length,5);
+  assert.equal((html.match(/\baria-selected="(?:true|false)"/g)||[]).length,5);
+});

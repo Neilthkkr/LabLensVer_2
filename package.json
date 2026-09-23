@@ -5,6 +5,7 @@
   "description": "Private, on-device lab report extraction and review",
   "scripts": {
     "test": "node --test tests/*.test.mjs",
+    "test:ui": "node scripts/test-ui-buttons.mjs",
     "benchmark:ocr": "node scripts/run-ocr-benchmark.mjs",
     "probe:parser": "node scripts/run-report-parser.mjs",
     "probe:pdf": "node scripts/probe-pdf-parser.mjs"
