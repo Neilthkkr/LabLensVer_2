@@ -9,6 +9,7 @@ const worker=fs.readFileSync(new URL('../service-worker.js',import.meta.url),'ut
 test('on-device PDF assets resolve relative to the deployed app',()=>{
   assert.match(html,/<script src="\.\/vendor\/pdfjs\/pdf\.min\.js"><\/script>/);
   assert.match(html,/new URL\('\.\/vendor\/pdfjs\/pdf\.worker\.min\.js',document\.baseURI\)/);
+  assert.match(html,/getDocument\(\{data:buf,isEvalSupported:false\}\)/);
   assert.doesNotMatch(html,/<script src="\/vendor\/pdfjs/);
 });
 
@@ -19,14 +20,22 @@ test('a missing PDF engine is reported as a processing failure',()=>{
 });
 
 test('service worker refreshes the app shell before using its cache',()=>{
-  assert.match(worker,/lablens-cache-v4/);
+  assert.match(worker,/lablens-cache-v6/);
   assert.match(worker,/event\.request\.mode === 'navigate'/);
   const navigationBlock=worker.slice(worker.indexOf("event.request.mode === 'navigate'"));
   assert.ok(navigationBlock.indexOf('fetch(event.request)')<navigationBlock.indexOf("caches.match('./index.html')"));
 });
 
-test('mobile capture uses the rear camera and blocks clearly unusable photos',()=>{
-  assert.match(html,/<input(?=[^>]*id="captureInput")(?=[^>]*capture="environment")[^>]*>/);
+test('report sources provide camera, photos, and PDF or image files',()=>{
+  const filePicker=html.match(/<input(?=[^>]*id="fileInput")(?=[^>]*type="file")[^>]*>/)?.[0]||'';
+  const photosPicker=html.match(/<input(?=[^>]*id="photosInput")(?=[^>]*type="file")[^>]*>/)?.[0]||'';
+  const cameraPicker=html.match(/<input(?=[^>]*id="captureInput")(?=[^>]*type="file")[^>]*>/)?.[0]||'';
+  assert.match(filePicker,/accept="[^"]*application\/pdf/);
+  assert.match(filePicker,/accept="[^"]*image\/jpeg/);
+  assert.match(photosPicker,/accept="[^"]*image\/jpeg/);
+  assert.doesNotMatch(photosPicker,/\bcapture=/);
+  assert.match(cameraPicker,/capture="environment"/);
+  assert.match(html,/<dialog[^>]*id="reportSourceDialog"[^>]*>/);
   assert.match(html,/if\(blocked\.length\)return showToast/);
   const start=html.indexOf('function gradeImageQualityStats');
   const end=html.indexOf('\nasync function assessImageQuality',start);
@@ -38,9 +47,33 @@ test('mobile capture uses the rear camera and blocks clearly unusable photos',()
   assert.equal(context.grade({width:1000,height:1600,mean:180,contrast:40,sharpness:5}).level,'warn');
 });
 
+test('add report opens source choices and each choice uses its own picker',()=>{
+  const events=[];
+  const controls=Object.fromEntries(['addReportBtn','reportSourceCancel','reportSourceCamera','reportSourcePhotos','reportSourceFiles'].map(id=>[id,{}]));
+  controls.dropZone={addEventListener(){}};
+  controls.reportSourceDialog={showModal(){events.push('choices')},close(){events.push('close')}};
+  for(const [id,source] of [['captureInput','camera'],['photosInput','photos'],['fileInput','files']]){
+    controls[id]={click(){events.push(source)}};
+  }
+  const start=html.indexOf('function wireUpload(){');
+  const end=html.indexOf('\nasync function fileToDataURL',start);
+  assert.ok(start>=0&&end>start,'upload wiring is discoverable');
+  const context={$:id=>controls[id]};
+  vm.createContext(context);
+  vm.runInContext(`${html.slice(start,end)}\nthis.wireUpload=wireUpload`,context);
+  context.wireUpload();
+  controls.addReportBtn.onclick();
+  assert.deepEqual(events,['choices']);
+  for(const [button,source] of [['reportSourceCamera','camera'],['reportSourcePhotos','photos'],['reportSourceFiles','files']]){
+    events.length=0;
+    controls[button].onclick();
+    assert.deepEqual(events,['close',source]);
+  }
+});
+
 test('every button is wired and every inline handler resolves',()=>{
   const buttonTags=[...html.matchAll(/<button\b[^>]*>/gi)].map(match=>match[0]);
-  const deliberatelyWired=new Set(['takePhotoBtn','browseFilesBtn','confirmDialogCancel','confirmDialogOk','btnRejectionClose','btnRejectionRetry','btnSubmitFeedback']);
+  const deliberatelyWired=new Set(['addReportBtn','reportSourceCamera','reportSourcePhotos','reportSourceFiles','reportSourceCancel','confirmDialogCancel','confirmDialogOk','btnRejectionClose','btnRejectionRetry','btnSubmitFeedback']);
   const unwired=buttonTags.filter(tag=>{
     if(/\bonclick\s*=|\btype\s*=\s*["']submit["']/i.test(tag))return false;
     const id=tag.match(/\bid=["']([^"']+)["']/i)?.[1];

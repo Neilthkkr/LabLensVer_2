@@ -4,15 +4,15 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
-<title>LabLens</title>
+<title>LabLens Ver2.0</title>
 <!-- ===== PWA: installable app metadata =====
      manifest.webmanifest + icons must sit at the site ROOT alongside this
      file (as index.html) for these root-relative paths to resolve. -->
 <link href="/manifest.webmanifest" rel="manifest"/>
 <meta content="#1F314A" name="theme-color"/>
-<link href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%231F314A'/%3E%3Ccircle cx='41' cy='41' r='21' fill='none' stroke='%23FAF8F5' stroke-width='8.6'/%3E%3Cpath d='M41 41 m-11.5 2.8 h6.6 l2.8 -7.6 l4.7 13.2 l2.8 -8.5 h5.6' fill='none' stroke='%23FAF8F5' stroke-width='4.3' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cline x1='57' y1='57' x2='73' y2='73' stroke='%23FAF8F5' stroke-width='9.4' stroke-linecap='round'/%3E%3C/svg%3E" rel="icon" type="image/svg+xml"/>
+<link href="/icon.svg" rel="icon" type="image/svg+xml"/>
 <link href="/icons/favicon-32.png" rel="icon" sizes="32x32" type="image/png"/>
-<link href="/icons/icon-180.png" rel="apple-touch-icon"/>
+<link href="/icons/icon-180.png" rel="apple-touch-icon" sizes="180x180"/>
 <!-- iOS-specific PWA behaviour: standalone (no browser chrome), dark status bar -->
 <meta content="yes" name="apple-mobile-web-app-capable"/>
 <meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"/>
@@ -69,7 +69,7 @@ body::before{
 }
 @media (prefers-reduced-motion: reduce){ body::before{ filter:blur(40px); } }
   
-  [data-theme="dark"] .analyze-btn,[data-theme="dark"] .btn-primary{background:#1F6E62}[data-theme="dark"] .header{background:rgba(24,28,32,.62);border-bottom:1px solid rgba(255,255,255,.08)}.header{background:rgba(255,255,255,.62);backdrop-filter:blur(var(--glass-blur)) saturate(var(--glass-sat));-webkit-backdrop-filter:blur(var(--glass-blur)) saturate(var(--glass-sat));position:sticky;top:0;z-index:100;box-shadow:0 1px 24px rgba(20,30,40,.08);border-bottom:1px solid rgba(20,30,40,.08)}
+  [data-theme="dark"] .analyze-btn,[data-theme="dark"] .btn-primary{background:#1F6E62}.header{background:var(--bg);position:sticky;top:0;z-index:100;box-shadow:0 1px 12px rgba(20,30,40,.07);border-bottom:1px solid var(--border)}
   .header-inner{max-width:1200px;margin:auto;padding:12px 24px;display:flex;flex-direction:column;gap:10px}
 .header-top-row{display:flex;align-items:center;justify-content:space-between;gap:10px}
 .header-bottom-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
@@ -81,7 +81,7 @@ body::before{
 .header-nav{display:grid;grid-template-columns:repeat(4,auto);justify-content:center;justify-items:center;gap:6px 8px;width:100%}
 .header-nav .nav-btn{white-space:nowrap}
 @media(max-width:480px){.header-nav{grid-template-columns:repeat(4,1fr)}.header-nav .nav-btn{width:100%;text-align:center;padding-left:4px;padding-right:4px;font-size:12px}}
-  .logo{display:flex;align-items:center;gap:12px;color:var(--text);text-decoration:none}.logo-icon{width:40px;height:40px;background-color:var(--primary-dark);border-radius:12px;display:grid;place-items:center;font-size:20px;background-image:radial-gradient(circle at 30% 25%, rgba(255,255,255,.42), rgba(255,255,255,0) 60%);border:1px solid rgba(255,255,255,.25);box-shadow:inset 0 1px 1px rgba(255,255,255,.35), 0 2px 8px rgba(20,40,45,.18)}.logo-text h1{font-size:18px}.logo-text span{font-size:12px;opacity:.82;color:var(--text-secondary)}
+  .logo{display:flex;align-items:center;gap:12px;color:var(--text);text-decoration:none}.logo-icon{width:40px;height:40px;flex:0 0 40px;overflow:hidden;background-color:var(--primary-dark);border-radius:12px;display:grid;place-items:center;font-size:20px;background-image:radial-gradient(circle at 30% 25%, rgba(255,255,255,.42), rgba(255,255,255,0) 60%);border:1px solid rgba(255,255,255,.25);box-shadow:inset 0 1px 1px rgba(255,255,255,.35), 0 2px 8px rgba(20,40,45,.18)}.logo-icon svg{display:block;width:26px;height:26px;shape-rendering:geometricPrecision}.logo-text h1{font-size:18px}.logo-text span{font-size:12px;opacity:.82;color:var(--text-secondary)}
   .user-badge{background:var(--user-badge);color:#fff;padding:6px 12px;border-radius:20px;font-size:12px;font-weight:700;white-space:nowrap}.user-selector{display:flex;gap:8px;align-items:center;flex-wrap:wrap;flex-shrink:0}.user-select{padding:7px 10px;border-radius:8px;border:1px solid rgba(20,30,40,.12);background:rgba(20,30,40,.05);color:var(--text)}.user-select option{background:var(--card);color:var(--text)}
   button,.field,select,textarea{font-family:inherit}.nav-btn,.add-user-btn{background:rgba(20,30,40,.06);border:1px solid rgba(20,30,40,.1);color:var(--text);padding:8px 14px;border-radius:999px;cursor:pointer;font-size:12px;font-weight:700;flex-shrink:0;white-space:nowrap}.nav-btn:hover,.add-user-btn:hover{background:rgba(20,30,40,.11)}.theme-toggle:hover{background:rgba(20,30,40,.11)}
   .nav-btn{transition:transform .15s ease, background .15s ease, box-shadow .15s ease, opacity .15s ease;user-select:none;position:relative;min-height:44px}
@@ -92,11 +92,13 @@ body::before{
   .user-info-section{display:none;background:rgba(43,90,156,0.05);border:1px solid rgba(43,90,156,.15);border-radius:var(--radius);padding:16px 24px;margin-bottom:24px;align-items:center;gap:16px}.user-avatar{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;background:var(--primary);color:white;font-weight:800}.user-details{flex:1}.user-name{font-weight:800;text-transform:capitalize}.data-badge{display:inline-block;margin-top:6px;margin-right:8px;padding:4px 10px;border-radius:6px;background:rgba(43,90,156,.1);color:var(--primary);font-size:12px;font-weight:800}
   .upload-section{display:grid;grid-template-columns:1fr 320px;gap:24px;margin-bottom:32px}@media(max-width:860px){.upload-section{grid-template-columns:1fr}.container{padding:16px}.hero h2{font-size:25px}}
   .card{background:var(--card);backdrop-filter:blur(var(--glass-blur)) saturate(var(--glass-sat));-webkit-backdrop-filter:blur(var(--glass-blur)) saturate(var(--glass-sat));border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}.card:hover{box-shadow:var(--shadow-lg)}.card-header{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;gap:12px;align-items:center}.card-header-icon{width:40px;height:40px;border-radius:10px;display:grid;place-items:center}.card-header h3{font-size:16px}.card-header p{font-size:12px;color:var(--text-secondary)}
-  .drop-zone{padding:8px;text-align:center;cursor:pointer}.drop-zone-inner{border:2px dashed var(--border);border-radius:var(--radius-sm);padding:30px 20px 24px;margin:16px;transition:.2s}.drop-zone:hover .drop-zone-inner,.drop-zone.drag-over .drop-zone-inner{border-color:var(--primary);background:rgba(43,90,156,.05)}.drop-icon{width:64px;height:64px;margin:0 auto 16px;border-radius:16px;display:grid;place-items:center;background:rgba(43,90,156,.1);font-size:28px}.drop-zone p{color:var(--text-secondary);font-size:13px}.file-types{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:12px}.file-type-badge{background:var(--bg);padding:4px 10px;border-radius:6px;color:var(--text-secondary);font-size:12px;font-weight:700}
-  .capture-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px;max-width:420px;margin-inline:auto}.capture-choice{min-height:48px;border:1px solid var(--border);border-radius:10px;background:var(--card);color:var(--text);font-weight:850;font-size:13px;cursor:pointer;padding:10px 14px}.capture-choice.primary{background:var(--primary-dark);border-color:var(--primary-dark);color:#fff}.capture-choice:hover{border-color:var(--primary)}
+  .drop-zone{padding:8px;text-align:center}.drop-zone-inner{border:2px dashed var(--border);border-radius:var(--radius-sm);padding:30px 20px 24px;margin:16px;transition:.2s}.drop-zone.drag-over .drop-zone-inner{border-color:var(--primary);background:rgba(43,90,156,.05)}.drop-icon{width:64px;height:64px;margin:0 auto 16px;border-radius:16px;display:grid;place-items:center;background:rgba(43,90,156,.1);font-size:28px}.drop-zone p{color:var(--text-secondary);font-size:13px}.file-types{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:12px}.file-type-badge{background:var(--bg);padding:4px 10px;border-radius:6px;color:var(--text-secondary);font-size:12px;font-weight:700}
+  .add-report-button{min-height:48px;min-width:180px;margin:18px auto 0;border:1px solid var(--primary-dark);border-radius:10px;background:var(--primary-dark);color:#fff;font-weight:850;font-size:14px;cursor:pointer;padding:10px 20px}.add-report-button:hover{background:var(--primary);border-color:var(--primary)}.add-report-button:focus-visible{outline:3px solid var(--primary-light);outline-offset:3px}
+  .report-source-dialog{box-sizing:border-box;width:min(420px,calc(100vw - 32px));max-width:none;max-height:88dvh;overflow-y:auto;border:0;border-radius:16px;background:var(--bg);color:var(--text);padding:24px;box-shadow:var(--shadow-lg)}.report-source-dialog::backdrop{background:rgba(14,22,32,.58)}.report-source-dialog h3{font-size:18px;margin:0 0 4px}.report-source-dialog p{font-size:13px;color:var(--text-secondary);margin:0 0 18px}.report-source-options{display:grid;gap:8px}.report-source-option{display:block;width:100%;min-height:64px;padding:12px 16px;text-align:left;font-family:inherit;border:1px solid var(--border);border-radius:10px;background:var(--card);color:var(--text);cursor:pointer}.report-source-option strong,.report-source-option small{display:block}.report-source-option strong{font-size:14px}.report-source-option small{font-size:12px;color:var(--text-secondary);margin-top:2px}.report-source-option:hover,.report-source-option:focus-visible{border-color:var(--primary);background:rgba(43,90,156,.08)}.report-source-option:focus-visible,.report-source-cancel:focus-visible{outline:3px solid var(--primary-light);outline-offset:2px}.report-source-cancel{display:block;width:100%;min-height:44px;margin-top:12px;border:0;border-radius:10px;background:transparent;color:var(--primary);font:inherit;font-weight:800;cursor:pointer}
+  @media(max-width:700px){.report-source-dialog{position:fixed;inset:auto 0 0;width:100%;margin:0;border-radius:18px 18px 0 0;padding:22px 18px calc(22px + env(safe-area-inset-bottom))}}
   .action-buttons{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 16px 16px}.action-btn{padding:12px 14px;border-radius:10px;border:1px solid var(--border);background:var(--card);backdrop-filter:blur(var(--glass-blur)) saturate(var(--glass-sat));-webkit-backdrop-filter:blur(var(--glass-blur)) saturate(var(--glass-sat));color:var(--text);cursor:pointer;font-weight:700}.action-btn:hover{border-color:var(--primary);background:rgba(43,90,156,.04)}
   .file-list-container{margin:0 16px 16px;padding:12px;background:var(--bg);border-radius:var(--radius-sm);max-height:320px;overflow:auto}.file-list-header{display:flex;justify-content:space-between;margin-bottom:10px}.file-list-count{font-size:12px;color:var(--primary);font-weight:800}.clear-btn{min-height:44px;background:transparent;border:none;color:var(--danger);cursor:pointer;font-size:12px;padding:6px 8px}.file-item{display:flex;gap:12px;align-items:flex-start;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:8px}.file-item.quality-poor{border-color:rgba(183,67,53,.5);background:rgba(183,67,53,.06)}.file-item-icon{width:40px;height:40px;border-radius:8px;display:grid;place-items:center;font-size:13px;font-weight:900;flex:0 0 auto}.pdf{background:rgba(178,74,61,.1);color:var(--danger)}.image{background:rgba(78,110,142,.1);color:var(--info)}.file-item-info{flex:1;min-width:0}.file-item-name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:13px;font-weight:800}.file-item-meta{font-size:12px;line-height:1.45;color:var(--text-secondary);margin-top:2px}.quality-line{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:7px}.quality-badge{display:inline-flex;align-items:center;min-height:24px;padding:3px 8px;border-radius:999px;font-size:12px;font-weight:900}.quality-badge.good{background:rgba(33,117,74,.12);color:var(--success)}.quality-badge.warn{background:rgba(154,91,8,.12);color:var(--warning)}.quality-badge.poor{background:rgba(183,67,53,.12);color:var(--danger)}.quality-detail{font-size:12px;color:var(--text-secondary);overflow-wrap:anywhere}.quality-override{min-height:36px;border:1px solid var(--border);background:var(--card);color:var(--primary);border-radius:8px;padding:6px 10px;font-weight:800;cursor:pointer}.remove-file-btn{border:none;background:var(--bg);color:var(--text-secondary);width:44px;height:44px;border-radius:8px;cursor:pointer;flex:0 0 auto}.remove-file-btn:hover{color:var(--danger)}
-  @media(max-width:520px){.capture-actions{grid-template-columns:1fr}.drop-zone-inner{padding:24px 14px 18px;margin:10px}.file-item{gap:9px;padding:10px}.file-item-icon{width:36px;height:36px}}
+  @media(max-width:520px){.drop-zone-inner{padding:24px 14px 18px;margin:10px}.file-item{gap:9px;padding:10px}.file-item-icon{width:36px;height:36px}}
   .step-row{display:flex;gap:14px;margin-bottom:18px}.step-num{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;color:#fff;font-weight:900;flex-shrink:0}.t{font-size:14px;font-weight:800}.d{font-size:12px;color:var(--text-secondary)}.test-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.test-pill{background:var(--bg);border-radius:8px;padding:8px;font-size:12px;font-weight:700}
   .analyze-section{text-align:center;margin-top:18px;padding:18px 0 0;border-top:1px dashed var(--border)}.type-picker{display:flex;justify-content:center;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}.type-picker-select{padding:8px 12px;border-radius:99px;border:1px solid var(--border);background:var(--card);backdrop-filter:blur(var(--glass-blur)) saturate(var(--glass-sat));-webkit-backdrop-filter:blur(var(--glass-blur)) saturate(var(--glass-sat));color:var(--text);font-weight:800}.group-toggle{display:none;flex-direction:column;align-items:center;gap:8px;margin-bottom:16px}.group-toggle.show{display:flex}.gt-options{display:inline-flex;gap:6px;background:var(--bg);border:1px solid var(--border);border-radius:99px;padding:4px}.gt-opt{border:none;background:transparent;color:var(--text-secondary);padding:8px 16px;border-radius:99px;cursor:pointer;font-weight:800}.gt-opt.active{background:var(--card);backdrop-filter:blur(var(--glass-blur)) saturate(var(--glass-sat));-webkit-backdrop-filter:blur(var(--glass-blur)) saturate(var(--glass-sat));color:var(--primary);box-shadow:var(--shadow)}.analyze-btn{padding:16px 48px;border:none;border-radius:14px;background:var(--primary-dark);color:white;font-size:16px;font-weight:900;cursor:pointer;box-shadow:var(--shadow)}.analyze-btn:disabled{opacity:.6;cursor:not-allowed}
   .progress-container{display:none;margin-bottom:32px}.progress-container.active{display:block}.progress-card{background:var(--card);backdrop-filter:blur(var(--glass-blur)) saturate(var(--glass-sat));-webkit-backdrop-filter:blur(var(--glass-blur)) saturate(var(--glass-sat));border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-lg);padding:38px;text-align:center}.spinner{width:56px;height:56px;margin:0 auto 20px;border:4px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin 1s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}.progress-text{font-weight:900}.progress-sub{color:var(--text-secondary);font-size:13px;margin-top:6px}.progress-bar-track{height:8px;background:var(--bg);border-radius:999px;margin:20px auto 8px;max-width:380px;overflow:hidden;border:1px solid var(--border)}.progress-bar-fill{height:100%;background:var(--primary);width:0}.progress-bar-pct{font-size:12px;color:var(--text-secondary);font-weight:800}
@@ -275,7 +277,7 @@ body::before{
   .ai-context-bar{flex:0 0 auto}.ai-messages{flex:1 1 auto;height:auto!important;min-height:180px;overflow-y:auto;overscroll-behavior:contain}.ai-suggests{flex:0 0 auto;max-height:92px;overflow-y:auto}.ai-input-row{flex:0 0 auto;background:var(--card);backdrop-filter:blur(var(--glass-blur)) saturate(var(--glass-sat));-webkit-backdrop-filter:blur(var(--glass-blur)) saturate(var(--glass-sat));position:sticky;bottom:0;z-index:2}.ai-disclaimer-sm{flex:0 0 auto;background:var(--card);backdrop-filter:blur(var(--glass-blur)) saturate(var(--glass-sat));-webkit-backdrop-filter:blur(var(--glass-blur)) saturate(var(--glass-sat));margin:0}
   .ai-model-list{max-height:none}.medgemma-local-panel .field{margin-bottom:8px}
   @media(max-width:700px){.modal-overlay#aiModal{align-items:stretch;padding:0}.ai-modal{width:100vw!important;height:100dvh;max-height:100dvh;border-radius:0!important}.ai-head{padding:14px 16px}.ai-setup{padding:14px 16px!important}.ai-messages{min-height:120px}.ai-model-opt{align-items:flex-start}.ai-model-ic{width:34px;height:34px}.ai-input-row{padding:10px}.ai-suggests{padding:0 10px 8px}}
-  @media print{.header,.hero,.upload-section,.analyze-section,.history-section,.disclaimer,.footer,.tabs,.download-btn,.modal-overlay,.toast{display:none!important}.results-section{display:block!important}.tab-content{display:block!important}body{background:#fff}}
+  @media print{.header,.hero,.upload-section,.analyze-section,.history-section,.disclaimer,.footer,.tabs,.download-btn,.modal-overlay,.report-source-dialog,.toast{display:none!important}.results-section{display:block!important}.tab-content{display:block!important}body{background:#fff}}
   .identity-modal{max-width:580px}.identity-detect{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:14px;margin:12px 0}.identity-row{display:flex;gap:10px;align-items:center;padding:8px 0;border-bottom:1px dashed var(--border);font-size:13px}.identity-row:last-child{border-bottom:none}.identity-label{font-weight:800;min-width:90px;color:var(--text-secondary);text-transform:capitalize}.identity-val{flex:1}.identity-val.profile{color:var(--primary);font-weight:700}.identity-arrow{color:var(--text-secondary);font-size:16px}.identity-val.report{color:var(--warning);font-weight:700}.identity-question{background:rgba(43,90,156,0.06);border:1px solid rgba(184,134,62,.3);border-radius:10px;padding:14px;margin:14px 0;font-size:13.5px;line-height:1.6}.identity-question strong{color:var(--warning)}.identity-big-q{font-size:16px;font-weight:900;margin:14px 0 8px;text-align:center}.identity-btn-row{display:flex;flex-direction:column;gap:8px;margin-top:14px}.identity-btn{padding:12px 16px;border-radius:10px;border:none;cursor:pointer;font-weight:800;font-size:13px;text-align:left;display:flex;align-items:center;gap:10px;transition:.15s}.identity-btn.yes{background:var(--success);color:#fff}.identity-btn.yes:hover{filter:brightness(1.08)}.identity-btn.new{background:var(--primary-dark);color:#fff}.identity-btn.new:hover{filter:brightness(1.08)}.identity-btn.no{background:var(--bg);color:var(--text-secondary);border:1px solid var(--border)}.identity-btn.no:hover{border-color:var(--danger);color:var(--danger)}.identity-clarify{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:14px;margin-top:12px}.identity-clarify h5{font-size:13px;margin-bottom:10px}.id-choice{display:flex;gap:8px;align-items:center;padding:8px;border-bottom:1px dashed var(--border);font-size:12.5px;flex-wrap:wrap}.id-choice:last-child{border-bottom:none}.id-choice label{font-weight:700;min-width:90px;color:var(--text-secondary);text-transform:capitalize}.id-choice .id-swap{display:inline-flex;gap:6px;flex-wrap:wrap}.id-choice .id-opt{padding:5px 10px;border-radius:999px;border:1px solid var(--border);background:var(--card);backdrop-filter:blur(var(--glass-blur)) saturate(var(--glass-sat));-webkit-backdrop-filter:blur(var(--glass-blur)) saturate(var(--glass-sat));color:var(--text);cursor:pointer;font-size:12.5px;font-weight:700}.id-choice .id-opt.active-keep{border-color:var(--primary);color:var(--primary);background:rgba(43,90,156,.08)}.id-choice .id-opt.active-report{border-color:var(--warning);color:var(--warning);background:rgba(184,134,62,.08)}.identity-note{font-size:12.5px;color:var(--text-secondary);margin-top:10px;line-height:1.5}
   .diag-list{display:grid;gap:10px;margin-top:12px}.diag-item{display:flex;gap:12px;align-items:flex-start;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:11px 13px}.diag-ic{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:900;flex-shrink:0;font-size:13px}.diag-ic.pass{background:var(--success)}.diag-ic.fail{background:var(--danger)}.diag-ic.run{background:var(--warning)}.diag-ic.idle{background:#8A867E}.diag-body{flex:1;min-width:0}.diag-title{font-weight:900;font-size:13px}.diag-detail{font-size:12.5px;color:var(--text-secondary);margin-top:3px;line-height:1.55;word-break:break-word;font-family:ui-monospace,Menlo,monospace;background:var(--card);backdrop-filter:blur(var(--glass-blur)) saturate(var(--glass-sat));-webkit-backdrop-filter:blur(var(--glass-blur)) saturate(var(--glass-sat));border:1px solid var(--border);border-radius:6px;padding:6px 8px;margin-top:6px;white-space:pre-wrap}.diag-summary{background:rgba(46,142,93,.10);border:1px solid rgba(46,142,93,.3);border-radius:10px;padding:11px 13px;margin-top:14px;font-size:12.5px;line-height:1.55}.diag-summary.bad{background:rgba(178,74,61,.08);border-color:rgba(178,74,61,.3)}
 
@@ -505,7 +507,7 @@ body::before{
 <body>
 <header class="header"><div class="header-inner">
 <div class="header-top-row">
-<a class="logo" href="#" onclick="showHome();return false"><div class="logo-icon"><svg aria-hidden="true" height="24" viewbox="0 0 100 100" width="24"><circle cx="41" cy="41" fill="none" r="21" stroke="#fff" stroke-width="8.6"></circle><path d="M41 41 m-11.5 2.8 h6.6 l2.8 -7.6 l4.7 13.2 l2.8 -8.5 h5.6" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="4.3"></path><line stroke="#fff" stroke-linecap="round" stroke-width="9.4" x1="57" x2="73" y1="57" y2="73"></line></svg></div><div class="logo-text"><h1>LabLens</h1><span id="taglineText">Your private lens on Labs</span></div></a>
+<a class="logo" href="#" onclick="showHome();return false"><div class="logo-icon"><svg aria-hidden="true" viewBox="0 0 100 100" focusable="false"><circle cx="41" cy="41" fill="none" r="21" stroke="#fff" stroke-width="8.6"></circle><path d="M41 41 m-11.5 2.8 h6.6 l2.8 -7.6 l4.7 13.2 l2.8 -8.5 h5.6" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="4.3"></path><line stroke="#fff" stroke-linecap="round" stroke-width="9.4" x1="57" x2="73" y1="57" y2="73"></line></svg></div><div class="logo-text"><h1>LabLens</h1><span id="taglineText">Your private lens on Labs</span></div></a>
 <button aria-label="Switch light or dark theme" class="theme-toggle" id="themeToggleBtn" onclick="toggleTheme()" title="Switch light/dark"><span id="themeIcon">🌙</span></button>
 </div>
 <div class="header-bottom-row">
@@ -515,13 +517,14 @@ body::before{
 </div></header>
 <div class="container">
 <section class="user-info-section" id="userInfoSection"><div class="user-avatar" id="userAvatar">U</div><div class="user-details"><div class="user-name" id="userNameDisplay">User</div><span class="data-badge" id="userDataFiles">0 files</span><span class="data-badge" id="userDataReports">0 reports</span></div><button class="action-btn" onclick="logoutUser()" style="color:var(--danger)">⤺ Logout</button></section>
-<section class="hero" id="heroSection"><div class="hero-badge">🔒 Private &amp; on-device · Your personal data never leaves this browser</div><h2>Your Health Reports,<br/>Simplified &amp; Compared</h2><p>Upload lab reports or medical documents. Get plain-language explanations, trend comparisons, and practical wellness tips.</p></section>
+<section class="hero" id="heroSection"><div class="hero-badge">🔒 On-device by default · Sharing is always your choice</div><h2>Your Health Reports,<br/>Simplified &amp; Compared</h2><p>Upload lab reports or medical documents. Get plain-language explanations, trend comparisons, and practical wellness tips.</p></section>
 <div class="upcoming" id="upcomingStrip" style="display:none"></div>
 <section class="upload-section" id="uploadSection">
 <div class="card"><div class="card-header"><div class="card-header-icon" style="background:rgba(43,90,156,.1);color:var(--primary)">⬆️</div><div><h3>Upload Reports &amp; Scans</h3><p>Lab PDFs or clear images of blood/urine panels (PNG/JPG/WEBP/BMP)</p></div></div>
-<div aria-label="Add a lab report" class="drop-zone" id="dropZone" role="button" tabindex="0"><div class="drop-zone-inner"><div class="drop-icon" aria-hidden="true">📄</div><h4>Add a lab report</h4><p>Use a PDF when available—the original text is usually more accurate than a photo.</p><div class="capture-actions"><button class="capture-choice primary" id="takePhotoBtn" type="button">Take a clear photo</button><button class="capture-choice" id="browseFilesBtn" type="button">Choose PDF or image</button></div><div class="file-types"><span class="file-type-badge">PDF</span><span class="file-type-badge">PNG</span><span class="file-type-badge">JPG</span><span class="file-type-badge">WEBP</span><span class="file-type-badge">BMP</span></div></div></div>
-<input accept=".pdf,.png,.jpg,.jpeg,.webp,.bmp,image/*,application/pdf" id="fileInput" multiple="" style="display:none" type="file"/>
-<input accept="image/*" capture="environment" id="captureInput" style="display:none" type="file"/>
+<div aria-label="Add a lab report or drop a file" class="drop-zone" id="dropZone" role="region"><div class="drop-zone-inner"><div class="drop-icon" aria-hidden="true">📄</div><h4>Add a lab report</h4><p>Take a photo, choose from Photos, or browse Files.</p><button class="add-report-button" id="addReportBtn" type="button">Add report</button><div class="file-types"><span class="file-type-badge">PDF</span><span class="file-type-badge">PNG</span><span class="file-type-badge">JPG</span><span class="file-type-badge">WEBP</span><span class="file-type-badge">BMP</span></div></div></div>
+<input accept="application/pdf,.pdf,image/png,image/jpeg,image/webp,image/bmp,.png,.jpg,.jpeg,.webp,.bmp" id="fileInput" multiple="" style="display:none" type="file"/>
+<input accept="image/png,image/jpeg,image/webp,image/bmp,.png,.jpg,.jpeg,.webp,.bmp" id="photosInput" multiple="" style="display:none" type="file"/>
+<input accept="image/png,image/jpeg,image/webp,image/bmp" capture="environment" id="captureInput" style="display:none" type="file"/>
 <div id="previewArea" style="display:none"><div class="file-list-container"><div class="file-list-header"><span class="file-list-count" id="fileListCount"></span><button class="clear-btn" onclick="clearAllFiles()">🗑 Clear all</button></div><div id="fileList"></div></div></div>
 <section class="analyze-section" id="analyzeSection" style="display:none"><div class="type-picker"><span style="font-size:12px;color:var(--text-secondary);font-weight:800">Report type:</span><select class="type-picker-select" id="uploadCatSelect" onchange="setUploadCategory(this.value)"><option value="auto">✨ Auto-detect</option></select><span id="typePickerHint" style="font-size:12px;color:var(--text-secondary)">We'll guess from the content unless you choose.</span></div><div class="group-toggle" id="groupToggle"><span style="font-size:12px;color:var(--text-secondary);font-weight:800">When analyzing multiple files:</span><div class="gt-options"><button class="gt-opt" id="gtCombine" onclick="setGroupMode('combine')">📚 Merge into one report</button><button class="gt-opt active" id="gtSeparate" onclick="setGroupMode('separate')">🗂 Separate report per file (recommended)</button></div></div><button class="analyze-btn" id="analyzeBtn" onclick="analyzeReport()">✨ Analyze</button></section>
 <section class="progress-container" id="progressSection"><div class="progress-card"><div class="spinner"></div><div class="progress-text" id="progressText">Extracting information...</div><div class="progress-sub" id="progressSub">Reading files, running OCR, and interpreting parameters...</div><div class="progress-bar-track"><div class="progress-bar-fill" id="progressBarFill"></div></div><div class="progress-bar-pct" id="progressBarPct">0%</div></div></section>
@@ -567,12 +570,13 @@ body::before{
 </div></section>
 <section class="history-section" id="historySection"><div class="card" style="max-width:850px;margin:auto"><div class="history-header"><div><h3>🕘 Scan History</h3><p style="font-size:12px;color:var(--text-secondary)">Stored locally in this browser</p></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="action-btn" onclick="clearHistory()">🗑 Clear All</button></div></div><div class="history-toolbar"><input class="history-search" id="historySearch" oninput="setHistoryFilter('q',this.value)" placeholder="🔍 Search reports, dates, tags, notes…" type="search"/><div><button class="chip active" data-status="all" onclick="setHistoryFilter('status','all')">All</button><button class="chip" data-status="issues" onclick="setHistoryFilter('status','issues')">⚠ Issues</button><button class="chip" data-status="normal" onclick="setHistoryFilter('status','normal')">✅ Normal</button></div></div><div class="history-list" id="historyList"></div></div></section>
 <div class="disclaimer"><span>⚠️</span><p><strong>Medical Disclaimer:</strong> This tool is for informational purposes only and does not provide medical advice. OCR and parsing can make mistakes. Always verify results against the original document and consult a qualified healthcare provider.</p></div>
-<footer class="footer">Built with ❤️ · LabLens · Private, on-device health reports</footer>
+<footer class="footer">LabLens Ver2.0 · Reports stay in this browser's local storage and are not encrypted. Google AI and email sharing are optional.</footer>
+<dialog aria-labelledby="reportSourceTitle" class="report-source-dialog" id="reportSourceDialog"><h3 id="reportSourceTitle">Add a report</h3><p>Choose where your report is.</p><div class="report-source-options"><button class="report-source-option" id="reportSourceCamera" type="button"><strong>Camera</strong><small>Take a new photo</small></button><button class="report-source-option" id="reportSourcePhotos" type="button"><strong>Photos</strong><small>Choose an image from your library</small></button><button class="report-source-option" id="reportSourceFiles" type="button"><strong>Files</strong><small>Choose a PDF or image</small></button></div><button class="report-source-cancel" id="reportSourceCancel" type="button">Cancel</button></dialog>
 <div class="modal-overlay" id="firstRunModal"><div class="modal">
 <h3>👋 Welcome</h3>
-<p style="line-height:1.6">This is a fully private, on-device health-report app. Nothing you upload leaves this browser.</p>
+<p style="line-height:1.6">Reports are processed in this browser and stored on this device. Optional Google AI and email features share information only after you choose to use them.</p>
 <p style="line-height:1.6;color:var(--text-secondary);font-size:12.5px">
-  To get started, create a profile for whoever the reports are for. Reports are kept separate per person and stored only on this device — clearing your browser data removes them.</p>
+  To get started, create a profile for whoever the reports are for. Reports are kept separate per person in this browser's local storage. They are not encrypted; someone with access to this browser profile may be able to read them. Clearing browser data removes them.</p>
 <div class="modal-actions">
 <button class="btn-secondary" onclick="firstRunSkip()">Skip for now</button>
 <button class="btn-primary" onclick="firstRunAdd()">Create the first profile</button>
@@ -681,30 +685,71 @@ const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const metricValueText=m=>m&&m.valueText?String(m.valueText):`${m&&m.qualifier||''}${m&&m.value!=null?m.value:''}`;
 
-let __statsLastSend=0;
-function pingStats(reason){
-  const now=Date.now();
-  if(now-__statsLastSend<2000)return;
-  __statsLastSend=now;
-  const body={
-    users:(typeof users!=='undefined'&&Array.isArray(users))?users.length:0,
-    reports:0,
-    event:String(reason||'update'),
-    t:new Date().toISOString()
+const SAFE_METRIC_STATUSES=new Set(['normal','high','low','borderline','unknown','classifier']);
+const SAFE_METRIC_KEY=/^[A-Za-z0-9 _.,:+/%#()\[\]-]{1,120}$/;
+const safeText=(value,max=2000)=>['string','number','boolean'].includes(typeof value)?String(value).slice(0,max):'';
+const safeCount=(value,fallback=0,max=1000000)=>{
+  if(!['number','string'].includes(typeof value))return fallback;
+  const n=Number(value);
+  return Number.isSafeInteger(n)&&n>=0&&n<=max?n:fallback;
+};
+const safeLocalImage=value=>{
+  const data=typeof value==='string'?value:'';
+  return data.length<=20000000&&/^data:image\/(?:png|jpe?g|webp|bmp);base64,/i.test(data)?data:'';
+};
+function normalizeAnalysisRecord(record,index=0){
+  if(!record||typeof record!=='object'||Array.isArray(record))return null;
+  const numericId=['number','string'].includes(typeof record.id)?Number(record.id):NaN;
+  const id=Number.isSafeInteger(numericId)&&numericId>0?numericId:index+1;
+  const metrics=(Array.isArray(record.metrics)?record.metrics:[]).slice(0,500).filter(m=>m&&typeof m==='object'&&!Array.isArray(m)).map((m,i)=>{
+    let key=safeText(m.key,120);
+    if(!SAFE_METRIC_KEY.test(key))key=`backup-metric-${i+1}`;
+    const status=SAFE_METRIC_STATUSES.has(m.status)?m.status:'unknown';
+    const finiteOrNull=value=>value==null||value===''?null:(['number','string'].includes(typeof value)&&Number.isFinite(Number(value))?Number(value):null);
+    const unitCoord=value=>{const n=Number(value);return Number.isFinite(n)?Math.max(0,Math.min(1,n)):0};
+    const page=Number(m.bboxPage);
+    return {...m,key,status,name:safeText(m.name,200),unit:safeText(m.unit,80),normal_range:safeText(m.normal_range,200),rangeNote:safeText(m.rangeNote,200),classifierLabel:safeText(m.classifierLabel,120),srcLine:safeText(m.srcLine,500),value:typeof m.value==='number'&&Number.isFinite(m.value)?m.value:safeText(m.value,100),valueText:safeText(m.valueText,120),qualifier:safeText(m.qualifier,20),min:finiteOrNull(m.min),max:finiteOrNull(m.max),needsReview:m.needsReview===true,reviewReasons:Array.isArray(m.reviewReasons)?m.reviewReasons.slice(0,20).map(x=>safeText(x,120)):[],bboxPage:Number.isSafeInteger(page)&&page>=0&&page<100?page:null,bbox:m.bbox&&typeof m.bbox==='object'?{x0:unitCoord(m.bbox.x0),y0:unitCoord(m.bbox.y0),x1:unitCoord(m.bbox.x1),y1:unitCoord(m.bbox.y1)}:null};
+  });
+  const patient=record.detectedPatient&&typeof record.detectedPatient==='object'?record.detectedPatient:{};
+  const audit=record.audit&&typeof record.audit==='object'?record.audit:{};
+  const age=['number','string'].includes(typeof patient.age)&&Number.isFinite(Number(patient.age))?Number(patient.age):null;
+  const counts={
+    totalMetrics:metrics.length,
+    normalCount:safeCount(record.normalCount),
+    highCount:safeCount(record.highCount),
+    lowCount:safeCount(record.lowCount),
+    outOfRangeCount:safeCount(record.outOfRangeCount),
+    safeCount:safeCount(record.safeCount),
+    borderlineCount:safeCount(record.borderlineCount),
+    concernCount:safeCount(record.concernCount)
   };
-  try{
-    const h=LS.get(historyKey(),[]);
-    body.reports=Array.isArray(h)?h.length:0;
-  }catch(e){}
-  try{
-    fetch('/.netlify/functions/stats',{
-      method:'POST', keepalive:true,
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify(body)
-    }).catch(()=>{});
-  }catch(e){}
+  return {...record,id,metrics,...counts,
+    fileName:safeText(record.fileName||'Health Report',255),
+    category:['lab','other','prescription'].includes(record.category)?record.category:'other',
+    date:safeText(record.date,40),analyzedAt:safeText(record.analyzedAt,40),
+    rawText:safeText(record.rawText,200000),laymanSummary:safeText(record.laymanSummary,20000),
+    detectedPatient:{name:safeText(patient.name,120),age:age!=null&&age>=0&&age<=130?age:null,sex:safeText(patient.sex,30)},
+    audit:{uploadedCount:safeCount(audit.uploadedCount,1),duplicateCount:safeCount(audit.duplicateCount),unitStandardized:safeCount(audit.unitStandardized),duplicateExisting:audit.duplicateExisting===true},
+    recommendations:Array.isArray(record.recommendations)?record.recommendations.slice(0,30).filter(x=>x&&typeof x==='object').map(x=>({title:safeText(x.title,160),desc:safeText(x.desc,1000)})):[],
+    tags:Array.isArray(record.tags)?record.tags.slice(0,100).map(x=>safeText(x,60)):[],note:safeText(record.note,10000),
+    scanImages:Array.isArray(record.scanImages)?record.scanImages.slice(0,30).filter(x=>x&&typeof x==='object').map(x=>({name:safeText(x.name||'medical image',255),dataURL:safeLocalImage(x.dataURL),tags:Array.isArray(x.tags)?x.tags.slice(0,30).map(t=>safeText(t,60)):[]})):[],
+    docPages:Array.isArray(record.docPages)?record.docPages.slice(0,100).filter(x=>x&&typeof x==='object').map(x=>({image:safeLocalImage(x.image)})):[]
+  };
 }
-
+function safeSummaryMarkup(value){
+  const parsed=new DOMParser().parseFromString(String(value||''),'text/html');
+  const allowed=new Set(['STRONG','B','EM','BR']);
+  const render=node=>{
+    if(node.nodeType===Node.TEXT_NODE)return esc(node.nodeValue||'');
+    if(node.nodeType!==Node.ELEMENT_NODE)return '';
+    if(['SCRIPT','STYLE','IFRAME','OBJECT','SVG','MATH'].includes(node.tagName))return '';
+    const children=Array.from(node.childNodes).map(render).join('');
+    if(!allowed.has(node.tagName))return children;
+    const tag=node.tagName.toLowerCase();
+    return tag==='br'?'<br>':`<${tag}>${children}</${tag}>`;
+  };
+  return Array.from(parsed.body.childNodes).map(render).join('');
+}
 
 // --- LAB REFERENCE LIBRARY + RECORD-ASSEMBLY PARSER (v14) ---
 // Groups: blood, sugar, chol, kidney, liver, thyroid, electro, vitamin, iron,
@@ -2423,7 +2468,9 @@ function recommendations(high,low){
 }
 function layman(metrics,high,low){if(!metrics.length)return"I couldn't identify specific lab values. Try a clearer scan or a text-based PDF.";let out=[];if(high.length+low.length)out.push(`Out of <strong>${metrics.length}</strong> recognized results, <strong>${high.length+low.length}</strong> are outside range: ${esc([...high,...low].map(m=>m.name).join(', '))}.`);else out.push(`None of the <strong>${metrics.length}</strong> recognized results are outside the selected reference ranges.`);out.push('<br><br><strong>What this means:</strong> '+(high.length+low.length?'Review the out-of-range values against the original report and discuss them with a qualified healthcare provider.':'This is an extraction summary, not a diagnosis. Verify the values against the original report and continue routine follow-up.'));return out.join('')}
 let currentUser=null,users=[],uploadedFiles=[],currentAnalysis=null,groupMode='separate',uploadCategory='auto',historyFilter={q:'',status:'all'},activeResultTab='summary',selectedTrendKey=null,defaultTrendKey=LS.get('defaultTrendKey_'+(currentUser||'guest'),null),metricsFilter=null;
-const historyKey=()=>`health_reports_${currentUser||'guest'}`;function getHistory(){return LS.get(historyKey(),[])}function setHistory(arr){LS.set(historyKey(),arr)}
+const historyKey=()=>`health_reports_${currentUser||'guest'}`;
+function getHistory(){const stored=LS.get(historyKey(),[]);return Array.isArray(stored)?stored.map(normalizeAnalysisRecord).filter(Boolean):[]}
+function setHistory(arr){LS.set(historyKey(),Array.isArray(arr)?arr.map(normalizeAnalysisRecord).filter(Boolean):[])}
 
 function renderUserSelect(){const sel=$('userSelect');sel.innerHTML='<option value="">-- Select User --</option>'+users.map(u=>`<option value="${esc(u.username)}">${esc(u.nickname||u.username)}</option>`).join('');if(currentUser)sel.value=currentUser}
 function switchUser(name){currentUser=name||null;LS.set('currentUser',currentUser);defaultTrendKey=LS.get('defaultTrendKey_'+(currentUser||'guest'),null);selectedTrendKey=defaultTrendKey;uploadCategory=LS.get('uploadCategory_'+(currentUser||'guest'),'auto');const catSel=$('uploadCatSelect');if(catSel)catSel.value=uploadCategory;uploadedFiles=[];currentAnalysis=null;activeNavKey='new';updateFilePreview();renderUserBadge();updateUserInfoDisplay();try{renderUpcoming()}catch(e){}$('resultsSection').classList.remove('active');$('historySection').style.display='none';$('uploadSection').style.display='grid';renderNav();window.scrollTo({top:0,behavior:'smooth'})}
@@ -2495,7 +2542,7 @@ async function addUser(e){
       if(typeof renderHistoryList==='function')renderHistoryList();
     }
   }
-  showToast('Profile created','success');pingStats('user_created');
+  showToast('Profile created','success');
   
 }
 // The active profile drives which reference ranges we use.
@@ -2518,6 +2565,14 @@ function profileContext(reportDate){
 }
 function logoutUser(){switchUser('');$('userSelect').value='';showToast('Logged out','info')}
 function toggleTheme(){const next=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',next);LS.set('healthTheme',next);updateThemeIcon()}function updateThemeIcon(){$('themeIcon').textContent=document.documentElement.getAttribute('data-theme')==='dark'?'☀️':'🌙'}
+const SUPPORTED_IMAGE_TYPES=new Set(['image/png','image/jpeg','image/webp','image/bmp']);
+function isSupportedReportFile(file){
+  const type=String(file.type||'').toLowerCase().split(';')[0];
+  const extension=/\.(pdf|png|jpe?g|webp|bmp)$/i.test(file.name||'');
+  if(type==='application/pdf')return true;
+  if(SUPPORTED_IMAGE_TYPES.has(type))return true;
+  return (!type||type==='application/octet-stream'||type==='application/x-pdf')&&extension;
+}
 function classifyType(file){return file.type==='application/pdf'||/\.pdf$/i.test(file.name)?'pdf':'image'}
 function gradeImageQualityStats({width,height,mean,contrast,sharpness}){
   const issues=[],blocking=[],shortEdge=Math.min(width,height),ratio=width/Math.max(1,height);
@@ -2549,12 +2604,26 @@ async function assessImageQuality(file){
   }catch(e){return{level:'warn',blocking:false,issues:['quality check unavailable'],width:0,height:0,overridden:false,summary:'quality check unavailable—verify OCR carefully'}}
   finally{URL.revokeObjectURL(url)}
 }
-async function handleFiles(list,options={}){const arr=Array.from(list||[]);let added=0;for(const file of arr){if(!(file.type==='application/pdf'||file.type.startsWith('image/')||/\.(pdf|png|jpe?g|webp|bmp)$/i.test(file.name)))continue;if(file.size>50*1024*1024){showToast(`${file.name} is too large`,'error');continue}const entry={file,type:classifyType(file),name:file.name,size:file.size,captured:!!options.camera};if(entry.type==='image'){entry.quality={level:'checking',blocking:true,issues:[],summary:'checking photo quality…'};uploadedFiles.push(entry);updateFilePreview();entry.quality=await assessImageQuality(file)}else uploadedFiles.push(entry);added++;updateFilePreview()}if(added){const blocked=blockingImageFiles().length;showToast(blocked?`${blocked} photo${blocked===1?'':'s'} need attention before analysis`:`${added} file${added===1?'':'s'} ready` ,blocked?'error':'success')}else showToast('No supported files were added','error')}
+async function handleFiles(list){const arr=Array.from(list||[]);let added=0;for(const file of arr){if(!isSupportedReportFile(file)){showToast(`${file.name||'File'} is not a supported PDF or image`,'error');continue}if(file.size>50*1024*1024){showToast(`${file.name} is too large (50 MB maximum)`,'error');continue}if(uploadedFiles.length>=10){showToast('You can analyze up to 10 files at a time','error');break}const totalSize=uploadedFiles.reduce((sum,item)=>sum+item.size,0);if(totalSize+file.size>100*1024*1024){showToast('The selected files exceed the 100 MB total limit','error');break}const entry={file,type:classifyType(file),name:file.name,size:file.size};if(entry.type==='image'){entry.quality={level:'checking',blocking:true,issues:[],summary:'checking photo quality…'};uploadedFiles.push(entry);updateFilePreview();entry.quality=await assessImageQuality(file)}else uploadedFiles.push(entry);added++;updateFilePreview()}if(added){const blocked=blockingImageFiles().length;showToast(blocked?`${blocked} photo${blocked===1?'':'s'} need attention before analysis`:`${added} file${added===1?'':'s'} ready` ,blocked?'error':'success')}else if(!uploadedFiles.length)showToast('No supported files were added','error')}
 function blockingImageFiles(){return uploadedFiles.filter(f=>f.type==='image'&&f.quality&&f.quality.blocking&&!f.quality.overridden)}
 function overrideImageQuality(i){const f=uploadedFiles[i];if(!f||!f.quality)return;f.quality.overridden=true;updateFilePreview();showToast('Photo will be analyzed—verify every extracted value','info')}
 function updateFilePreview(){const has=uploadedFiles.length>0,blocked=blockingImageFiles();$('previewArea').style.display=has?'block':'none';$('analyzeSection').style.display=has?'block':'none';$('fileListCount').textContent=`${uploadedFiles.length} file${uploadedFiles.length===1?'':'s'} selected${blocked.length?` · ${blocked.length} needs a retake`:''}`;$('fileList').innerHTML=uploadedFiles.map((f,i)=>{const q=f.quality;const qHtml=q?`<div class="quality-line"><span class="quality-badge ${q.level==='checking'?'warn':q.level}">${q.level==='good'?'Ready':q.level==='poor'?'Retake recommended':q.level==='checking'?'Checking…':'Check photo'}</span>${q.overridden?'<span class="quality-badge warn">Using anyway</span>':''}</div><div class="quality-detail">${esc(q.summary||'')}</div>${q.blocking&&!q.overridden?`<button class="quality-override" type="button" onclick="event.stopPropagation();overrideImageQuality(${i})">Use anyway</button>`:''}`:'';return`<div class="file-item ${q&&q.level==='poor'&&!q.overridden?'quality-poor':''}"><div class="file-item-icon ${f.type==='pdf'?'pdf':'image'}">${f.type==='pdf'?'PDF':'IMG'}</div><div class="file-item-info"><div class="file-item-name">${esc(f.name)}</div><div class="file-item-meta">${(f.size/1024).toFixed(1)} KB${q&&q.width?` · ${q.width}×${q.height}px`:''}</div>${qHtml}</div><button aria-label="Remove ${esc(f.name)}" class="remove-file-btn" onclick="removeFile(${i})">✕</button></div>`}).join('');$('groupToggle').classList.toggle('show',uploadedFiles.length>1);const btn=$('analyzeBtn');btn.disabled=blocked.length>0;btn.title=blocked.length?'Retake the photo or choose Use anyway first':'';btn.textContent=blocked.length?`Fix ${blocked.length} photo${blocked.length===1?'':'s'} before analysis`:(uploadedFiles.length>1?(groupMode==='separate'?`Analyze ${uploadedFiles.length} files → ${uploadedFiles.length} reports`:`Analyze ${uploadedFiles.length} files → 1 report`):'Analyze report');updateUserInfoDisplay()}
 function removeFile(i){uploadedFiles.splice(i,1);updateFilePreview()}function clearAllFiles(){uploadedFiles=[];updateFilePreview()}function setGroupMode(m){groupMode=m;$('gtCombine').classList.toggle('active',m==='combine');$('gtSeparate').classList.toggle('active',m==='separate');updateFilePreview()}function setUploadCategory(k){uploadCategory=k||'auto';LS.set('uploadCategory_'+(currentUser||'guest'),uploadCategory);$('typePickerHint').textContent=uploadCategory==='auto'?"We'll guess from the content unless you choose.":`Forcing: ${catMeta(uploadCategory).label}`}
-function wireUpload(){const dz=$('dropZone'),inp=$('fileInput'),capture=$('captureInput'),browse=$('browseFilesBtn'),take=$('takePhotoBtn');const openBrowse=()=>inp.click();dz.onclick=e=>{if(e.target.closest('button'))return;openBrowse()};dz.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openBrowse()}};browse.onclick=e=>{e.stopPropagation();openBrowse()};take.onclick=e=>{e.stopPropagation();capture.click()};inp.onchange=async e=>{await handleFiles(e.target.files);inp.value=''};capture.onchange=async e=>{await handleFiles(e.target.files,{camera:true});capture.value=''};['dragenter','dragover'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.add('drag-over')}));['dragleave','drop'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.remove('drag-over')}));dz.addEventListener('drop',e=>handleFiles(e.dataTransfer.files))}
+function wireUpload(){
+  const dz=$('dropZone'),add=$('addReportBtn'),dialog=$('reportSourceDialog');
+  const inputs={camera:$('captureInput'),photos:$('photosInput'),files:$('fileInput')};
+  add.onclick=()=>dialog.showModal();
+  $('reportSourceCancel').onclick=()=>dialog.close();
+  [['reportSourceCamera','camera'],['reportSourcePhotos','photos'],['reportSourceFiles','files']].forEach(([buttonId,source])=>{
+    $(buttonId).onclick=()=>{dialog.close();inputs[source].click()};
+  });
+  Object.values(inputs).forEach(input=>{
+    input.onchange=async e=>{await handleFiles(e.target.files);input.value=''};
+  });
+  ['dragenter','dragover'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.add('drag-over')}));
+  ['dragleave','drop'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.remove('drag-over')}));
+  dz.addEventListener('drop',e=>handleFiles(e.dataTransfer.files));
+}
 async function fileToDataURL(file){return new Promise((res,rej)=>{const fr=new FileReader();fr.onload=()=>res(fr.result);fr.onerror=()=>rej(fr.error);fr.readAsDataURL(file)})}
 function setProgress(p,text,sub){$('progressBarFill').style.width=Math.round(p*100)+'%';$('progressBarPct').textContent=Math.round(p*100)+'%';if(text)$('progressText').textContent=text;if(sub)$('progressSub').textContent=sub}
 let ocrWorker=null,ocrWorkerPromise=null,ocrProgressCb=null;
@@ -2818,7 +2887,9 @@ async function extractPdfText(file,fileObj){
     err.code='PDF_ENGINE_UNAVAILABLE';
     throw err;
   }
-  const buf=await file.arrayBuffer();const pdf=await pdfjsLib.getDocument({data:buf}).promise;let text='',ocrPages=0;
+  const buf=await file.arrayBuffer();const pdf=await pdfjsLib.getDocument({data:buf,isEvalSupported:false}).promise;
+  if(pdf.numPages>100){await pdf.destroy();const err=new Error('This PDF has more than 100 pages. Split it into smaller files and try again.');err.code='PDF_PAGE_LIMIT';throw err;}
+  let text='',ocrPages=0;
   const docPages=[];
   for(let i=1;i<=pdf.numPages;i++){
     setProgress((i-1)/pdf.numPages,'Reading PDF...',`${file.name} · page ${i}/${pdf.numPages}`);
@@ -3005,7 +3076,7 @@ function auditDuplicates(analysis){
   return {duplicateExisting,signature:sig};
 }
 function attachAnalysisAudit(a,uploadedCount,duplicateCount,skippedCount){a.audit={uploadedCount:uploadedCount||0,duplicateCount:duplicateCount||0,skippedCount:skippedCount||0,unitStandardized:(a.metrics||[]).filter(m=>m.unitStandardized).length,ocrEngine:window.__ocrEngineUsed||''};return a}
-async function saveAnalysis(a){const dup=auditDuplicates(a).duplicateExisting;if(dup){dup.audit=Object.assign({},dup.audit||{},a.audit||{}, {duplicateExisting:true});currentAnalysis=dup;showToast('Duplicate report found — existing saved report opened instead.','info');updateUserInfoDisplay();return dup}const h=getHistory();h.unshift(a);h.sort((x,y)=>new Date(y.date)-new Date(x.date));setHistory(h);currentAnalysis=a;updateUserInfoDisplay();pingStats('report_added');return a}
+async function saveAnalysis(a){const dup=auditDuplicates(a).duplicateExisting;if(dup){dup.audit=Object.assign({},dup.audit||{},a.audit||{}, {duplicateExisting:true});currentAnalysis=dup;showToast('Duplicate report found — existing saved report opened instead.','info');updateUserInfoDisplay();return dup}const h=getHistory();h.unshift(a);h.sort((x,y)=>new Date(y.date)-new Date(x.date));setHistory(h);currentAnalysis=a;updateUserInfoDisplay();return a}
 
 /* ============== IDENTITY DISCREPANCY CHECK ==============
    Detects patient name/gender/age from the report text, compares leniently
@@ -3584,9 +3655,10 @@ function showRejectionModal(files){
   if(retry)retry.addEventListener('click',()=>{overlay.remove();$('analyzeSection').style.display='block';analyzeReport();});
 }
 function renderAnalysisAudit(a){
-  const au=a.audit||{}; const unitNote=au.unitStandardized?` · <strong>${au.unitStandardized}</strong> unit conversion${au.unitStandardized===1?'':'s'} standardized`:'';
-  const dupNote=au.duplicateExisting?' · existing duplicate opened':` · <strong>${au.duplicateCount||0}</strong> duplicate upload${(au.duplicateCount||0)===1?'':'s'} found`;
-  return `<div class="analysis-audit">📦 Reports uploaded: <strong>${au.uploadedCount||1}</strong>${dupNote}${unitNote}. Trends use standardized scientific units and extracted report dates.</div>`;
+  const au=a.audit||{}; const converted=safeCount(au.unitStandardized);const uploaded=safeCount(au.uploadedCount,1);const duplicates=safeCount(au.duplicateCount);
+  const unitNote=converted?` · <strong>${converted}</strong> unit conversion${converted===1?'':'s'} standardized`:'';
+  const dupNote=au.duplicateExisting?' · existing duplicate opened':` · <strong>${duplicates}</strong> duplicate upload${duplicates===1?'':'s'} found`;
+  return `<div class="analysis-audit">📦 Reports uploaded: <strong>${uploaded}</strong>${dupNote}${unitNote}. Trends use standardized scientific units and extracted report dates.</div>`;
 }
 function profileWarning(){
   const p=currentProfile();
@@ -3602,15 +3674,15 @@ function displayResults(a){currentAnalysis=a;LS.set('currentAnalysisId_'+(curren
         <div style="font-weight:900;color:var(--primary);display:flex;align-items:center;gap:6px">👤 Patient Profile:</div>
         ${det.name ? `<div>Name: <strong>${esc(det.name)}</strong></div>` : ''}
         ${det.age != null ? `<div>Age: <strong>${det.age} yrs</strong></div>` : ''}
-        ${det.sex ? `<div>Sex: <strong>${det.sex.toUpperCase()}</strong></div>` : ''}
+        ${det.sex ? `<div>Sex: <strong>${esc(det.sex.toUpperCase())}</strong></div>` : ''}
       </div>
     `;
   }
   $('demoNote').innerHTML=patientHtml+(renderAnalysisAudit(a)+(a.rawText?'<div class="layman" style="margin-bottom:16px">🔎 Text was captured from your file. OCR can make mistakes — verify against the original report.</div>':''));
 metricsFilter=null; // a freshly displayed report never inherits a stale filter
 renderVerificationCard(a);
-const ok=(a.outOfRangeCount||0)===0;const statKey=(filter)=>`if(event.key==='Enter'||event.key===' '){event.preventDefault();setMetricsFilter(${filter})}`;$('healthStatusDisplay').innerHTML=`<div class="status-row"><div class="status-icon ${ok?'good':'attention'}">${ok?'✓':'!'}</div><div><h4>${ok?'No recognized values outside range':'Review out-of-range values'}</h4><p style="color:var(--text-secondary);font-size:12px;margin-top:4px">${ok?'This describes extracted values only; it is not a diagnosis.':`${a.outOfRangeCount} extracted value(s) are outside the selected reference range.`}</p></div></div><div class="stat-grid"><div aria-label="Show all ${a.totalMetrics} tests" class="stat-box" onclick="setMetricsFilter(null)" onkeydown="${statKey('null')}" role="button" tabindex="0" title="Show all"><div class="v" style="color:var(--primary)">${a.totalMetrics}</div><div class="l">Tests</div></div><div aria-label="Show ${a.safeCount} values in range" class="stat-box" onclick="setMetricsFilter('tier-safe')" onkeydown="${statKey("'tier-safe'")}" role="button" tabindex="0" title="Show only in-range values"><div class="v" style="color:var(--success)">${a.safeCount}</div><div class="l">In range</div></div><div aria-label="Show ${a.concernCount} high or low values" class="stat-box" onclick="setMetricsFilter('tier-concern')" onkeydown="${statKey("'tier-concern'")}" role="button" tabindex="0" title="Show only high or low values"><div class="v" style="color:var(--danger)">${a.concernCount}</div><div class="l">High/Low</div></div><div aria-label="Show ${a.borderlineCount} borderline values" class="stat-box" onclick="setMetricsFilter('tier-borderline')" onkeydown="${statKey("'tier-borderline'")}" role="button" tabindex="0" title="Show only borderline values"><div class="v" style="color:var(--warning)">${a.borderlineCount}</div><div class="l">Borderline</div></div></div>`;
-$('laymanCard').innerHTML=`<h5>🤖 Plain-Language Summary</h5><div>${a.laymanSummary}</div>`;renderAIReviewCard(a);renderTagsNotes(a);
+const outOfRange=safeCount(a.outOfRangeCount),total=safeCount(a.totalMetrics),safe=safeCount(a.safeCount),concern=safeCount(a.concernCount),borderline=safeCount(a.borderlineCount);const ok=outOfRange===0;const statKey=(filter)=>`if(event.key==='Enter'||event.key===' '){event.preventDefault();setMetricsFilter(${filter})}`;$('healthStatusDisplay').innerHTML=`<div class="status-row"><div class="status-icon ${ok?'good':'attention'}">${ok?'✓':'!'}</div><div><h4>${ok?'No recognized values outside range':'Review out-of-range values'}</h4><p style="color:var(--text-secondary);font-size:12px;margin-top:4px">${ok?'This describes extracted values only; it is not a diagnosis.':`${outOfRange} extracted value(s) are outside the selected reference range.`}</p></div></div><div class="stat-grid"><div aria-label="Show all ${total} tests" class="stat-box" onclick="setMetricsFilter(null)" onkeydown="${statKey('null')}" role="button" tabindex="0" title="Show all"><div class="v" style="color:var(--primary)">${total}</div><div class="l">Tests</div></div><div aria-label="Show ${safe} values in range" class="stat-box" onclick="setMetricsFilter('tier-safe')" onkeydown="${statKey("'tier-safe'")}" role="button" tabindex="0" title="Show only in-range values"><div class="v" style="color:var(--success)">${safe}</div><div class="l">In range</div></div><div aria-label="Show ${concern} high or low values" class="stat-box" onclick="setMetricsFilter('tier-concern')" onkeydown="${statKey("'tier-concern'")}" role="button" tabindex="0" title="Show only high or low values"><div class="v" style="color:var(--danger)">${concern}</div><div class="l">High/Low</div></div><div aria-label="Show ${borderline} borderline values" class="stat-box" onclick="setMetricsFilter('tier-borderline')" onkeydown="${statKey("'tier-borderline'")}" role="button" tabindex="0" title="Show only borderline values"><div class="v" style="color:var(--warning)">${borderline}</div><div class="l">Borderline</div></div></div>`;
+const summary=$('laymanCard');summary.innerHTML=`<h5>🤖 Plain-Language Summary</h5><div>${safeSummaryMarkup(a.laymanSummary)}</div>`;renderAIReviewCard(a);renderTagsNotes(a);
 renderQuickMetricsSummary(a);
 renderMetricsList(a);
 renderDocumentView(a);
@@ -4002,7 +4074,7 @@ function renderDocumentView(a){
         <div class="img-ai">
           <div style="background:rgba(43,90,156,0.05);border:1px solid rgba(43,90,156,0.15);border-radius:var(--radius-sm);padding:14px;line-height:1.5;font-size:12px;color:var(--text);margin-top:10px">
             <div style="font-weight:900;color:var(--primary);margin-bottom:6px;display:flex;align-items:center;gap:6px">🩻 Diagnostic Viewer Active</div>
-            <div>All scans are kept completely secure and private on this device. You can use the toolbar above to <strong>Zoom (＋/－)</strong>, <strong>Rotate (↻)</strong>, <strong>Invert (◐)</strong>, or adjust <strong>Brightness &amp; Contrast</strong> for manual inspection. Automated AI visual parsing is disabled in this build to preserve 100% local privacy.</div>
+            <div>Scans stay in this browser's local storage on this device. Anyone with access to this browser profile may be able to view them. Use the toolbar above to <strong>Zoom (＋/－)</strong>, <strong>Rotate (↻)</strong>, <strong>Invert (◐)</strong>, or adjust <strong>Brightness &amp; Contrast</strong> for manual inspection. Automated AI visual parsing is disabled in this build.</div>
           </div>
         </div>
       </div></div>`).join('');
@@ -4744,30 +4816,50 @@ function importBackup(file) {
   const reader = new FileReader();
   reader.onload = async (e) => {
     try {
+      if(file.size>50*1024*1024)throw new Error('Backup is too large to import (50 MB maximum).');
       const data = JSON.parse(e.target.result);
-      if (!data || data.version !== "1.0.0" || !Array.isArray(data.users)) {
+      if (!data || data.version !== "1.0.0" || !Array.isArray(data.users) || data.users.length>100) {
         throw new Error("Invalid or corrupted LabLens backup file.");
       }
-      
+      const importedUsers=data.users.map(u=>{
+        if(!u||typeof u!=='object'||Array.isArray(u))throw new Error('Backup contains an invalid profile.');
+        const username=safeText(u.username,80).trim();
+        if(!username||/[\u0000-\u001f\u007f]/.test(username))throw new Error('Backup contains an invalid profile name.');
+        return {username,nickname:safeText(u.nickname||username,80),sex:safeText(u.sex,30),dob:safeText(u.dob,20),createdAt:safeText(u.createdAt,40)};
+      });
+      const userNames=new Set();
+      for(const user of importedUsers){const key=user.username.toLocaleLowerCase();if(userNames.has(key))throw new Error('Backup contains duplicate profile names.');userNames.add(key)}
+      const importedPrefixes=['guest',...importedUsers.map(u=>u.username)];
+      if(data.reports!=null&&(typeof data.reports!=='object'||Array.isArray(data.reports)))throw new Error('Backup report data is invalid.');
+      const importedReports={};
+      let totalImportedReports=0;
+      for(const prefix of importedPrefixes){
+        const rows=data.reports&&Object.prototype.hasOwnProperty.call(data.reports,prefix)?data.reports[prefix]:[];
+        if(!Array.isArray(rows)||rows.length>2000||totalImportedReports+rows.length>5000)throw new Error('Backup contains too many or invalid reports.');
+        totalImportedReports+=rows.length;
+        importedReports[prefix]=rows.map((row,i)=>{
+          const clean=normalizeAnalysisRecord(row,i);
+          if(!clean)throw new Error('Backup contains an invalid report.');
+          return clean;
+        });
+      }
+      const validCurrentUser=typeof data.currentUser==='string'&&(data.currentUser===''||data.currentUser==='guest'||importedUsers.some(u=>u.username===data.currentUser))?data.currentUser:null;
+      const validTheme=data.theme==='dark'?'dark':'light';
+      const categoryFor=prefix=>['auto','lab','other','prescription'].includes(data.uploadCategories?.[prefix])?data.uploadCategories[prefix]:'auto';
+      const trendKeyFor=prefix=>SAFE_METRIC_KEY.test(safeText(data.defaultTrendKeys?.[prefix],120))?data.defaultTrendKeys[prefix]:null;
+
       const confirmRestore = await confirmDialog("Restore data from this backup? This will overwrite your current local records with the backed-up history.");
       if (!confirmRestore) return;
       
       localStorage.clear();
-      LS.set('healthUsers', data.users);
-      if (data.currentUser) LS.set('currentUser', data.currentUser);
-      if (data.theme) LS.set('healthTheme', data.theme);
+      LS.set('healthUsers', importedUsers);
+      LS.set('currentUser', validCurrentUser);
+      LS.set('healthTheme', validTheme);
       
-      const prefixes = ['guest', ...data.users.map(u => u.username)];
-      prefixes.forEach(prefix => {
-        if (data.reports && data.reports[prefix]) {
-          LS.set(`health_reports_${prefix}`, data.reports[prefix]);
-        }
-        if (data.uploadCategories && data.uploadCategories[prefix]) {
-          LS.set(`uploadCategory_${prefix}`, data.uploadCategories[prefix]);
-        }
-        if (data.defaultTrendKeys && data.defaultTrendKeys[prefix]) {
-          LS.set(`defaultTrendKey_${prefix}`, data.defaultTrendKeys[prefix]);
-        }
+      importedPrefixes.forEach(prefix=>{
+        LS.set(`health_reports_${prefix}`,importedReports[prefix]);
+        LS.set(`uploadCategory_${prefix}`,categoryFor(prefix));
+        LS.set(`defaultTrendKey_${prefix}`,trendKeyFor(prefix));
       });
       
       showToast('Backup successfully restored! Reloading app...', 'success');
@@ -4838,98 +4930,22 @@ function openFeedbackModal(prefillMessage){
 function closeFeedbackModal(){
   $('feedbackModal').classList.remove('active');
   $('feedbackForm').reset();
-  $('fbScreenshotPreview').style.display='none';
-  $('fbPreviewImg').removeAttribute('src');
 }
-function previewFeedbackScreenshot(e){
-  const file=e.target.files[0];
-  if(file){
-    const reader=new FileReader();
-    reader.onload=()=>{
-      $('fbPreviewImg').src=reader.result;
-      $('fbScreenshotPreview').style.display='block';
-    };
-    reader.readAsDataURL(file);
-  }
-}
-async function sendFeedback(e){
+function sendFeedback(e){
   e.preventDefault();
   const email=$('fbEmail').value.trim();
   const message=$('fbMessage').value.trim();
-  const fileInput=$('fbScreenshot');
-  const file=fileInput.files[0];
-  const submitBtn=$('btnSubmitFeedback');
-  
   if(!email||!message)return;
-  submitBtn.disabled=true;
-  submitBtn.textContent='Sending...';
-  
-  // Build structured system diagnostics log (Privacy Preserving - no personal file data)
-  const diagnostics={
-    userAgent: navigator.userAgent,
-    screenSize: `${window.innerWidth}x${window.innerHeight}`,
-    activeProfile: typeof currentDisplayName==='function'?currentDisplayName():'Guest',
-    reportsCount: typeof getHistory==='function'?getHistory().length:0
-  };
-  
-  let screenshotBase64='';
-  if(file){
-    try {
-      screenshotBase64=await fileToDataURL(file).catch(()=>'');
-    } catch(err){
-      console.warn('Failed to convert screenshot to Base64',err);
-    }
-  }
-  
-  const payload={
-    email,
-    message,
-    screenshot: screenshotBase64,
-    diagnostics
-  };
-  
-  try {
-    const res=await fetch('/.netlify/functions/feedback',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify(payload)
-    });
-    const data=await res.json().catch(()=>({}));
-    
-    if(res.status===200 && data.success){
-      showToast('Your request is submitted','success');
-      closeFeedbackModal();
-    } else {
-      throw new Error(data.error || 'Serverless function returned failure');
-    }
-  } catch(err) {
-    console.warn('Netlify serverless feedback failed. Falling back to native mailto client:',err);
-    
-    // Fallback: Mailto client (completely free, zero database setup, works 100% offline!)
-    const subject=encodeURIComponent(`💬 LabLens Feedback from ${email}`);
-    const bodyText=
-      `Hello Support,\n\n`+
-      `Message:\n${message}\n\n`+
-      `---------------------------------------\n`+
-      `💻 Diagnostics Logs:\n`+
-      `- User Agent: ${diagnostics.userAgent}\n`+
-      `- Screen Size: ${diagnostics.screenSize}\n`+
-      `- Active Profile: ${diagnostics.activeProfile}\n`+
-      `- Saved Reports: ${diagnostics.reportsCount}\n`+
-      `---------------------------------------\n\n`+
-      `*(Please attach your screenshot to this email before sending!)*`;
-      
-    const mailtoUrl=`mailto:lablens.support@gmail.com?subject=${subject}&body=${encodeURIComponent(bodyText)}`;
-    
-    window.open(mailtoUrl,'_blank','noopener');
-    showToast('Your request is submitted','info');
-    closeFeedbackModal();
-  } finally {
-    submitBtn.disabled=false;
-    submitBtn.textContent='✉️ Send Feedback';
-  }
+  if(message.length>2000){showToast('Please keep feedback under 2,000 characters.','error');return;}
+  const body=encodeURIComponent(`Reply email: ${email}\n\n${message}`);
+  const href=`mailto:lablens.support@gmail.com?subject=${encodeURIComponent('LabLens feedback')}&body=${body}`;
+  const link=document.createElement('a');
+  link.href=href;link.target='_blank';link.rel='noopener';link.hidden=true;
+  document.body.appendChild(link);link.click();link.remove();
+  closeFeedbackModal();
+  showToast('Email draft opened. Review it and tap Send in your email app.','success');
 }
-Object.assign(window,{showHome,resetAll,showHistory,toggleTheme,openAddUserModal,closeAddUserModal,addUser,switchUser,logoutUser,removeFile,clearAllFiles,overrideImageQuality,setGroupMode,setUploadCategory,analyzeReport,switchTab,handleResultTabKey,loadHistoryReport,openHistoryItem,deleteHistoryItem,clearHistory,printResults,setHistoryFilter,addTagFromInput,removeTag,onNoteInput,runAIReview,setTrendParam,setDefaultTrendParam,clearDefaultTrendParam,showCurrentAnalysis,exportReportPDF,changeReportCategory,firstRunAdd,firstRunSkip,toggleProv,flagMetric,confirmMetric,setHistoryView,initMedViewer,medZoom,medReset,medRotate,medInvert,medRedraw,idAnswerYes,idAnswerNew,idAnswerSkip,idCancelClarify,idConfirmClarify,idPickField,idCancelNew,idCreateNewProfile,closeIdentityModal,renderNav,setMetricsFilter,openMetricSheet,closeMetricSheet,metricSheetPick,toggleSheetProv,flagMetricByKey,askAIAboutMetrics,setDocMode,setOriginalView,copyOriginalText,onDocPageImgLoad,onDocHitTap,openSelectedMetricsSheet,explainMetricsNow,explainWithGoogleAI,openFeedbackModal,closeFeedbackModal,previewFeedbackScreenshot,sendFeedback,showTrends,exportBackup,importBackup,getOcrDiagnostics});if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+Object.assign(window,{showHome,resetAll,showHistory,toggleTheme,openAddUserModal,closeAddUserModal,addUser,switchUser,logoutUser,removeFile,clearAllFiles,overrideImageQuality,setGroupMode,setUploadCategory,analyzeReport,switchTab,handleResultTabKey,loadHistoryReport,openHistoryItem,deleteHistoryItem,clearHistory,printResults,setHistoryFilter,addTagFromInput,removeTag,onNoteInput,runAIReview,setTrendParam,setDefaultTrendParam,clearDefaultTrendParam,showCurrentAnalysis,exportReportPDF,changeReportCategory,firstRunAdd,firstRunSkip,toggleProv,flagMetric,confirmMetric,setHistoryView,initMedViewer,medZoom,medReset,medRotate,medInvert,medRedraw,idAnswerYes,idAnswerNew,idAnswerSkip,idCancelClarify,idConfirmClarify,idPickField,idCancelNew,idCreateNewProfile,closeIdentityModal,renderNav,setMetricsFilter,openMetricSheet,closeMetricSheet,metricSheetPick,toggleSheetProv,flagMetricByKey,askAIAboutMetrics,setDocMode,setOriginalView,copyOriginalText,onDocPageImgLoad,onDocHitTap,openSelectedMetricsSheet,explainMetricsNow,explainWithGoogleAI,openFeedbackModal,closeFeedbackModal,sendFeedback,showTrends,exportBackup,importBackup,getOcrDiagnostics});if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 
 // ---- PWA: register the service worker ----
 // Only runs on a real http(s) origin — service workers are unavailable (and
@@ -4985,22 +5001,15 @@ if('serviceWorker' in navigator && location.protocol.startsWith('http')){
   <div class="modal" style="max-width:440px;padding:24px;border-radius:var(--radius);background:var(--bg)">
     <h3 style="margin-top:0;display:flex;align-items:center;gap:8px;font-size:16px;font-weight:900">💬 Help &amp; Support Feedback</h3>
     <p style="font-size:12px;color:var(--text-secondary);margin-bottom:14px;line-height:1.5">
-      Encountered an issue or have a suggestion? Share your description and upload an optional screenshot below to let us help you.
+      Your email app will open with a draft addressed to LabLens support. Nothing is sent until you tap Send. You can attach a screenshot in your email app; avoid including patient details unless you intend to share them.
     </p>
     <form id="feedbackForm" onsubmit="sendFeedback(event)">
-      <input type="email" class="field" id="fbEmail" placeholder="Your Email Address" required style="margin-bottom:10px;padding:10px 14px"/>
-      <textarea class="field" id="fbMessage" placeholder="Describe the issue or share your suggestion..." required style="min-height:90px;max-height:180px;resize:vertical;margin-bottom:10px;padding:10px 14px;line-height:1.55"></textarea>
-      
-      <label class="fld-label" style="display:block;font-size:12.5px;color:var(--text-secondary);margin-bottom:4px;font-weight:700">Attach Screenshot (Optional)</label>
-      <input type="file" id="fbScreenshot" accept="image/*" class="field" style="padding:6px 10px;font-size:12.5px;background:var(--card);margin-bottom:10px" onchange="previewFeedbackScreenshot(event)" />
-      
-      <div id="fbScreenshotPreview" style="display:none;margin-top:4px;margin-bottom:14px;text-align:center">
-        <img alt="Feedback screenshot preview" id="fbPreviewImg" src="./icons/favicon-32.png" style="max-height:100px;border-radius:6px;border:1px solid var(--border);box-shadow:var(--shadow)" />
-      </div>
+      <input type="email" class="field" id="fbEmail" autocomplete="email" maxlength="254" placeholder="Your email address for a reply" required style="margin-bottom:10px;padding:10px 14px"/>
+      <textarea class="field" id="fbMessage" maxlength="2000" placeholder="Describe the issue or share your suggestion..." required style="min-height:90px;max-height:180px;resize:vertical;margin-bottom:10px;padding:10px 14px;line-height:1.55"></textarea>
       
       <div class="modal-actions" style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px">
         <button type="button" class="btn-secondary" onclick="closeFeedbackModal()" style="font-size:12px">Cancel</button>
-        <button type="submit" class="btn-primary" id="btnSubmitFeedback" style="font-size:12px;padding:10px 20px">✉️ Send Feedback</button>
+        <button type="submit" class="btn-primary" id="btnSubmitFeedback" style="font-size:12px;padding:10px 20px">✉️ Open email draft</button>
       </div>
     </form>
   </div>

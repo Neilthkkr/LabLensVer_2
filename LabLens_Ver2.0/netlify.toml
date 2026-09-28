@@ -1,5 +1,3 @@
-# netlify.toml - Netlify configuration file for LabLens PWA deployment
-
 [build]
   publish = "."
 
@@ -10,15 +8,13 @@
     X-XSS-Protection = "1; mode=block"
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
-    Content-Security-Policy = "default-src 'self' https: data: 'unsafe-inline' 'unsafe-eval' blob:; img-src 'self' data: blob: https:; worker-src 'self' blob: https:; connect-src 'self' https:;"
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; worker-src 'self' blob:; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'"
 
-# Ensure the service worker is never cached so updates propagate instantly
 [[headers]]
   for = "/service-worker.js"
   [headers.values]
     Cache-Control = "public, max-age=0, must-revalidate"
 
-# Ensure the manifest is always fresh
 [[headers]]
   for = "/manifest.webmanifest"
   [headers.values]

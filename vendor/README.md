@@ -3,6 +3,11 @@
 These files are kept in-repository so report contents are processed without
 executing JavaScript fetched from third-party CDNs at runtime.
 
+PDF.js `3.11.174` is an older release. LabLens passes `isEvalSupported: false`
+for every PDF load, following Mozilla's workaround for CVE-2024-4367. Keep this
+setting in place unless the vendored runtime is replaced with a patched release.
+The deployment CSP is an additional layer and is not a substitute for this flag.
+
 | Component | Version/source | Runtime files |
 |---|---|---|
 | PDF.js | `pdfjs-dist@3.11.174` | `pdfjs/pdf.min.js`, `pdfjs/pdf.worker.min.js` |

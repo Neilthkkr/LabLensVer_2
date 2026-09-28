@@ -1,9 +1,13 @@
-const CACHE_NAME = 'lablens-cache-v4';
+const CACHE_NAME = 'lablens-cache-v6';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './manifest.webmanifest',
   './icon.svg',
+  './icons/favicon-32.png',
+  './icons/icon-180.png',
+  './icons/icon-192.png',
+  './icons/icon-512.png',
   './vendor/pdfjs/pdf.min.js',
   './vendor/pdfjs/pdf.worker.min.js',
   './vendor/tesseract/tesseract.min.js',

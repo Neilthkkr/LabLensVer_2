@@ -1,8 +1,8 @@
 {
   "name": "lablens",
   "private": true,
-  "version": "0.1.0",
-  "description": "Private, on-device lab report extraction and review",
+  "version": "2.0.0",
+  "description": "LabLens Ver2.0: private, on-device lab report extraction and review",
   "scripts": {
     "test": "node --test tests/*.test.mjs",
     "test:ui": "node scripts/test-ui-buttons.mjs",

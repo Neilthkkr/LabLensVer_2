@@ -1,15 +1,19 @@
-const CACHE_NAME = 'lablens-cache-v2';
+const CACHE_NAME = 'lablens-cache-v6';
 const ASSETS_TO_CACHE = [
-  '/',
-  '/index.html',
-  '/manifest.webmanifest',
-  '/icon.svg',
-  'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js',
-  'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js',
-  'https://cdn.jsdelivr.net/npm/tesseract.js@5.1.0/dist/tesseract.min.js',
-  'https://cdn.jsdelivr.net/npm/tesseract.js@5.1.0/dist/worker.min.js',
-  'https://cdn.jsdelivr.net/npm/tesseract.js-core@5.1.0/tesseract-core.wasm.js',
-  'https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&display=swap'
+  './',
+  './index.html',
+  './manifest.webmanifest',
+  './icon.svg',
+  './icons/favicon-32.png',
+  './icons/icon-180.png',
+  './icons/icon-192.png',
+  './icons/icon-512.png',
+  './vendor/pdfjs/pdf.min.js',
+  './vendor/pdfjs/pdf.worker.min.js',
+  './vendor/tesseract/tesseract.min.js',
+  './vendor/tesseract/worker.min.js',
+  './vendor/tesseract/tesseract-core.wasm.js',
+  './vendor/tessdata/eng.traineddata.gz'
 ];
 
 // On install, precache core assets and external medical parser engines
@@ -48,6 +52,24 @@ self.addEventListener('activate', event => {
 // Fetch handler using a Stale-While-Revalidate pattern with fallback
 self.addEventListener('fetch', event => {
   if (!event.request.url.startsWith('http')) return;
+
+  // App-shell navigations must prefer the network. Serving an old cached
+  // index first can leave the UI running parser code that no longer matches
+  // the vendored OCR/PDF assets, producing false "no metrics" rejections.
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request).then(response => {
+        if (response && response.status === 200) {
+          const copy = response.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put('./index.html', copy));
+        }
+        return response;
+      }).catch(async () =>
+        (await caches.match('./index.html')) || (await caches.match('./'))
+      )
+    );
+    return;
+  }
 
   event.respondWith(
     caches.open(CACHE_NAME).then(cache => {
