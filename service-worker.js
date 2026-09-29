@@ -1,13 +1,15 @@
-const CACHE_NAME = 'lablens-cache-v6';
+const CACHE_NAME = 'lablens-cache-v10';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './manifest.webmanifest',
+  './src/privacy/deidentify.js',
   './icon.svg',
   './icons/favicon-32.png',
   './icons/icon-180.png',
   './icons/icon-192.png',
   './icons/icon-512.png',
+  './vendor/fonts/manrope-var.woff2',
   './vendor/pdfjs/pdf.min.js',
   './vendor/pdfjs/pdf.worker.min.js',
   './vendor/tesseract/tesseract.min.js',

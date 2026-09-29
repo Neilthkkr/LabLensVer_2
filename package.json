@@ -8,6 +8,8 @@
     "test:ui": "node scripts/test-ui-buttons.mjs",
     "benchmark:ocr": "node scripts/run-ocr-benchmark.mjs",
     "probe:parser": "node scripts/run-report-parser.mjs",
-    "probe:pdf": "node scripts/probe-pdf-parser.mjs"
+    "probe:pdf": "node scripts/probe-pdf-parser.mjs",
+    "dev": "node scripts/dev-server.mjs",
+    "probe:curation": "node scripts/probe-curation.mjs"
   }
 }

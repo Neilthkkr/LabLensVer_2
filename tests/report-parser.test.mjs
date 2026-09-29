@@ -124,3 +124,9 @@ test('does not parse explanatory ratio prose as a result',()=>{
 AST/ALT Ratio < 1-1 indicates another clinical pattern.`);
   assert.equal(rows.length,0);
 });
+
+test('method text such as "Flow Cytometry" or "Fluoride Plasma" is never read as the fL unit',()=>{
+  const rows=parse(`Test Result Biological Reference Interval\nEosinophils 6.8 1 - 6\nFlow Cytometry %\nGlucose, Fasting 138 70 - 99\nFluoride Plasma,Glucose Oxidase-Peroxidase GODPOD mg/dL`);
+  assert.equal(rows.find(r=>/eosinophils/i.test(r.name)).unit,'%');
+  assert.equal(rows.find(r=>/glucose/i.test(r.name)).unit,'mg/dL');
+});

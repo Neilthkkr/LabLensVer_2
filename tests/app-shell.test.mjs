@@ -20,7 +20,7 @@ test('a missing PDF engine is reported as a processing failure',()=>{
 });
 
 test('service worker refreshes the app shell before using its cache',()=>{
-  assert.match(worker,/lablens-cache-v6/);
+  assert.match(worker,/lablens-cache-v10/);
   assert.match(worker,/event\.request\.mode === 'navigate'/);
   const navigationBlock=worker.slice(worker.indexOf("event.request.mode === 'navigate'"));
   assert.ok(navigationBlock.indexOf('fetch(event.request)')<navigationBlock.indexOf("caches.match('./index.html')"));
@@ -49,7 +49,7 @@ test('report sources provide camera, photos, and PDF or image files',()=>{
 
 test('add report opens source choices and each choice uses its own picker',()=>{
   const events=[];
-  const controls=Object.fromEntries(['addReportBtn','reportSourceCancel','reportSourceCamera','reportSourcePhotos','reportSourceFiles'].map(id=>[id,{}]));
+  const controls=Object.fromEntries(['addReportBtn','reportSourceCancel','reportSourceCamera','reportSourcePhotos','reportSourceFiles','srcCameraInput','srcPhotosInput','srcFilesInput'].map(id=>[id,{}]));
   controls.dropZone={addEventListener(){}};
   controls.reportSourceDialog={showModal(){events.push('choices')},close(){events.push('close')}};
   for(const [id,source] of [['captureInput','camera'],['photosInput','photos'],['fileInput','files']]){
@@ -58,12 +58,18 @@ test('add report opens source choices and each choice uses its own picker',()=>{
   const start=html.indexOf('function wireUpload(){');
   const end=html.indexOf('\nasync function fileToDataURL',start);
   assert.ok(start>=0&&end>start,'upload wiring is discoverable');
-  const context={$:id=>controls[id]};
+  let coarse=true;
+  const context={$:id=>controls[id],matchMedia:()=>({matches:coarse})};
   vm.createContext(context);
   vm.runInContext(`${html.slice(start,end)}\nthis.wireUpload=wireUpload`,context);
   context.wireUpload();
   controls.addReportBtn.onclick();
-  assert.deepEqual(events,['choices']);
+  assert.deepEqual(events,['choices'],'touch devices get the source sheet');
+  events.length=0;coarse=false;controls.addReportBtn.onclick();
+  assert.deepEqual(events,['files'],'desktop opens the file browser directly');
+  // The three phone source buttons are real file inputs laid over the tap target: no click proxy to break.
+  for(const id of ['srcCameraInput','srcPhotosInput','srcFilesInput'])assert.equal(typeof controls[id].onchange,'function',id+' must handle its own selection');
+  events.length=0;
   for(const [button,source] of [['reportSourceCamera','camera'],['reportSourcePhotos','photos'],['reportSourceFiles','files']]){
     events.length=0;
     controls[button].onclick();

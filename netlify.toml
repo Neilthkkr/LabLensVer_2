@@ -3,6 +3,10 @@
 [build]
   publish = "."
 
+[functions]
+  directory = "netlify/functions"
+  included_files = ["src/privacy/**"]
+
 [[headers]]
   for = "/*"
   [headers.values]
