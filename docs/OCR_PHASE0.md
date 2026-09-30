@@ -1,14 +1,15 @@
 # OCR Phase 0: measurement foundation
 
-Phase 0 changes no production OCR decision. Tesseract remains the active image
-engine while alternatives are evaluated behind the same result contract.
+The web app uses local Tesseract. This phase establishes the benchmark and
+review rules before any replacement OCR engine is considered for deployment.
 
 ## Contract
 
 `src/ocr/schema.mjs` defines page-level extraction, word polygons, metric
 candidates, confidence, provenance, verification state, warnings, performance,
-and device profile data. Coordinates remain in source-page pixels so the UI can
-always map a value back to its original evidence.
+and device profile data. The current `app.js` evidence overlay uses top-left normalized fractions.
+The canonical schema still needs an explicit coordinate-space and orientation
+field, followed by tests that map each extracted value back to its source page.
 
 ## Release metrics
 
@@ -36,3 +37,10 @@ normal/high/low classification.
 - decimal comma, superscripts, uncommon units, and handwritten annotations.
 
 All fixtures must be synthetic or irreversibly deidentified.
+
+The current corpus contains one replayed synthetic PDF result and five live
+synthetic image cases. It contains **zero independently reviewed real reports**.
+`node scripts/run-ocr-benchmark.mjs test-fixtures/ocr/manifest.json --min-reviewed-real=1`
+fails until a reviewed real fixture is added. A recorded `actual/` result is
+useful for regression scoring, but release accuracy must be measured by running
+the current web engine on the source documents before any release claim.

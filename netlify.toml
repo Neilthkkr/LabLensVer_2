@@ -1,7 +1,8 @@
 # netlify.toml - Netlify configuration file for LabLens PWA deployment
 
 [build]
-  publish = "."
+  command = "npm run build:web"
+  publish = "dist-web"
 
 [functions]
   directory = "netlify/functions"
@@ -14,7 +15,7 @@
     X-XSS-Protection = "1; mode=block"
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
-    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; worker-src 'self' blob:; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'"
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' blob:; script-src-elem 'self' 'wasm-unsafe-eval' blob:; script-src-attr 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; worker-src 'self' blob:; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'"
 
 [[redirects]]
   from = "/LabLens_Ver2.0/*"

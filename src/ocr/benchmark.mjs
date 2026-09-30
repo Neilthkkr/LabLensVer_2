@@ -44,7 +44,7 @@ function metricKey(metric) {
 }
 
 export function scoreMetrics(expectedMetrics = [], actualMetrics = [], highConfidenceThreshold = 0.95) {
-  const actualByName = new Map(actualMetrics.map(metric => [metricKey(metric), metric]));
+  const unused = new Set(actualMetrics.map((_,index)=>index));
   let matched = 0;
   let exactValue = 0;
   let exactUnit = 0;
@@ -53,11 +53,24 @@ export function scoreMetrics(expectedMetrics = [], actualMetrics = [], highConfi
   const errors = [];
 
   expectedMetrics.forEach(expected => {
-    const actual = actualByName.get(metricKey(expected));
+    const candidates=[...unused].filter(index=>metricKey(actualMetrics[index])===metricKey(expected));
+    const samePage=candidates.filter(index=>actualMetrics[index].pageNumber===expected.pageNumber);
+    const pool=samePage.length?samePage:candidates;
+    pool.sort((a,b)=>{
+      const score=index=>{
+        const actual=actualMetrics[index];
+        return Number(normalizeText(expected.value)===normalizeText(actual.value))*4+
+          Number(normalizeText(expected.unit)===normalizeText(actual.unit))*2+
+          Number(normalizeText(expected.referenceRange)===normalizeText(actual.referenceRange));
+      };
+      return score(b)-score(a);
+    });
+    const index=pool[0],actual=index==null?null:actualMetrics[index];
     if (!actual) {
       errors.push({ name: expected.name, type: 'missing-metric' });
       return;
     }
+    unused.delete(index);
     matched += 1;
     const valueMatches = normalizeText(expected.value) === normalizeText(actual.value);
     const unitMatches = normalizeText(expected.unit) === normalizeText(actual.unit);
@@ -76,11 +89,18 @@ export function scoreMetrics(expectedMetrics = [], actualMetrics = [], highConfi
     }
   });
 
+  for(const index of unused){
+    const actual=actualMetrics[index];
+    if(Number(actual.confidence)>=highConfidenceThreshold)dangerousConfidentErrors+=1;
+    errors.push({name:actual.name,type:'unexpected-metric',actual:{value:actual.value,unit:actual.unit,referenceRange:actual.referenceRange,confidence:actual.confidence}});
+  }
+
   const count = expectedMetrics.length;
   return {
     expected: count,
     predicted: actualMetrics.length,
     matched,
+    falsePositive:unused.size,
     metricRecall: count ? matched / count : 1,
     exactValueRate: count ? exactValue / count : 1,
     exactUnitRate: count ? exactUnit / count : 1,

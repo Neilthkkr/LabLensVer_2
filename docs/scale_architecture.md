@@ -1,5 +1,7 @@
 # LabLens: Modularization Options
 
+> Historical design note. `app.js` has now been extracted from `index.html`.
+
 This document evaluates whether to split `index.html` into a Vite-built, multi-file
 project. It is not a recommendation to do this now — it's a reference for when the
 tradeoff is actually worth making, and what it costs.

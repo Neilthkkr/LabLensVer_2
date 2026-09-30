@@ -5,6 +5,7 @@
 import fs from 'node:fs';
 import vm from 'node:vm';
 import {createRequire} from 'node:module';
+import {parseReportText} from '../src/core/lab-parser.mjs';
 
 // PDF.js reports recoverable font warnings through console.log. Keep stdout
 // machine-readable so this probe can be used safely by batch audit scripts.
@@ -16,16 +17,16 @@ const require=createRequire(import.meta.url);
 const pdfjs=require('../vendor/pdfjs/pdf.min.js');
 pdfjs.GlobalWorkerOptions.workerSrc=new URL('../vendor/pdfjs/pdf.worker.min.js',import.meta.url).pathname;
 const html=fs.readFileSync(new URL('../index.html',import.meta.url),'utf8');
-const parserStart=html.indexOf('const STANDARD_RANGES =');
-const parserEnd=html.indexOf('\nconst LS=',parserStart);
-const rowStart=html.indexOf('function reconstructPdfLines(items)');
-const rowEnd=html.indexOf('\n// §6:',rowStart);
-if(parserStart<0||parserEnd<=parserStart||rowStart<0||rowEnd<=rowStart){
-  throw new Error('Embedded PDF parser source was not found');
+const app=fs.readFileSync(new URL('../app.js',import.meta.url),'utf8');
+const source=html+'\n'+app;
+const rowStart=source.indexOf('function reconstructPdfLines(items)');
+const rowEnd=source.indexOf('\n// §6:',rowStart);
+if(rowStart<0||rowEnd<=rowStart){
+  throw new Error('PDF row reconstruction source was not found');
 }
 const context={console};
 vm.createContext(context);
-vm.runInContext(`${html.slice(parserStart,parserEnd)}\n${html.slice(rowStart,rowEnd)}\nthis.__parse=parseReportText;this.__rows=reconstructPdfLines;`,context);
+vm.runInContext(`${source.slice(rowStart,rowEnd)}\nthis.__rows=reconstructPdfLines;`,context);
 
 const bytes=new Uint8Array(fs.readFileSync(input));
 const pdf=await pdfjs.getDocument({data:bytes,disableWorker:true}).promise;
@@ -38,7 +39,7 @@ for(let pageNumber=1;pageNumber<=pdf.numPages;pageNumber++){
   pageTextChars.push(pageText.replace(/\s/g,'').length);
   text+=pageText+'\n';
 }
-const metrics=context.__parse(text,{sex:null,age:null});
+const metrics=parseReportText(text,{sex:null,age:null});
 if(process.argv.includes('--text'))process.stdout.write(text);
 else process.stdout.write(JSON.stringify({
   pages:pdf.numPages,

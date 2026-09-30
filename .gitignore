@@ -9,3 +9,6 @@ test-fixtures/ocr/results/
 
 # OS cruft
 .DS_Store
+node_modules/
+dist/
+dist-web/

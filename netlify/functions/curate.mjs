@@ -6,6 +6,39 @@ const require = createRequire(import.meta.url);
 const { deidentify, demographics } = require('../../src/privacy/deidentify.js');
 
 const MAX_CHARS = 30000;
+const MAX_BODY_BYTES = 64000;
+const WINDOW_MS = 60 * 60 * 1000;
+const MAX_REQUESTS_PER_CLIENT = 30;
+const MAX_REQUESTS_PER_INSTANCE = 300;
+const usage = new Map();
+function withinLimit(req) {
+  const now=Date.now();
+  for(const [id,bucket] of usage)if(bucket.until<=now)usage.delete(id);
+  const client=req.headers.get('x-nf-client-connection-ip')||'unknown';
+  for(const [id,limit] of [['all',MAX_REQUESTS_PER_INSTANCE],[`client:${client}`,MAX_REQUESTS_PER_CLIENT]]){
+    const bucket=usage.get(id)||{count:0,until:now+WINDOW_MS};
+    if(bucket.count>=limit)return false;
+  }
+  for(const id of ['all',`client:${client}`]){
+    const bucket=usage.get(id)||{count:0,until:now+WINDOW_MS};
+    bucket.count++;usage.set(id,bucket);
+  }
+  return true;
+}
+async function readBoundedJson(req){
+  const reader=req.body?.getReader();
+  if(!reader)return null;
+  const decoder=new TextDecoder();let bytes=0,raw='';
+  for(;;){
+    const {done,value}=await reader.read();
+    if(done)break;
+    bytes+=value.byteLength;
+    if(bytes>MAX_BODY_BYTES){await reader.cancel().catch(()=>{});return {tooLarge:true};}
+    raw+=decoder.decode(value,{stream:true});
+  }
+  raw+=decoder.decode();
+  try{return JSON.parse(raw)}catch{return null}
+}
 // Lite models are fast and rarely overloaded; larger ones returned 503 during testing.
 // Override with GEMINI_MODEL (comma-separated, tried in order).
 const MODELS = (process.env.GEMINI_MODEL || 'gemini-3.1-flash-lite,gemini-3.5-flash-lite').split(',').map((m) => m.trim()).filter(Boolean);
@@ -49,22 +82,40 @@ Rules:
 - Placeholders like [DATE] or [NAME] are redactions; ignore them.
 - Set isLabReport false if the text is not a laboratory result.`;
 
-const json = (status, body) =>
-  new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json', 'cache-control': 'no-store' } });
+const jsonResponse = (status, body, origin) =>
+  new Response(JSON.stringify(body), { status, headers: {
+    'content-type': 'application/json', 'cache-control': 'no-store',
+    ...(origin?{'access-control-allow-origin':origin,'vary':'Origin'}:{})
+  } });
 
 export default async (req) => {
+  const origin=req.headers.get('origin');
+  const allowedOrigin=!origin||origin===new URL(req.url).origin||['capacitor://localhost','http://localhost'].includes(origin)?origin:null;
+  if(origin&&!allowedOrigin)return jsonResponse(403,{error:'origin_not_allowed'});
+  const json=(status,body)=>jsonResponse(status,body,allowedOrigin);
+  if(req.method==='OPTIONS')return new Response(null,{status:204,headers:{
+    'access-control-allow-origin':allowedOrigin||'',
+    'access-control-allow-methods':'POST, OPTIONS',
+    'access-control-allow-headers':'content-type',
+    'cache-control':'no-store','vary':'Origin'
+  }});
   if (req.method !== 'POST') return json(405, { error: 'method_not_allowed' });
   const key = process.env.GEMINI_API_KEY;
   if (!key) return json(503, { error: 'not_configured' });
+  if(!/^application\/json(?:;|$)/i.test(req.headers.get('content-type')||''))return json(415,{error:'json_required'});
+  if(!withinLimit(req))return json(429,{error:'rate_limited'});
 
-  let body;
-  try { body = await req.json(); } catch { return json(400, { error: 'bad_json' }); }
+  const body=await readBoundedJson(req);
+  if(body?.tooLarge)return json(413,{error:'too_large'});
+  if(!body||typeof body!=='object')return json(400,{error:'bad_json'});
   if (typeof body.text !== 'string' || !body.text.trim()) return json(400, { error: 'no_text' });
   if (body.text.length > MAX_CHARS) return json(413, { error: 'too_large' });
 
   // Second gate: scrub again server-side, and only accept age and sex as demographics.
   const demo = demographics(Number(body.age), body.sex);
   const clean = deidentify(body.text).text;
+  // The browser preview must match what goes to the provider byte for byte.
+  if(clean!==body.text)return json(422,{error:'redaction_required'});
 
   const payload = {
     contents: [{ role: 'user', parts: [{ text: `${PROMPT}\n\nPatient demographics: sex=${demo.sex || 'unknown'}, age=${demo.age ?? 'unknown'}\n\nREPORT TEXT:\n${clean}` }] }],

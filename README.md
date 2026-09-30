@@ -1,14 +1,27 @@
-# LabLens
+# LabLens Web
 
-Private, on-device lab report reader. Add a PDF or photo, and every value is shown beside its reference range and
-linked back to the line it was read from. Reports never leave the device unless the user turns on AI checking.
+LabLens reads PDF and photo lab reports in the browser, shows extracted values
+beside their reference ranges, and links results to the source text. Local PDF
+and OCR processing works without an account. AI rechecking is optional: the
+user reviews the exact outgoing text before a request reaches the Netlify
+proxy. Reports and profiles are stored in browser local storage, which is **not
+encrypted**.
 
-- `index.html` – the whole app (UI, parser, storage). Zero build tooling by design.
-- `service-worker.js`, `manifest.webmanifest` – PWA shell.
-- `src/privacy/deidentify.js` – scrubs text before anything is sent for AI checking (also used server-side).
-- `netlify/functions/curate.mjs` – `/api/curate` proxy that keeps the AI key off the client.
-- `vendor/` – PDF.js, Tesseract, fonts (self-hosted).
-- `tests/`, `scripts/` – unit tests, browser smoke test, parser and OCR probes.
-- `docs/` – deployment notes, architecture options, OCR notes.
+This repository branch is the **web deployment**. It contains no iOS or Android
+project files. The separate `mobile-development` branch preserves the native
+app prototypes.
 
-See [docs/DEPLOY.md](docs/DEPLOY.md) to deploy and configure.
+## Run and verify
+
+```sh
+npm test
+npm run build:web
+LABLENS_STATIC_ROOT=dist-web npm run test:ui
+npm run benchmark:ocr:live
+```
+
+Netlify runs `npm run build:web` and publishes only `dist-web`; the function
+under `netlify/functions/` holds the Gemini key on the server. See
+[deployment instructions](docs/DEPLOY.md) for configuration and privacy notes.
+The real-report accuracy corpus is not yet complete; see
+[test-fixtures/ocr/README.md](test-fixtures/ocr/README.md).

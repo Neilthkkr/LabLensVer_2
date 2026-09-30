@@ -7,6 +7,7 @@
 import fs from 'node:fs';
 import vm from 'node:vm';
 import {createRequire} from 'node:module';
+import {parseReportText,matchTest,comparableUnit} from '../src/core/lab-parser.mjs';
 console.log=(...a)=>console.error(...a);
 const input=process.argv[2];
 if(!input)throw new Error('Usage: GEMINI_API_KEY=... node scripts/probe-curation.mjs <report.pdf>');
@@ -15,12 +16,13 @@ const pdfjs=require('../vendor/pdfjs/pdf.min.js');
 pdfjs.GlobalWorkerOptions.workerSrc=new URL('../vendor/pdfjs/pdf.worker.min.js',import.meta.url).pathname;
 const {deidentify,demographics}=require('../src/privacy/deidentify.js');
 const html=fs.readFileSync(new URL('../index.html',import.meta.url),'utf8');
-const cut=(a,b)=>html.slice(html.indexOf(a),html.indexOf(b,html.indexOf(a)));
-const ctx={console};vm.createContext(ctx);
+const app=fs.readFileSync(new URL('../app.js',import.meta.url),'utf8');
+const source=html+'\n'+app;
+const cut=(a,b)=>source.slice(source.indexOf(a),source.indexOf(b,source.indexOf(a)));
+const ctx={console,parseReportText,matchTest,comparableUnit};vm.createContext(ctx);
 vm.runInContext([
-  cut('const STANDARD_RANGES =','\nconst LS='),
   cut('function reconstructPdfLines(items)','\n// §6:'),
-  html.match(/^function normText[^\n]*$/m)[0],
+  source.match(/^function normText[^\n]*$/m)[0],
   cut('function parseLooseDate','function nameSimilarity'),
   cut('function extractPatientIdentity','function parseLooseDate'),
   cut('function curatedRowsToMetrics','// One entry point for every analysis path'),

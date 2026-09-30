@@ -1,7 +1,9 @@
-const CACHE_NAME = 'lablens-cache-v10';
+const CACHE_NAME = 'lablens-cache-v13';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
+  './app.js',
+  './src/core/lab-parser.mjs',
   './manifest.webmanifest',
   './src/privacy/deidentify.js',
   './icon.svg',
@@ -51,23 +53,25 @@ self.addEventListener('activate', event => {
   );
 });
 
-// Fetch handler using a Stale-While-Revalidate pattern with fallback
+// Fetch handler: network-first for the document and parser, cached assets otherwise.
 self.addEventListener('fetch', event => {
   if (!event.request.url.startsWith('http')) return;
+  if (event.request.method !== 'GET') return;
 
-  // App-shell navigations must prefer the network. Serving an old cached
-  // index first can leave the UI running parser code that no longer matches
+  // App-shell navigations and parser code must prefer the network. Serving old
+  // versions first can leave the UI running code that no longer matches
   // the vendored OCR/PDF assets, producing false "no metrics" rejections.
-  if (event.request.mode === 'navigate') {
+  if (event.request.mode === 'navigate' || /\/(?:app\.js|src\/core\/lab-parser\.mjs)$/.test(new URL(event.request.url).pathname)) {
     event.respondWith(
       fetch(event.request).then(response => {
         if (response && response.status === 200) {
           const copy = response.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put('./index.html', copy));
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request.mode === 'navigate' ? './index.html' : event.request, copy));
         }
         return response;
       }).catch(async () =>
-        (await caches.match('./index.html')) || (await caches.match('./'))
+        (await caches.match(event.request.mode === 'navigate' ? './index.html' : event.request)) ||
+        (event.request.mode === 'navigate' ? await caches.match('./') : Response.error())
       )
     );
     return;

@@ -66,3 +66,10 @@ test('lab web addresses and corrupted repeated footer text are dropped',()=>{
   const out=deidentify(`${junk}\nHemoglobin 14.4 gm/dl 13.5-18`).text;
   assert.equal(out,'Hemoglobin 14.4 gm/dl 13.5-18');
 });
+
+test('identity-labelled lines are dropped even when OCR joins them to measurements',()=>{
+  const out=deidentify('Patient Name: Jane Smith 13.2 g/dL\nHemoglobin Jane Smith 13.2 g/dL 12 - 16\nGlucose 101 mg/dL 70 - 99\nHemoglobin 13.2 g/dL 12 - 16').text;
+  assert.ok(!out.includes('Jane Smith'),out);
+  assert.match(out,/Glucose 101 mg\/dL/);
+  assert.match(out,/Hemoglobin 13\.2 g\/dL/);
+});

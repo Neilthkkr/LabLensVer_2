@@ -16,3 +16,20 @@ test('high-confidence wrong values are counted separately', () => {
   assert.equal(score.exactValueRate, 0);
   assert.equal(score.dangerousConfidentErrors, 1);
 });
+
+test('repeated analytes require distinct predictions and extra confident rows count',()=>{
+  const expected=[
+    {name:'Glucose',value:'101',unit:'mg/dL',referenceRange:'70-99',pageNumber:1},
+    {name:'Glucose',value:'104',unit:'mg/dL',referenceRange:'70-99',pageNumber:2}
+  ];
+  const actual=[
+    {name:'Glucose',value:'104',unit:'mg/dL',referenceRange:'70-99',pageNumber:2,confidence:.98},
+    {name:'Glucose',value:'101',unit:'mg/dL',referenceRange:'70-99',pageNumber:1,confidence:.98},
+    {name:'Glucose',value:'999',unit:'mg/dL',referenceRange:'70-99',pageNumber:1,confidence:.99}
+  ];
+  const score=scoreMetrics(expected,actual);
+  assert.equal(score.matched,2);
+  assert.equal(score.exactValueRate,1);
+  assert.equal(score.falsePositive,1);
+  assert.equal(score.dangerousConfidentErrors,1);
+});

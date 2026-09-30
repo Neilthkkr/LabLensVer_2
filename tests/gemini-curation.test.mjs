@@ -4,12 +4,14 @@ import fs from 'node:fs';
 import vm from 'node:vm';
 
 const html=fs.readFileSync(new URL('../index.html',import.meta.url),'utf8');
-const parser=html.slice(html.indexOf('const STANDARD_RANGES ='),html.indexOf('\nconst LS='));
-const normText=html.match(/^function normText[^\n]*$/m)[0];
-const a=html.indexOf('function curatedRowsToMetrics'),b=html.indexOf('// One entry point for every analysis path');
+const app=fs.readFileSync(new URL('../app.js',import.meta.url),'utf8');
+const source=html+'\n'+app;
+const parser=fs.readFileSync(new URL('../src/core/lab-parser.mjs',import.meta.url),'utf8').replace(/^export \{[^\n]+\};\s*$/m,'');
+const normText=source.match(/^function normText[^\n]*$/m)[0];
+const a=source.indexOf('function curatedRowsToMetrics'),b=source.indexOf('// One entry point for every analysis path');
 const context={console};
 vm.createContext(context);
-vm.runInContext(`${parser}\n${normText}\n${html.slice(a,b)}\nthis.map=curatedRowsToMetrics;`,context);
+vm.runInContext(`${parser}\n${normText}\n${source.slice(a,b)}\nthis.map=curatedRowsToMetrics;`,context);
 
 const TEXT=`Hemoglobin 13.5 g/dL 13.0 - 17.0\nLDL Cholesterol 132 mg/dL < 100\nGlucose Fasting 91 mg/dL`;
 const map=rows=>context.map(rows,TEXT,TEXT,{sex:'male',age:34});
@@ -58,8 +60,8 @@ test('non-numeric results are flagged when they differ from the printed referenc
   assert.match(m[0].key,/^qual:/);
 });
 
-const c1=html.indexOf('function condenseForCuration'),c2=html.indexOf('async function fetchCuratedRows');
-vm.runInContext(`${html.slice(c1,c2)}\nthis.condense=condenseForCuration;this.chunk=chunkLines;`,context);
+const c1=source.indexOf('function condenseForCuration'),c2=source.indexOf('async function fetchCuratedRows');
+vm.runInContext(`${source.slice(c1,c2)}\nthis.condense=condenseForCuration;this.chunk=chunkLines;`,context);
 test('interpretation prose is dropped, result rows are kept',()=>{
   const prose='High sodium levels can be caused by dehydration, disorder of the adrenal glands, diarrhoea, diuretics, kidney disease, and diabetes insipidus in some people.';
   const out=context.condense(`Sodium 138 mmol/L 137 - 145\n${prose}\nHemoglobin 14.4 gm/dl 13.5-18`);
@@ -70,4 +72,20 @@ test('chunks stay under the size limit and never split a line',()=>{
   const chunks=context.chunk(lines.join('\n'),2000);
   assert.ok(chunks.length>1&&chunks.every(c=>c.length<=2000));
   assert.equal(chunks.join('\n'),lines.join('\n'));
+});
+
+test('AI cannot substitute a reference number or invent units and ranges',()=>{
+  const text='Glucose 101 mg/dL 70 - 99';
+  const rows=[
+    {name:'Glucose',value:99,unit:'mg/dL',sourceLine:text},
+    {name:'Glucose',value:101,unit:'mmol/L',refLow:50,refHigh:500,sourceLine:text}
+  ];
+  const found=context.map(rows,text,text,{sex:'female',age:35});
+  assert.equal(found.length,0);assert.equal(found.dropped,2);
+});
+
+test('AI source validation preserves decimal punctuation',()=>{
+  const text='Glucose 1.2 mg/dL';
+  const found=context.map([{name:'Glucose',value:12,unit:'mg/dL',sourceLine:'Glucose 1,2 mg/dL'}],text,text,{sex:'female',age:35});
+  assert.equal(found.length,0);
 });

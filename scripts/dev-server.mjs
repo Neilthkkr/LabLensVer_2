@@ -13,7 +13,7 @@ http.createServer(async(req,res)=>{
   const url=new URL(req.url,`http://localhost:${port}`);
   if(url.pathname==='/api/curate'){
     const chunks=[];for await(const c of req)chunks.push(c);
-    const r=await curate(new Request(url,{method:req.method,body:req.method==='POST'?Buffer.concat(chunks):undefined}));
+    const r=await curate(new Request(url,{method:req.method,headers:{'content-type':req.headers['content-type']||''},body:req.method==='POST'?Buffer.concat(chunks):undefined}));
     res.writeHead(r.status,{'content-type':'application/json'});res.end(await r.text());return;
   }
   let f=path.join(root,decodeURIComponent(url.pathname==='/'?'/index.html':url.pathname));

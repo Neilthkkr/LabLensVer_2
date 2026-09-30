@@ -4,10 +4,12 @@ import fs from 'node:fs';
 import vm from 'node:vm';
 
 const html=fs.readFileSync(new URL('../index.html',import.meta.url),'utf8');
-const a=html.indexOf('function severityTier(m){'),b=html.indexOf('\n}\n',a)+3;
+const app=fs.readFileSync(new URL('../app.js',import.meta.url),'utf8');
+const source=html+'\n'+app;
+const a=source.indexOf('function severityTier(m){'),b=source.indexOf('\n}\n',a)+3;
 const context={};
 vm.createContext(context);
-vm.runInContext(`${html.slice(a,b)}\nthis.tier=severityTier;`,context);
+vm.runInContext(`${source.slice(a,b)}\nthis.tier=severityTier;`,context);
 
 const metrics=[
   {status:'normal',value:13,min:12,max:15},           // safe
@@ -34,8 +36,8 @@ test('a value only slightly outside its range is outside, not borderline',()=>{
   assert.equal(context.tier({status:'low',value:11.9,min:12,max:15}),'tier-concern');
 });
 
-const n=html.indexOf('function prettyMetricName'),m=html.indexOf('function prettyUnit');
-vm.runInContext(`${html.slice(n,m)}\nthis.pretty=prettyMetricName;`,context);
+const n=source.indexOf('function prettyMetricName'),m=source.indexOf('function prettyUnit');
+vm.runInContext(`${source.slice(n,m)}\nthis.pretty=prettyMetricName;`,context);
 test('parser-style dashes around abbreviations read as parentheses',()=>{
   assert.equal(context.pretty('Hemoglobin -Hb'),'Hemoglobin (Hb)');
   assert.equal(context.pretty('Thyroid Stimulating Hormone -TSH-'),'Thyroid Stimulating Hormone (TSH)');
@@ -43,9 +45,9 @@ test('parser-style dashes around abbreviations read as parentheses',()=>{
   assert.equal(context.pretty('Non-High Density Lipoprotein'),'Non-High Density Lipoprotein');
 });
 
-const ia=html.indexOf('function parseLooseDate'),ib=html.indexOf('function nameSimilarity');
-const ic=html.indexOf('function extractPatientIdentity'),id=html.indexOf('function offerGuestProfile');
-vm.runInContext(`${html.slice(ia,ic)}\n${html.slice(ic,html.indexOf('let __gpPending',ic)>0?html.indexOf('/* ============== GUEST -> PROFILE',ic):id)}\nthis.ident=extractPatientIdentity;`,context);
+const ia=source.indexOf('function parseLooseDate'),ib=source.indexOf('function nameSimilarity');
+const ic=source.indexOf('function extractPatientIdentity'),id=source.indexOf('function offerGuestProfile');
+vm.runInContext(`${source.slice(ia,ic)}\n${source.slice(ic,source.indexOf('let __gpPending',ic)>0?source.indexOf('/* ============== GUEST -> PROFILE',ic):id)}\nthis.ident=extractPatientIdentity;`,context);
 test('sex and age are read from layouts such as "Age / Gender : 16 Yrs / Male"',()=>{
   assert.equal(context.ident('Age / Gender : 16 Yrs / Male','').sex,'male');
   assert.equal(context.ident('Age / Gender : / Male\n16 Yrs','').age,16);
@@ -66,8 +68,8 @@ test('an age quoted in prose (eGFR footnote) does not beat the banner age',()=>{
   assert.equal(context.ident(banner+foot,'').age,53);
 });
 
-const t1=html.indexOf('function locateValueBox'),t2=html.indexOf('function attachMetricBoxes');
-vm.runInContext(`${html.slice(t1,t2)}\nthis.loc=locateValueBox;`,context);
+const t1=source.indexOf('function locateValueBox'),t2=source.indexOf('function attachMetricBoxes');
+vm.runInContext(`${source.slice(t1,t2)}\nthis.loc=locateValueBox;`,context);
 test('the value box is the word that holds the value, not the whole row',()=>{
   const ln={text:'Hemoglobin (Hb) 11.9 12 - 15',x0n:0.1,x1n:0.9,y0n:0.2,y1n:0.22,words:[{s:'Hemoglobin (Hb)',a:0.1,b:0.3},{s:'11.9',a:0.5,b:0.56},{s:'12 - 15',a:0.7,b:0.9}]};
   const b=context.loc({value:11.9},ln);
@@ -79,8 +81,8 @@ test('without word boxes the value box is estimated inside the row and stays wit
   assert.ok(b.x0>=0.1&&b.x1<=0.9&&b.x1>b.x0);
 });
 
-const r1=html.indexOf('function metricRangeBar'),r2=html.indexOf('function renderMetricSheet');
-vm.runInContext(`const trendTierColor=t=>t;const fmtTick=v=>String(v);const esc=s=>String(s);const metricValueText=m=>String(m.value);\n${html.slice(r1,r2)}\nthis.bar=metricRangeBar;`,context);
+const r1=source.indexOf('function metricRangeBar'),r2=source.indexOf('function renderMetricSheet');
+vm.runInContext(`const trendTierColor=t=>t;const fmtTick=v=>String(v);const esc=s=>String(s);const metricValueText=m=>String(m.value);\n${source.slice(r1,r2)}\nthis.bar=metricRangeBar;`,context);
 const pos=h=>[...h.matchAll(/class="rb-dot" style="left:([\d.]+)%/g)].map(x=>+x[1])[0];
 const band=h=>{const m=/class="rb-ref" style="left:([\d.]+)%;width:([\d.]+)%/.exec(h);return [+m[1],+m[1]+ +m[2]]};
 test('range bar: an in-range value sits inside the green band at its true position',()=>{

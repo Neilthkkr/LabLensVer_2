@@ -17,6 +17,9 @@
   const IDENTITY_LINE=/^[\s:;.,-]*(?:report(?:ed)?\s*(?:date|on)|registration\s*date|collect(?:ion|ed)\s*(?:date|on|at)|received\s*(?:date|on)|patient(?:\s+name)?|pt\.?\s*name|name|full\s*name|mr\.?|mrs\.?|ms\.?|master|miss|shri|smt|age(?:\s*\/\s*sex)?|sex|gender|d\.?o\.?b|date\s+of\s+birth|address|addr|city|phone|mobile|mob|tel|telephone|contact|e-?mail|mrn|uhid|pid|patient\s+id|reg(?:istration)?\.?\s*(?:no|number|id)?|sample\s*(?:id|no)|specimen\s*(?:id|no)|accession|barcode|lab\s*(?:id|no)|order\s*(?:id|no)|bill|invoice|visit|ward|bed|ip\s*no|op\s*no|aadhaar|aadhar|passport|emirates\s*id|insurance|policy|referr?ed?\s*by|ref\.?\s*by|ref\.?\s*doctor|doctor|dr\.|consultant|physician|pathologist|technologist|signed|authori[sz]ed|verified\s*by|printed|page\s+\d)/i;
   // Anywhere in a line: identifiers and demographic banners are never result rows.
   const IDENTITY_ANYWHERE=/\b(?:ref\.?\s*id|patient\s*id|report\s*ref|barcode|uhid|mrn|reg(?:istration)?\s*(?:no|id))\b|^\s*\d{1,3}\s*(?:year\(s\)|years?|yrs?)\s*[\/,|-]?\s*(?:male|female|m|f)?\s*$/i;
+  // A labelled identity field is unsafe even when OCR joins it to a result row.
+  const IDENTITY_FIELD=/\b(?:patient\s*(?:name|id)\b|pt\.?\s*name\b|full\s*name\b|name\s*[:=]|date\s*of\s*birth\b|d\.?o\.?b\s*[:=]|address\s*[:=]|phone\s*[:=]|mobile\s*[:=]|e-?mail\s*[:=]|mrn\s*[:=]|uhid\s*[:=]|passport\s*[:=]|emirates\s*id\s*[:=])/i;
+  const EMBEDDED_NAME=/^\s*(?:ha?emoglobin|glucose|wbc|rbc|platelets?|ha?ematocrit|creatinine|cholesterol|triglycerides|sodium|potassium|calcium|tsh|hba1c)\b\s+(?:[A-Z][a-z]+(?:[-'][A-Z][a-z]+)?\s+){1,3}[A-Z][a-z]+(?=\s+[<>]?\d)/i;
   // Web addresses, corrupted repeated overlay text from PDF footers, and stray @ fragments.
   const NOISE_LINE=/\b[a-z0-9-]{3,}\.(?:com|in|org|net|co|health)\b|@|for\s+assistance|([A-Za-z]{4,})\1{2,}/i;
   const MEASURE=/\d\s*(?:g\/|mg|gm|ng|pg|pmol|nmol|umol|u\/|miu|uiu|mmol|ug|iu|%|fl|sec|mil|cell|10\s*\^|\/u?l|\/m[lL]|mm\/hr)/i;
@@ -55,7 +58,7 @@
     String(text||'').split(/\r?\n/).forEach(raw=>{
       let line=raw.replace(/\s+$/,'');
       if(!line.trim())return;
-      if((IDENTITY_LINE.test(line)||IDENTITY_ANYWHERE.test(line)||NOISE_LINE.test(line))&&!MEASURE.test(line)){stats.lines++;return}
+      if(IDENTITY_FIELD.test(line)||EMBEDDED_NAME.test(line)||((IDENTITY_LINE.test(line)||IDENTITY_ANYWHERE.test(line)||NOISE_LINE.test(line))&&!MEASURE.test(line))){stats.lines++;return}
       line=line.replace(EMAIL,()=>{stats.emails++;return '[EMAIL]'});
       line=line.replace(URL_RE,()=>{stats.urls++;return '[URL]'});
       DATE.forEach(re=>{line=line.replace(re,()=>{stats.dates++;return '[DATE]'})});

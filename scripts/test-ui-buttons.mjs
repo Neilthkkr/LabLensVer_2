@@ -6,11 +6,13 @@ import http from 'node:http';
 import path from 'node:path';
 import os from 'node:os';
 import {spawn} from 'node:child_process';
+import {liveOcrCases} from '../test-fixtures/ocr/live-cases.mjs';
 
 const root=path.resolve(new URL('..',import.meta.url).pathname);
+const serveRoot=process.env.LABLENS_STATIC_ROOT?path.resolve(root,process.env.LABLENS_STATIC_ROOT):root;
 const chrome='/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 if(!fs.existsSync(chrome))throw new Error(`Chrome not found at ${chrome}`);
-const mime={'.html':'text/html','.js':'text/javascript','.css':'text/css','.json':'application/json','.png':'image/png','.webmanifest':'application/manifest+json'};
+const mime={'.html':'text/html','.js':'text/javascript','.mjs':'text/javascript','.css':'text/css','.json':'application/json','.png':'image/png','.webmanifest':'application/manifest+json'};
 const server=http.createServer((req,res)=>{
   const requestPath=decodeURIComponent(new URL(req.url,'http://localhost').pathname);
   // The production service worker can legitimately claim and reload a first-time
@@ -18,8 +20,8 @@ const server=http.createServer((req,res)=>{
   // service worker's network-first behavior is covered by the unit suite.
   if(requestPath==='/service-worker.js'){res.writeHead(404);res.end('Disabled in UI test');return}
   const rel=requestPath==='/'?'index.html':requestPath.replace(/^\/+/, '');
-  const file=path.resolve(root,rel);
-  if(!file.startsWith(root+path.sep)||!fs.existsSync(file)||fs.statSync(file).isDirectory()){res.writeHead(404);res.end('Not found');return}
+  const file=path.resolve(serveRoot,rel);
+  if(!file.startsWith(serveRoot+path.sep)||!fs.existsSync(file)||fs.statSync(file).isDirectory()){res.writeHead(404);res.end('Not found');return}
   res.writeHead(200,{'Content-Type':mime[path.extname(file)]||'application/octet-stream','Cache-Control':'no-store'});
   fs.createReadStream(file).pipe(res);
 });
@@ -58,7 +60,7 @@ try{
     await wait(100);
   }
   const checks=[];
-  const check=async(name,expression)=>{const value=await evaluate(expression);const passed=value&&value.ok!==false;if(!passed)throw new Error(`UI check failed: ${name} (${JSON.stringify(value)})`);checks.push(name)};
+  const check=async(name,expression)=>{const value=await evaluate(expression);const passed=value&&value.ok!==false;if(!passed)throw new Error(`UI check failed: ${name} (${JSON.stringify(value)})`);checks.push(name);return value};
 
   await check('theme toggle changes theme',`(()=>{const before=document.documentElement.getAttribute('data-theme');const btn=document.getElementById('themeToggleBtn');btn.click();const after=document.documentElement.getAttribute('data-theme');return {ok:after!==before,before,after,disabled:btn.disabled,handler:typeof btn.onclick,global:typeof window.toggleTheme,ready:document.readyState}})()`);
   await check('add profile opens and cancel closes',`(()=>{document.querySelector('.add-user-btn').click();const opened=document.getElementById('addUserModal').classList.contains('active');document.querySelector('#addUserModal .btn-secondary').click();return opened&&!document.getElementById('addUserModal').classList.contains('active')})()`);
@@ -85,12 +87,49 @@ try{
     return document.getElementById('resultsSection').classList.contains('active')&&document.querySelectorAll('#metricsList .metric-card').length===3&&document.querySelectorAll('#recommendationsList .rec-card').length===2;
   })()`);
   await check('summary and values controls open metric details',`(()=>{switchTab('detailed');const card=document.querySelector('#metricsList .metric-card');card.click();const opened=document.getElementById('metricSheetOverlay').classList.contains('active');closeMetricSheet();switchTab('summary');return opened&&!document.getElementById('metricSheetOverlay').classList.contains('active')})()`);
+  await check('a corrected result updates the saved report',`(()=>{switchTab('detailed');openMetricSheet('hemoglobin');renderMetricCorrection();const input=document.getElementById('correctValue');if(!input)return false;input.value='14.2';input.closest('form').requestSubmit();const saved=JSON.parse(localStorage.getItem('health_reports_guest'));return saved.some(r=>r.fileName==='Sample CBC 3.pdf'&&r.metrics.find(m=>m.key==='hemoglobin')?.value===14.2)&&document.getElementById('metricSheetOverlay').classList.contains('active')===false})()`);
+  await check('restore backup opens the file picker',`(()=>{showInfo();const input=document.getElementById('backupInput');let opened=false;input.click=()=>{opened=true};document.querySelector('[onclick="openBackupPicker()"]')?.click();return opened})()`);
   await check('original report switches views and has no multi-select mode',`(async()=>{switchTab('document');const text=document.getElementById('originalTextBtn'),report=document.getElementById('originalVisualBtn');if(!text||!report)return false;text.click();const textOpen=!document.getElementById('originalTextPanel').hidden;Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:async value=>{window.__copiedOriginal=value}}});document.getElementById('copyOriginalBtn').click();await new Promise(r=>setTimeout(r,20));report.click();return textOpen&&window.__copiedOriginal.includes('Hemoglobin')&&!document.getElementById('modeSelectBtn')&&!document.getElementById('selectPill')})()`);
   await check('trends selector, graph, and table controls agree',`(()=>{switchTab('comparison');const select=document.getElementById('trendMarkerSelect');if(!select||!document.querySelector('.trend-svg')||document.querySelectorAll('.trend-table tbody tr').length!==3)return false;select.value='glucose';select.dispatchEvent(new Event('change',{bubbles:true}));return document.querySelector('.trend-heading strong').textContent==='Glucose'&&document.querySelector('.trend-param-button[aria-current="true"]').textContent==='Glucose'})()`);
   await check('next steps renders actionable guidance',`(()=>{switchTab('recommendations');return document.querySelectorAll('#recommendationsList .rec-card').length===2&&document.getElementById('tab-recommendations').classList.contains('active')})()`);
+  const liveOcrReports=[];
+  if(process.env.LABLENS_OCR_LIVE==='1'){
+    for(const fixture of liveOcrCases){
+      const result=await check(`live OCR: ${fixture.id}`,`(async()=>{
+        const fixture=${JSON.stringify(fixture)};
+        clearAllFiles();setUploadCategory('lab');
+        const canvas=document.createElement('canvas');canvas.width=1800;canvas.height=1100;
+        const ctx=canvas.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,canvas.width,canvas.height);
+        if(fixture.render==='shadow-skew'){
+          const shadow=ctx.createLinearGradient(0,0,canvas.width,0);
+          shadow.addColorStop(0,'rgba(0,0,0,.22)');shadow.addColorStop(.35,'rgba(0,0,0,.08)');shadow.addColorStop(1,'rgba(0,0,0,0)');
+          ctx.fillStyle=shadow;ctx.fillRect(0,0,canvas.width,canvas.height);
+          ctx.translate(100,30);ctx.rotate(-0.025);ctx.translate(-100,-30);
+        }
+        ctx.fillStyle='#111';ctx.font='bold 62px Arial';ctx.fillText('LABORATORY RESULTS',90,140);
+        ctx.font='54px Arial';fixture.rows.forEach((row,i)=>ctx.fillText(row,90,300+i*125));
+        const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/png'));
+        const file=new File([blob],'synthetic-'+fixture.id+'.png',{type:'image/png'});
+        const transfer=new DataTransfer();transfer.items.add(file);
+        const input=document.getElementById('fileInput');input.files=transfer.files;input.dispatchEvent(new Event('change',{bubbles:true}));
+        for(let i=0;i<100;i++){await new Promise(r=>setTimeout(r,100));const badge=document.querySelector('.quality-badge');if(badge&&!badge.textContent.includes('Checking'))break}
+        if(document.getElementById('analyzeBtn').disabled)overrideImageQuality(0);
+        const guestWatcher=setInterval(()=>{if(document.getElementById('guestProfileModal').classList.contains('active'))guestProfileSkip()},100);
+        const analysis=await Promise.race([analyzeReport().then(()=>({finished:true})).catch(error=>({error:String(error)})),new Promise(resolve=>setTimeout(()=>resolve({timedOut:true}),45000))]);
+        clearInterval(guestWatcher);
+        const reports=JSON.parse(localStorage.getItem('health_reports_guest')||'[]');
+        const report=reports.find(r=>r.fileName==='synthetic-'+fixture.id+'.jpg'||r.fileName==='synthetic-'+fixture.id+'.png');
+        const actual=fixture.expected.map(expected=>{const metric=report?.metrics?.find(m=>m.key===expected.key);return {key:expected.key,value:metric?.value,unit:metric?.unit,min:metric?.min??null,max:Number.isFinite(metric?.max)?metric.max:null,status:metric?.status,qualifier:metric?.qualifier||'',ocrConfidence:metric?.ocrConfidence}});
+        const exact=fixture.expected.every((expected,i)=>Object.entries(expected).every(([field,value])=>actual[i][field]===value));
+        return {ok:analysis.finished&&report?.sourceMode==='ocr'&&exact&&actual.every(m=>Number.isFinite(m.ocrConfidence)),id:fixture.id,expected:fixture.expected,actual,predicted:report?.metrics?.length||0,analysis,sourceMode:report?.sourceMode,openDialogs:[...document.querySelectorAll('dialog[open],.modal-overlay.active')].map(x=>x.id)};
+      })()`);
+      liveOcrReports.push(result);
+    }
+  }
   const inventory=await evaluate(`(()=>{const buttons=[...document.querySelectorAll('button')];return {buttons:buttons.length,disabled:buttons.filter(b=>b.disabled).length,unnamed:buttons.filter(b=>!(b.textContent||'').trim()&&!b.getAttribute('aria-label')).length}})()`);
   const screenshots=[];
   if(process.env.LABLENS_UI_SCREENSHOTS==='1'){
+    await evaluate(`showCurrentAnalysis();true`);
     for(const [name,width,height] of [['desktop',1440,1000],['mobile',390,844]]){
       await send('Emulation.setDeviceMetricsOverride',{width,height,screenWidth:width,screenHeight:height,deviceScaleFactor:1,mobile:name==='mobile'});
       await evaluate(`window.scrollTo(0,0);window.dispatchEvent(new Event('resize'));true`);
@@ -108,7 +147,15 @@ try{
       }
     }
   }
-  process.stdout.write(JSON.stringify({checks:checks.length,passed:checks,inventory,screenshots},null,2)+'\n');
+  const liveOcrSummary=liveOcrReports.length?{
+    documents:liveOcrReports.length,
+    metricsExpected:liveOcrReports.reduce((n,r)=>n+r.expected.length,0),
+    metricsPredicted:liveOcrReports.reduce((n,r)=>n+r.predicted,0),
+    exactValues:liveOcrReports.reduce((n,r)=>n+r.expected.filter((m,i)=>m.value===r.actual[i].value).length,0),
+    exactUnits:liveOcrReports.reduce((n,r)=>n+r.expected.filter((m,i)=>m.unit===r.actual[i].unit).length,0),
+    exactRanges:liveOcrReports.reduce((n,r)=>n+r.expected.filter((m,i)=>m.min===r.actual[i].min&&m.max===r.actual[i].max).length,0)
+  }:null;
+  process.stdout.write(JSON.stringify({checks:checks.length,passed:checks,inventory,liveOcrSummary,liveOcrReports:liveOcrReports.map(r=>({id:r.id,predicted:r.predicted,actual:r.actual})),screenshots},null,2)+'\n');
 }finally{
   try{ws?.close()}catch{}
   browser.kill('SIGTERM');server.close();

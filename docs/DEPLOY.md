@@ -1,6 +1,7 @@
 # Deploying LabLens
 
-The repository root is the deployable site (`publish = "."`). There is no build step.
+Netlify runs `npm run build:web` and publishes only `dist-web`. This keeps the
+native projects, tests, local fixtures and server code out of static hosting.
 
 ```bash
 netlify deploy --prod
@@ -17,9 +18,11 @@ netlify deploy --prod
 | `GEMINI_MODEL` | Optional, comma-separated model list tried in order (default: two lite models). |
 | `GEMINI_PROVIDER` | Set to `vertex` only for a Google Cloud (Vertex AI) key. |
 
-Only de-identified result text plus age and sex is sent (see `src/privacy/deidentify.js`, applied in the browser and
-again in the function). Netlify's default function timeout is 10 seconds; long reports are sent in small chunks for
-that reason.
+The browser shows the exact result text, age and sex for confirmation before each AI check. Automatic redaction is
+best effort; users must inspect the preview. The function applies the same filter and rejects text that would change
+server-side. It limits JSON bodies to 64 KB and allows 30 requests per client and 300 per function instance per hour.
+Those counters reset with each serverless instance, so **set a provider-side spending quota before enabling the API
+key**. Netlify's default function timeout is 10 seconds; long reports are sent in small chunks for that reason.
 
 ## Local development
 
@@ -33,6 +36,7 @@ npm run test:ui                                     # browser smoke test (needs 
 ## Privacy notes
 
 - Reports and profiles are stored in the browser's local storage. They are not encrypted.
+- Info offers an unencrypted JSON backup of listed profiles, reports, medication records, and related selections; keep it somewhere private. Restore accepts current 1.1 and older 1.0 backups. A restore starts a separate `LabLens_PreRestore_…json` recovery download before replacing local records. Check that the file saved; a browser can block downloads. Older 1.0 backups lack medication records, so restoring one keeps any medication records already on this device.
 - Feedback opens the user's email app with a draft; nothing is transmitted by LabLens.
 - There is no telemetry.
 

@@ -3,13 +3,11 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
 
-const html=fs.readFileSync(new URL('../index.html',import.meta.url),'utf8');
-const start=html.indexOf('const STANDARD_RANGES =');
-const end=html.indexOf('\nconst LS=',start);
-assert.ok(start>=0&&end>start,'embedded parser source is discoverable');
+const parser=fs.readFileSync(new URL('../src/core/lab-parser.mjs',import.meta.url),'utf8').replace(/^export \{[^\n]+\};\s*$/m,'');
+assert.match(parser,/function parseReportText\(/,'shared parser source is discoverable');
 const context={console};
 vm.createContext(context);
-vm.runInContext(`${html.slice(start,end)}\nthis.__parseReportText=parseReportText;`,context);
+vm.runInContext(`${parser}\nthis.__parseReportText=parseReportText;`,context);
 const parse=(text)=>context.__parseReportText(text,{sex:'female',age:35});
 
 test('preserves a leading result comparator and uses the following interval',()=>{
@@ -129,4 +127,32 @@ test('method text such as "Flow Cytometry" or "Fluoride Plasma" is never read as
   const rows=parse(`Test Result Biological Reference Interval\nEosinophils 6.8 1 - 6\nFlow Cytometry %\nGlucose, Fasting 138 70 - 99\nFluoride Plasma,Glucose Oxidase-Peroxidase GODPOD mg/dL`);
   assert.equal(rows.find(r=>/eosinophils/i.test(r.name)).unit,'%');
   assert.equal(rows.find(r=>/glucose/i.test(r.name)).unit,'mg/dL');
+});
+
+test('decimal commas preserve the measured value and printed range',()=>{
+  const m=parse('Glucose 5,6 mmol/L 3,9 - 5,5').find(x=>x.key==='glucose');
+  assert.equal(m.value,5.6);assert.equal(m.min,3.9);assert.equal(m.max,5.5);
+  assert.equal(m.status,'high');
+  assert.equal(m.srcLine,'Glucose 5,6 mmol/L 3,9 - 5,5');
+});
+
+test('a library range is not applied to an incompatible unit',()=>{
+  const glucose=parse('Glucose 5.6 mmol/L').find(x=>x.key==='glucose');
+  const hemoglobin=parse('Hemoglobin 132 g/L').find(x=>x.key==='hemoglobin');
+  assert.equal(glucose.status,'unknown');assert.equal(glucose.min,null);
+  assert.equal(hemoglobin.unit,'g/L');assert.equal(hemoglobin.status,'unknown');
+});
+
+test('current and previous columns choose the current measurement',()=>{
+  const m=parse('Test Current Previous Unit Reference\nGlucose 105 95 mg/dL 70 - 99').find(x=>x.key==='glucose');
+  assert.equal(m.value,105);assert.equal(m.status,'high');
+});
+
+test('bounded results are classified only when the bound proves the status',()=>{
+  const egfr=parse('eGFR > 90 mL/min/1.73m2 > 60').find(x=>x.key==='egfr');
+  const glucose=parse('Glucose < 110 mg/dL 70 - 99').find(x=>x.key==='glucose');
+  assert.equal(egfr.value,90);assert.equal(egfr.status,'normal');
+  assert.equal(glucose.value,110);assert.equal(glucose.status,'unknown');
+  assert.equal(context.__parseReportText('Glucose ≤ 70 mg/dL 70 - 99',{sex:'female',age:35}).find(x=>x.key==='glucose')?.status,'unknown');
+  assert.equal(context.__parseReportText('Glucose > 99 mg/dL 70 - 99',{sex:'female',age:35}).find(x=>x.key==='glucose')?.status,'high');
 });
