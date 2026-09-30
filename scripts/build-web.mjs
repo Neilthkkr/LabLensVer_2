@@ -1,7 +1,8 @@
 import { cp, mkdir, rm } from 'node:fs/promises';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const root=path.resolve(import.meta.dirname,'..');
+const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const out=path.join(root,'dist-web');
 await rm(out,{recursive:true,force:true});
 await mkdir(out,{recursive:true});
