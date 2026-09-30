@@ -107,3 +107,11 @@ test('result actions and tabs use one clear action with accessible state',()=>{
   assert.equal((resultTabs.match(/\brole="tab"/g)||[]).length,5);
   assert.equal((resultTabs.match(/\baria-selected="(?:true|false)"/g)||[]).length,5);
 });
+
+test('profiles can be edited from the menu and the Info tab, and deleted from the edit dialog',()=>{
+  assert.match(html,/__edit"?>Edit profile/);
+  assert.match(html,/id="profileList"/);
+  assert.match(html,/id="deleteUserBtn"/);
+  // Escape / cancel dismissal picks the first .btn-secondary, so the delete control must not use that class.
+  assert.doesNotMatch(html.match(/<button[^>]*id="deleteUserBtn"[^>]*>/)[0],/btn-secondary/);
+});

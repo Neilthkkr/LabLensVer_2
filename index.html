@@ -371,7 +371,7 @@ input,select,textarea{accent-color:var(--primary)}
 .header-nav .nav-btn:disabled{opacity:.4;background:transparent}
 .appbar-tools{display:flex;align-items:center;gap:8px;flex:none}
 .profile-pick{display:flex;align-items:center;gap:6px;height:40px;padding:0 4px 0 12px;border:1px solid var(--border);border-radius:8px;background:var(--card);color:var(--text-secondary)}
-.profile-pick .user-select{border:0;background:transparent;color:var(--text);font-size:14px;font-weight:550;height:38px;padding:0 8px 0 2px;max-width:150px;cursor:pointer}
+.profile-pick .user-select{border:0;background:transparent;color:var(--text);font-size:14px;font-weight:550;height:38px;padding:0 8px 0 2px;max-width:min(260px,52vw);text-overflow:ellipsis;cursor:pointer}
 .appbar .add-user-btn{display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:0 12px;border:1px solid var(--border);border-radius:8px;background:transparent;color:var(--text);font-size:14px;font-weight:550;cursor:pointer}
 .appbar .add-user-btn:hover{background:var(--surface-2)}
 .theme-toggle{width:40px;height:40px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text)}
@@ -682,7 +682,7 @@ button,a,select,summary,label,.chip,.tab-btn,.nav-btn{touch-action:manipulation}
 @media(max-width:820px){
   .appbar-inner{flex-wrap:nowrap}
   .appbar .add-user-btn{display:none}
-  .profile-pick .user-select{max-width:132px}
+  .profile-pick .user-select{max-width:min(200px,46vw)}
 }
 @media(max-width:480px){
   .recent-row{flex-direction:column;align-items:flex-start;gap:2px}
@@ -695,6 +695,17 @@ button,a,select,summary,label,.chip,.tab-btn,.nav-btn{touch-action:manipulation}
 .analyze-section>*+*{margin-top:12px}
 .analyze-section .analyze-btn{margin-top:0}
 .analyze-section .type-picker{margin-top:16px}
+
+.profile-list{list-style:none;margin:0 0 12px;padding:0;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--card);overflow:hidden}
+.profile-list li{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 14px}
+.profile-list li+li{border-top:1px solid var(--border)}
+.pl-main strong{display:block;font-size:15px;font-weight:600;color:var(--text)}
+.pl-main small,.pl-empty{font-size:13px;color:var(--text-secondary)}
+.pl-empty{display:block;padding:12px 14px}
+.btn-text{background:none;border:0;font:inherit;font-size:14px;font-weight:600;min-height:40px;padding:0 8px;cursor:pointer;border-radius:8px}
+.btn-text.danger{color:var(--danger);margin-right:auto}
+.btn-text.danger:hover{background:color-mix(in srgb,var(--danger) 10%,transparent)}
+#addUserModal .modal-actions{flex-wrap:wrap;margin-top:18px}
 @media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 </style>
 </head>
@@ -737,6 +748,7 @@ button,a,select,summary,label,.chip,.tab-btn,.nav-btn{touch-action:manipulation}
 <section class="info-section" id="infoSection" style="display:none"><h2>Info</h2>
 <div class="info-block"><h3>How it works</h3><p>LabLens reads your report on this device with PDF and OCR engines, pulls out each value, and compares it with the reference range printed on the report. Where none is printed, general age and sex ranges are used and labelled. Every value links to the line it was read from so you can check it.</p></div>
 <div class="info-block"><h3>Not medical advice</h3><p>LabLens is for information only. It does not diagnose or recommend treatment. Text extraction can make mistakes, so check results against the original report and talk to a qualified healthcare professional.</p></div>
+<div class="info-block"><h3>Profiles</h3><ul class="profile-list" id="profileList"></ul><div class="about-actions"><button class="btn-secondary" type="button" onclick="openAddUserModal()">Add profile</button></div></div>
 <div class="info-block"><h3>Your data</h3><ul><li>Reports and profiles are stored in this browser, on this device. They are not encrypted.</li><li>Nothing leaves the device unless you choose it. AI checking sends de-identified result text, age and sex. AI explanations and email drafts send only what you preview and confirm.</li></ul><div class="about-actions"><button class="btn-secondary" type="button" onclick="exportBackup()">Download a backup</button><button class="btn-secondary danger" type="button" onclick="deleteAllData()">Delete all data on this device</button></div></div>
 <div class="info-block"><h3>Feedback</h3><p>Found a problem or have an idea?</p><div class="about-actions"><button class="btn-secondary" type="button" onclick="openFeedbackModal()">Send feedback</button></div></div>
 <div class="info-block"><h3>About</h3><p>LabLens Ver2.0. Made for blood, urine and clinical pathology reports.</p></div></section>
@@ -761,9 +773,9 @@ button,a,select,summary,label,.chip,.tab-btn,.nav-btn{touch-action:manipulation}
 </div>
 <label class="curate-opt gp-never"><input type="checkbox" id="gpNever"/><span><strong>Don’t ask again</strong><small>Reports will stay under Guest until you add a profile yourself.</small></span></label>
 <div class="modal-actions"><button class="btn-secondary" onclick="guestProfileSkip()" type="button">Continue as Guest</button><button class="btn-primary" id="gpSaveBtn" type="submit">Save profile and show results</button></div></form></div></div>
-<div class="modal-overlay" id="addUserModal"><div class="modal"><h3>Add profile</h3><p>Reports are kept separate per person, on this device only.</p><form id="addUserForm" onsubmit="addUser(event)">
-<input class="field" id="newUserName" maxlength="40" placeholder="Full Name" required="" type="text"/>
-<input class="field" id="newUserNickname" maxlength="5" placeholder="Nickname (max 5 letters)" required="" type="text"/>
+<div class="modal-overlay" id="addUserModal"><div class="modal"><h3 id="addUserTitle">Add profile</h3><p id="addUserIntro">Reports are kept separate per person, on this device only.</p><form id="addUserForm" onsubmit="addUser(event)">
+<label class="fld-label" for="newUserName">Name</label><input class="field" id="newUserName" maxlength="40" placeholder="Full name" required="" type="text"/>
+<label class="fld-label" for="newUserNickname">Nickname <span class="fld-opt">(up to 10 letters, shown in the menu)</span></label><input class="field" id="newUserNickname" maxlength="10" placeholder="Nickname" required="" type="text"/>
 <label class="fld-label" for="newUserSex">Sex at birth</label>
 <select class="field" id="newUserSex" required="">
 <option value="">Select…</option>
@@ -774,7 +786,7 @@ button,a,select,summary,label,.chip,.tab-btn,.nav-btn{touch-action:manipulation}
 <label class="fld-label" for="newUserDob">Date of birth</label>
 <input class="field" id="newUserDob" max="2026-07-13" required="" type="date"/>
 <div class="fld-help">Many lab reference ranges differ by sex and age — for example a normal haemoglobin is roughly 13–17 g/dL for men and 12–15 g/dL for women. Without this, results can be flagged incorrectly. Stored only on this device.</div>
-<div class="modal-actions"><button class="btn-secondary" onclick="closeAddUserModal()" type="button">Cancel</button><button class="btn-primary" type="submit">Create profile</button></div></form></div></div>
+<div class="modal-actions"><button class="btn-text danger" id="deleteUserBtn" onclick="deleteProfile()" type="button" hidden>Delete profile</button><button class="btn-secondary" onclick="closeAddUserModal()" type="button">Cancel</button><button class="btn-primary" id="addUserSubmit" type="submit">Create profile</button></div></form></div></div>
 
 <div class="modal-overlay" id="identityModal"><div class="modal identity-modal">
 <h3 id="idModalTitle">🆔 Does this report belong to your active profile?</h3>
@@ -2627,23 +2639,97 @@ const historyKey=()=>`health_reports_${currentUser||'guest'}`;
 function getHistory(){const stored=LS.get(historyKey(),[]);return Array.isArray(stored)?stored.map(normalizeAnalysisRecord).filter(Boolean):[]}
 function setHistory(arr){LS.set(historyKey(),Array.isArray(arr)?arr.map(normalizeAnalysisRecord).filter(Boolean):[])}
 
-function renderUserSelect(){const sel=$('userSelect');sel.innerHTML='<option value="">Guest</option>'+users.map(u=>`<option value="${esc(u.username)}">${esc(u.nickname||u.username)}</option>`).join('')+'<option value="__add">Add profile…</option>';if(currentUser)sel.value=currentUser}
-function onProfileSelect(sel){if(sel.value==='__add'){sel.value=currentUser||'';openAddUserModal();return}switchUser(sel.value)}
-function switchUser(name){currentUser=name||null;LS.set('currentUser',currentUser);defaultTrendKey=LS.get('defaultTrendKey_'+(currentUser||'guest'),null);selectedTrendKey=defaultTrendKey;uploadCategory=LS.get('uploadCategory_'+(currentUser||'guest'),'auto');const catSel=$('uploadCatSelect');if(catSel)catSel.value=uploadCategory;uploadedFiles=[];currentAnalysis=null;activeNavKey='new';updateFilePreview();renderUserBadge();updateUserInfoDisplay();try{renderUpcoming()}catch(e){}$('resultsSection').classList.remove('active');$('historySection').style.display='none';$('uploadSection').style.display='grid';renderNav();window.scrollTo({top:0,behavior:'smooth'})}
+function renderUserSelect(){const sel=$('userSelect');sel.innerHTML='<option value="">Guest</option>'+users.map(u=>`<option value="${esc(u.username)}">${esc(u.nickname||u.username)}</option>`).join('')+(currentUser?'<option value="__edit">Edit profile…</option>':'')+'<option value="__add">Add profile…</option>';if(currentUser)sel.value=currentUser;fitProfileSelect()}
+// Size the profile menu to the name it shows (a select otherwise sizes to its longest option).
+function fitProfileSelect(){
+  const sel=$('userSelect');if(!sel)return;
+  try{
+    const cs=getComputedStyle(sel),c=fitProfileSelect.c||(fitProfileSelect.c=document.createElement('canvas').getContext('2d'));
+    c.font=`${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
+    const text=sel.selectedOptions[0]?sel.selectedOptions[0].textContent:'Guest';
+    sel.style.width=Math.ceil(c.measureText(text).width+38)+'px';
+  }catch(e){}
+}
+function onProfileSelect(sel){if(sel.value==='__add'){sel.value=currentUser||'';openAddUserModal();return}if(sel.value==='__edit'){sel.value=currentUser||'';openEditUserModal(currentUser);return}switchUser(sel.value)}
+function switchUser(name){currentUser=name||null;LS.set('currentUser',currentUser);renderUserSelect();fitProfileSelect();defaultTrendKey=LS.get('defaultTrendKey_'+(currentUser||'guest'),null);selectedTrendKey=defaultTrendKey;uploadCategory=LS.get('uploadCategory_'+(currentUser||'guest'),'auto');const catSel=$('uploadCatSelect');if(catSel)catSel.value=uploadCategory;uploadedFiles=[];currentAnalysis=null;activeNavKey='new';updateFilePreview();renderUserBadge();updateUserInfoDisplay();try{renderUpcoming()}catch(e){}$('resultsSection').classList.remove('active');$('historySection').style.display='none';$('uploadSection').style.display='grid';renderNav();window.scrollTo({top:0,behavior:'smooth'})}
 function currentProfile(){
   return (users||[]).find(u=>u.username===currentUser);
 }
 function currentDisplayName(){
   const p=currentProfile();
   if(p){
-    return p.nickname || p.username.slice(0,5);
+    return p.nickname || p.username.slice(0,10);
   }
-  return currentUser ? currentUser.slice(0,5) : 'Guest';
+  return currentUser ? currentUser.slice(0,10) : 'Guest';
 }
 function renderUserBadge(){$('currentUserName').textContent=currentDisplayName()}
 function updateUserInfoDisplay(){const sec=$('userInfoSection');if(!currentUser){sec.style.display='none';return}sec.style.display='flex';const name=currentDisplayName();$('userNameDisplay').textContent=name;$('userAvatar').textContent=name[0].toUpperCase();$('userDataFiles').textContent=uploadedFiles.length+' file'+(uploadedFiles.length===1?'':'s');const n=getHistory().length;$('userDataReports').textContent=n+' report'+(n===1?'':'s')}
-function openAddUserModal(){$('addUserModal').classList.add('active');setTimeout(()=>$('newUserName').focus(),50)}
-function closeAddUserModal(){$('addUserModal').classList.remove('active');$('addUserForm').reset()}
+let editingUser=null;
+const USER_KEY_PREFIXES=['health_reports_','health_meds_','health_medlog_','uploadCategory_','defaultTrendKey_','currentAnalysisId_'];
+function setUserModalMode(edit){
+  $('addUserTitle').textContent=edit?'Edit profile':'Add profile';
+  $('addUserIntro').textContent=edit?'Changing sex or date of birth can change which reference ranges apply.':'Reports are kept separate per person, on this device only.';
+  $('addUserSubmit').textContent=edit?'Save changes':'Create profile';
+  $('deleteUserBtn').hidden=!edit;
+}
+function openAddUserModal(){editingUser=null;$('addUserForm').reset();setUserModalMode(false);$('addUserModal').classList.add('active');setTimeout(()=>$('newUserName').focus(),50)}
+function openEditUserModal(username){
+  const u=users.find(x=>x.username===username);if(!u)return;
+  editingUser=u.username;
+  $('newUserName').value=u.username;$('newUserNickname').value=u.nickname||'';$('newUserSex').value=u.sex||'';$('newUserDob').value=u.dob||'';
+  setUserModalMode(true);
+  $('addUserModal').classList.add('active');setTimeout(()=>$('newUserName').focus(),50);
+}
+function closeAddUserModal(){$('addUserModal').classList.remove('active');$('addUserForm').reset();editingUser=null;setUserModalMode(false)}
+// Reference ranges depend on sex and age at the report date. When those change, re-derive the
+// range-dependent fields of stored values that used a general (not report-printed) range.
+function recomputeProfileReports(username){
+  const u=users.find(x=>x.username===username);if(!u)return 0;
+  const key='health_reports_'+username,list=LS.get(key,[]);if(!Array.isArray(list))return 0;
+  let changed=0;
+  list.forEach(r=>{
+    if(!Array.isArray(r.metrics))return;
+    const age=ageYears(u.dob,r.date);
+    r.metrics.forEach(m=>{
+      if(!m||m.refFromReport||!m.known||typeof m.value!=='number'||!STANDARD_RANGES)return;
+      const base=matchStdByKey(m.key);if(!base)return;
+      const ov=rangeForProfile(base.key,u.sex,age);
+      const min=ov?ov.min:base.min,max=ov?ov.max:base.max;
+      if(min===m.min&&max===m.max)return;
+      m.min=min;m.max=max;m.status=statusFor(m.value,min,max);
+      m.normal_range=rangeText(min,max,m.unit||'');m.rangeNote=ov?ov.note:'general adult range';changed++;
+    });
+    const ms=r.metrics,hi=ms.filter(m=>m.status==='high'),lo=ms.filter(m=>m.status==='low');
+    r.highCount=hi.length;r.lowCount=lo.length;r.outOfRangeCount=hi.length+lo.length;r.normalCount=ms.filter(m=>m.status==='normal').length;
+    r.safeCount=ms.filter(m=>severityTier(m)==='tier-safe').length;r.borderlineCount=ms.filter(m=>severityTier(m)==='tier-borderline').length;r.concernCount=ms.filter(m=>severityTier(m)==='tier-concern').length;
+    if(r.category==='lab'){r.laymanSummary=layman(ms,hi,lo);r.recommendations=recommendations(hi,lo)}
+  });
+  if(changed)LS.set(key,list);
+  return changed;
+}
+function matchStdByKey(k){try{return std_(k)}catch{return null}}
+function moveUserData(from,to){
+  USER_KEY_PREFIXES.forEach(pre=>{const v=LS.get(pre+from,null);if(v==null)return;LS.set(pre+to,v);LS.del(pre+from)});
+}
+async function deleteProfile(){
+  const name=editingUser;if(!name)return;
+  const n=(LS.get('health_reports_'+name,[])||[]).length;
+  const ok=await confirmDialog(`Delete the profile "${name}"${n?` and its ${n} saved report${n===1?'':'s'}`:''}?\n\nThis cannot be undone.`);
+  if(!ok)return;
+  USER_KEY_PREFIXES.forEach(pre=>LS.del(pre+name));
+  users=users.filter(u=>u.username!==name);LS.set('healthUsers',users);
+  closeAddUserModal();
+  const wasCurrent=currentUser===name;
+  renderUserSelect();
+  if(wasCurrent){$('userSelect').value='';switchUser('')}
+  try{renderProfilesList();renderRecents()}catch{}
+  showToast(`Deleted ${name}`,'info');
+}
+function editProfileFromList(btn){openEditUserModal(btn.dataset.user)}
+function renderProfilesList(){
+  const host=$('profileList');if(!host)return;
+  host.innerHTML=users.length?users.map(u=>{const a=ageYears(u.dob);return `<li><span class="pl-main"><strong>${esc(u.username)}</strong><small>${esc([u.sex==='female'?'Female':u.sex==='male'?'Male':'',a!=null?a+' years':''].filter(Boolean).join(' · ')||'No details')}</small></span><button class="btn-secondary" type="button" data-user="${esc(u.username)}" onclick="editProfileFromList(this)">Edit</button></li>`}).join(''):'<li class="pl-empty">No profiles yet. Reports are saved under Guest.</li>';
+}
 // BUG FIX: uploading in Guest mode, then creating a named profile, used to
 // silently orphan the guest data — it stayed under the 'guest' storage key
 // forever while the new profile started empty, with no warning either way.
@@ -2674,11 +2760,27 @@ function migrateGuestDataTo(username){
 async function addUser(e){
   e.preventDefault();
   const username=$('newUserName').value.trim();
-  const nickname=($('newUserNickname').value||'').trim().slice(0,5);
+  const nickname=($('newUserNickname').value||'').trim().slice(0,10);
   const sex=$('newUserSex').value;
   const dob=$('newUserDob').value;
   if(!username)return;
   if(!nickname)return showToast('Please enter a nickname','error');
+  if(editingUser){
+    const cur=users.find(u=>u.username===editingUser);
+    if(!cur)return closeAddUserModal();
+    if(!sex||!dob)return showToast('Sex and date of birth are needed to use the right reference ranges','error');
+    if(users.some(u=>u!==cur&&u.username.toLowerCase()===username.toLowerCase()))return showToast('Another profile already has that name','error');
+    const old=cur.username,detailsChanged=cur.sex!==sex||cur.dob!==dob;
+    if(old!==username){moveUserData(old,username);if(currentUser===old){currentUser=username;LS.set('currentUser',username)}}
+    Object.assign(cur,{username,nickname,sex,dob});
+    LS.set('healthUsers',users);
+    let recalculated=0;
+    if(detailsChanged&&(LS.get('health_reports_'+username,[])||[]).length&&await confirmDialog('Recalculate this profile’s saved reports with the new sex and date of birth?\n\nValues that used general reference ranges will be re-checked. Ranges printed on a report are never changed.'))recalculated=recomputeProfileReports(username);
+    closeAddUserModal();renderUserSelect();
+    if(currentUser===username){$('userSelect').value=username;switchUser(username)}
+    try{renderProfilesList();renderRecents()}catch{}
+    return showToast(recalculated?`Profile updated. ${recalculated} value${recalculated===1?'':'s'} re-checked.`:'Profile updated','success');
+  }
   const dupe=users.find(u=>u.username.toLowerCase()===username.toLowerCase());
   if(dupe){closeAddUserModal();$('userSelect').value=dupe.username;switchUser(dupe.username);return showToast(`${dupe.username} already exists. Switched to that profile.`,'info')}
   if(!sex||!dob)return showToast('Sex and date of birth are needed to use the right reference ranges','error');
@@ -3513,7 +3615,7 @@ function guestProfileSave(e){
     if(!(age>=0&&age<=120))return showToast('Enter an age or a date of birth','error');
     dob=`${reportYear-age}-01-01`;
   }
-  const nickname=(username.split(/\s+/)[0]||username).slice(0,5);
+  const nickname=(username.split(/\s+/)[0]||username).slice(0,10);
   users.push({username,nickname,sex,dob,createdAt:new Date().toISOString(),fromReport:true});
   LS.set('healthUsers',users);
   renderUserSelect();$('userSelect').value=username;switchUser(username);
@@ -4815,7 +4917,7 @@ function displayComparison(){
   el.innerHTML=`<div class="trend-workspace"><aside class="trend-side" aria-label="Markers"><div class="trend-tools"><input type="search" class="history-search" id="trendSearch" placeholder="Search markers" aria-label="Search markers" value="${esc(trendQuery)}" oninput="setTrendQuery(this.value)"/><div class="trend-chips" id="trendChips"></div><label class="trend-select-mobile"><span class="sr-only">Marker</span><select id="trendMarkerSelect" onchange="setTrendParam(this.value)"></select></label></div><ul class="trend-list" id="trendListHost"></ul>${hidden>0?`<p class="trend-note">${hidden} marker${hidden===1?' has':'s have'} only one reading and can’t be trended yet.</p>`:''}</aside><div class="trend-main"><div class="trend-chrome" id="trendChrome"></div><div id="trendDetail"></div></div></div>`;
   renderTrendChrome();renderTrendList();renderTrendDetail();
 }
-function showInfo(){['uploadSection','historySection'].forEach(i=>{const e=$(i);if(e)e.style.display='none'});$('resultsSection').classList.remove('active');$('progressSection').classList.remove('active');$('infoSection').style.display='block';setActiveNav('info');window.scrollTo({top:0,behavior:'smooth'})}
+function showInfo(){renderProfilesList();['uploadSection','historySection'].forEach(i=>{const e=$(i);if(e)e.style.display='none'});$('resultsSection').classList.remove('active');$('progressSection').classList.remove('active');$('infoSection').style.display='block';setActiveNav('info');window.scrollTo({top:0,behavior:'smooth'})}
 function hideInfo(){const e=$('infoSection');if(e)e.style.display='none'}
 function addAnotherPage(){const b=$('addReportBtn');if(b)b.click()}
 function renderRecents(){
@@ -5346,6 +5448,8 @@ function populateCategoryUI(){
   if(grid)grid.innerHTML = CATS.filter(c=>c.key!=='other').map(c=>`<div class="test-pill">${c.icon} ${esc(c.label)}</div>`).join('');
 }
 
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>fitProfileSelect());
+window.addEventListener('resize',()=>fitProfileSelect());
 async function init(){
   try{const _t=new Date().toISOString().slice(0,10);["newUserDob","idNewDob","gpDob"].forEach(i=>{const e=document.getElementById(i);if(e)e.max=_t})}catch{}
   try{const _c=$('curateToggle');if(_c)_c.checked=curationEnabled()}catch{}
@@ -5362,7 +5466,7 @@ async function init(){
   }else{
     currentUser=users[0].username;$('userSelect').value=currentUser;LS.set('currentUser',currentUser);
   }
-  renderUserBadge();updateUserInfoDisplay();
+  renderUserSelect();renderUserBadge();updateUserInfoDisplay();
   // --- Build modular nav (so #themeIcon exists in DOM) ---
   renderNav();
   updateThemeIcon();
@@ -5456,7 +5560,7 @@ function sendFeedback(e){
     if(o.classList&&o.classList.contains('modal-overlay')&&o.classList.contains('active')&&(o.id==='metricSheetOverlay'||o.id==='confirmDialogOverlay'))dismiss(o);
   });
 })();
-Object.assign(window,{onProfileSelect,addAnotherPage,showInfo,guestProfileSave,guestProfileSkip,deleteAllData,setCuration,showLastCuration,showHome,resetAll,showHistory,toggleTheme,openAddUserModal,closeAddUserModal,addUser,switchUser,logoutUser,removeFile,clearAllFiles,overrideImageQuality,setGroupMode,setUploadCategory,analyzeReport,switchTab,handleResultTabKey,loadHistoryReport,openHistoryItem,deleteHistoryItem,clearHistory,printResults,setHistoryFilter,addTagFromInput,removeTag,onNoteInput,setTrendParam,setTrendRange,setTrendView,setTrendFilter,setTrendQuery,trendTip,setDefaultTrendParam,clearDefaultTrendParam,showCurrentAnalysis,changeReportCategory,toggleProv,flagMetric,confirmMetric,setHistoryView,initMedViewer,medZoom,medReset,medRotate,medInvert,medRedraw,idAnswerYes,idAnswerNew,idAnswerSkip,idCancelClarify,idConfirmClarify,idPickField,idCancelNew,idCreateNewProfile,closeIdentityModal,renderNav,setMetricsFilter,openMetricSheet,closeMetricSheet,metricSheetPick,toggleSheetProv,flagMetricByKey,setOriginalView,copyOriginalText,onDocPageImgLoad,onDocHitTap,explainMetricsNow,explainWithGoogleAI,openFeedbackModal,closeFeedbackModal,sendFeedback,showTrends,exportBackup,importBackup,getOcrDiagnostics});if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+Object.assign(window,{fitProfileSelect,editProfileFromList,deleteProfile,openEditUserModal,onProfileSelect,addAnotherPage,showInfo,guestProfileSave,guestProfileSkip,deleteAllData,setCuration,showLastCuration,showHome,resetAll,showHistory,toggleTheme,openAddUserModal,closeAddUserModal,addUser,switchUser,logoutUser,removeFile,clearAllFiles,overrideImageQuality,setGroupMode,setUploadCategory,analyzeReport,switchTab,handleResultTabKey,loadHistoryReport,openHistoryItem,deleteHistoryItem,clearHistory,printResults,setHistoryFilter,addTagFromInput,removeTag,onNoteInput,setTrendParam,setTrendRange,setTrendView,setTrendFilter,setTrendQuery,trendTip,setDefaultTrendParam,clearDefaultTrendParam,showCurrentAnalysis,changeReportCategory,toggleProv,flagMetric,confirmMetric,setHistoryView,initMedViewer,medZoom,medReset,medRotate,medInvert,medRedraw,idAnswerYes,idAnswerNew,idAnswerSkip,idCancelClarify,idConfirmClarify,idPickField,idCancelNew,idCreateNewProfile,closeIdentityModal,renderNav,setMetricsFilter,openMetricSheet,closeMetricSheet,metricSheetPick,toggleSheetProv,flagMetricByKey,setOriginalView,copyOriginalText,onDocPageImgLoad,onDocHitTap,explainMetricsNow,explainWithGoogleAI,openFeedbackModal,closeFeedbackModal,sendFeedback,showTrends,exportBackup,importBackup,getOcrDiagnostics});if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 
 // ---- PWA: register the service worker ----
 // Only runs on a real http(s) origin — service workers are unavailable (and
