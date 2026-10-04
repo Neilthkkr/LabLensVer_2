@@ -7,6 +7,7 @@
    ============================================================================ */
 
 import {STANDARD_RANGES,rangeForProfile,std_,matchTest,statusForQualified,normalizedUnit,comparableUnit,parseReportText} from './src/core/lab-parser.mjs';
+import {buildChatContext,MAX_QUESTIONS as CHAT_MAX_QUESTIONS} from './src/core/chat-context.mjs';
 
 (function(){
 'use strict';
@@ -235,7 +236,7 @@ function setHistory(arr,{silent=false}={}){
   return ok;
 }
 
-function renderUserSelect(){const sel=$('userSelect');sel.innerHTML='<option value="">Guest</option>'+users.map(u=>`<option value="${esc(u.username)}">${esc(u.nickname||u.username)}</option>`).join('')+(currentUser?'<option value="__edit">Edit profile…</option>':'')+'<option value="__add">Add profile…</option>';if(currentUser)sel.value=currentUser;fitProfileSelect()}
+function renderUserSelect(){const sel=$('userSelect');sel.innerHTML='<option value="">Guest</option>'+users.map(u=>`<option value="${esc(u.username)}">${esc(u.nickname||u.username)}</option>`).join('')+'<option value="__add">Add profile…</option>';if(currentUser)sel.value=currentUser;fitProfileSelect()}
 // Size the profile menu to the name it shows (a select otherwise sizes to its longest option).
 function fitProfileSelect(){
   const sel=$('userSelect');if(!sel)return;
@@ -246,7 +247,7 @@ function fitProfileSelect(){
     sel.style.width=Math.ceil(c.measureText(text).width+38)+'px';
   }catch(e){}
 }
-function onProfileSelect(sel){if(sel.value==='__add'){sel.value=currentUser||'';openAddUserModal();return}if(sel.value==='__edit'){sel.value=currentUser||'';openEditUserModal(currentUser);return}switchUser(sel.value)}
+function onProfileSelect(sel){if(sel.value==='__add'){sel.value=currentUser||'';openAddUserModal();return}switchUser(sel.value)}
 function switchUser(name){const next=name||null;if(!LS.set('currentUser',next)){showToast('Could not switch profiles because browser storage is full. Your current profile is unchanged.','error');return false}currentUser=next;renderUserSelect();fitProfileSelect();defaultTrendKey=LS.get('defaultTrendKey_'+(currentUser||'guest'),null);selectedTrendKey=defaultTrendKey;uploadCategory=LS.get('uploadCategory_'+(currentUser||'guest'),'auto');const catSel=$('uploadCatSelect');if(catSel)catSel.value=uploadCategory;uploadedFiles=[];currentAnalysis=null;activeNavKey='new';updateFilePreview();renderUserBadge();updateUserInfoDisplay();try{renderUpcoming()}catch(e){}$('resultsSection').classList.remove('active');$('historySection').style.display='none';$('uploadSection').style.display='grid';renderNav();window.scrollTo({top:0,behavior:'smooth'});return true}
 function currentProfile(){
   return (users||[]).find(u=>u.username===currentUser);
@@ -259,10 +260,13 @@ function currentDisplayName(){
   return currentUser ? currentUser.slice(0,10) : 'Guest';
 }
 function renderUserBadge(){$('currentUserName').textContent=currentDisplayName()}
-function updateUserInfoDisplay(){const sec=$('userInfoSection');if(!currentUser){sec.style.display='none';return}sec.style.display='flex';const name=currentDisplayName();$('userNameDisplay').textContent=name;$('userAvatar').textContent=name[0].toUpperCase();$('userDataFiles').textContent=uploadedFiles.length+' file'+(uploadedFiles.length===1?'':'s');const n=getHistory().length;$('userDataReports').textContent=n+' report'+(n===1?'':'s')}
+function updateUserInfoDisplay(){const sec=$('userInfoSection');if(!currentUser){sec.style.display='none';return}sec.style.display='flex';const p=currentProfile(),name=(p&&p.username)||currentDisplayName();$('userNameDisplay').textContent=name;$('userAvatar').textContent=name[0].toUpperCase();$('userDataFiles').textContent=uploadedFiles.length+' file'+(uploadedFiles.length===1?'':'s');const n=getHistory().length;$('userDataReports').textContent=n+' report'+(n===1?'':'s')}
 let editingUser=null;
 const USER_KEY_PREFIXES=['health_reports_','health_meds_','health_medlog_','uploadCategory_','defaultTrendKey_','currentAnalysisId_'];
-function setUserModalMode(edit){
+function setUserModalMode(edit,profile){
+  // Creating needs sex and date of birth; editing an old incomplete profile must not be blocked by them.
+  $('newUserSex').required=!edit||!!(profile&&profile.sex);
+  $('newUserDob').required=!edit||!!(profile&&profile.dob);
   $('addUserTitle').textContent=edit?'Edit profile':'Add profile';
   $('addUserIntro').textContent=edit?'Changing sex or date of birth can change which reference ranges apply.':'Reports are kept separate per person, on this device only.';
   $('addUserSubmit').textContent=edit?'Save changes':'Create profile';
@@ -274,7 +278,7 @@ function openEditUserModal(username){
   $('newUserDob').max=new Date().toISOString().slice(0,10);
   editingUser=u.username;
   $('newUserName').value=u.username;$('newUserNickname').value=u.nickname||'';$('newUserSex').value=u.sex||'';$('newUserDob').value=u.dob||'';
-  setUserModalMode(true);
+  setUserModalMode(true,u);
   $('addUserModal').classList.add('active');setTimeout(()=>$('newUserName').focus(),50);
 }
 function closeAddUserModal(){$('addUserModal').classList.remove('active');$('addUserForm').reset();editingUser=null;setUserModalMode(false)}
@@ -337,6 +341,7 @@ async function deleteProfile(){
   showToast(removed?`Deleted ${name}`:`Profile removed, but some local records could not be deleted. Use Delete all data to retry.`,removed?'info':'error');
 }
 function editProfileFromList(btn){openEditUserModal(btn.dataset.user)}
+function editCurrentProfile(){if(currentUser)openEditUserModal(currentUser)}
 function renderProfilesList(){
   const host=$('profileList');if(!host)return;
   host.innerHTML=users.length?users.map(u=>{const a=ageYears(u.dob);return `<li><span class="pl-main"><strong>${esc(u.username)}</strong><small>${esc([u.sex==='female'?'Female':u.sex==='male'?'Male':'',a!=null?a+' years':''].filter(Boolean).join(' · ')||'No details')}</small></span><button class="btn-secondary" type="button" data-user="${esc(u.username)}" onclick="editProfileFromList(this)">Edit</button></li>`}).join(''):'<li class="pl-empty">No profiles yet. Reports are saved under Guest.</li>';
@@ -380,9 +385,12 @@ async function addUser(e){
   if(editingUser){
     const cur=users.find(u=>u.username===editingUser);
     if(!cur)return closeAddUserModal();
-    if(!sex||!dob)return showToast('Sex and date of birth are needed to use the right reference ranges','error');
+    // An incomplete profile (made before sex and date of birth were required) can still be renamed;
+    // one that has them cannot have them cleared, since ranges depend on them.
+    if((cur.sex&&!sex)||(cur.dob&&!dob))return showToast('Sex and date of birth are needed to use the right reference ranges','error');
+    const incomplete=!sex||!dob;
     if(users.some(u=>u!==cur&&u.username.toLowerCase()===username.toLowerCase()))return showToast('Another profile already has that name','error');
-    const old=cur.username,detailsChanged=cur.sex!==sex||cur.dob!==dob;
+    const old=cur.username,detailsChanged=(cur.sex||'')!==sex||(cur.dob||'')!==dob;
     const nextUsers=users.map(u=>u===cur?{...u,username,nickname,sex,dob}:u);
     let move=null,oldCopiesRemoved=true;
     try{
@@ -404,7 +412,7 @@ async function addUser(e){
     closeAddUserModal();renderUserSelect();
     if(currentUser===username){$('userSelect').value=username;switchUser(username)}
     try{renderProfilesList();renderRecents()}catch{}
-    return showToast(recalcError||(!oldCopiesRemoved?'Profile updated. Some old-name record copies remain on this device.':recalculated?`Profile updated. ${recalculated} value${recalculated===1?'':'s'} re-checked.`:'Profile updated'),recalcError||!oldCopiesRemoved?'error':'success');
+    return showToast(recalcError||(!oldCopiesRemoved?'Profile updated. Some old-name record copies remain on this device.':recalculated?`Profile updated. ${recalculated} value${recalculated===1?'':'s'} re-checked.`:incomplete?'Profile updated. Add sex and date of birth to get the right reference ranges.':'Profile updated'),recalcError||!oldCopiesRemoved?'error':(incomplete?'info':'success'));
   }
   const dupe=users.find(u=>u.username.toLowerCase()===username.toLowerCase());
   if(dupe){closeAddUserModal();$('userSelect').value=dupe.username;switchUser(dupe.username);return showToast(`${dupe.username} already exists. Switched to that profile.`,'info')}
@@ -517,22 +525,31 @@ function blockingImageFiles(){return uploadedFiles.filter(f=>f.type==='image'&&f
 function overrideImageQuality(i){const f=uploadedFiles[i];if(!f||!f.quality)return;f.quality.overridden=true;updateFilePreview();showToast('Photo will be analyzed—verify every extracted value','info')}
 function updateFilePreview(){const has=uploadedFiles.length>0,blocked=blockingImageFiles();{const dz=$('dropZone');if(dz)dz.classList.toggle('has-files',has)}$('previewArea').style.display=has?'block':'none';$('analyzeSection').style.display=has?'block':'none';$('fileListCount').textContent=`${uploadedFiles.length} file${uploadedFiles.length===1?'':'s'} selected${blocked.length?` · ${blocked.length} needs a retake`:''}`;$('fileList').innerHTML=uploadedFiles.map((f,i)=>{const q=f.quality;const qHtml=q?`<div class="quality-line"><span class="quality-badge ${q.level==='checking'?'warn':q.level}">${q.level==='good'?'Ready':q.level==='poor'?'Retake recommended':q.level==='checking'?'Checking…':'Check photo'}</span>${q.overridden?'<span class="quality-badge warn">Using anyway</span>':''}</div><div class="quality-detail">${esc(q.summary||'')}</div>${q.blocking&&!q.overridden?`<button class="quality-override" type="button" onclick="event.stopPropagation();overrideImageQuality(${i})">Use anyway</button>`:''}`:'';return`<div class="file-item ${q&&q.level==='poor'&&!q.overridden?'quality-poor':''}"><div class="file-item-icon ${f.type==='pdf'?'pdf':'image'}">${f.type==='pdf'?'PDF':'IMG'}</div><div class="file-item-info"><div class="file-item-name">${esc(f.name)}</div><div class="file-item-meta">${(f.size/1024).toFixed(1)} KB${q&&q.width?` · ${q.width}×${q.height}px`:''}</div>${qHtml}</div><button aria-label="Remove ${esc(f.name)}" class="remove-file-btn" onclick="removeFile(${i})" type="button"><svg class="icn" aria-hidden="true" focusable="false"><use href="#i-x"/></svg></button></div>`}).join('');$('groupToggle').classList.toggle('show',uploadedFiles.length>1);const btn=$('analyzeBtn');btn.disabled=blocked.length>0;btn.title=blocked.length?'Retake the photo or choose Use anyway first':'';btn.textContent=blocked.length?`Fix ${blocked.length} photo${blocked.length===1?'':'s'} before analysis`:(uploadedFiles.length>1?(groupMode==='separate'?`Analyze ${uploadedFiles.length} files → ${uploadedFiles.length} reports`:`Analyze ${uploadedFiles.length} files → 1 report`):'Analyze report');updateUserInfoDisplay()}
 function removeFile(i){uploadedFiles.splice(i,1);updateFilePreview()}function clearAllFiles(){uploadedFiles=[];updateFilePreview()}function setGroupMode(m){groupMode=m;$('gtCombine').classList.toggle('active',m==='combine');$('gtSeparate').classList.toggle('active',m==='separate');updateFilePreview()}function setUploadCategory(k){uploadCategory=k||'auto';LS.set('uploadCategory_'+(currentUser||'guest'),uploadCategory);const hint=$('typePickerHint');if(hint)hint.textContent=uploadCategory==='auto'?"Detected from the content unless you choose.":`Forcing: ${catMeta(uploadCategory).label}`}
+// One-handed use: on phones the add-report button sits at the bottom of the screen, just above the
+// tab bar. How tall the block above it is depends on the profile name, so measure it instead of guessing.
+function fitUploadMain(){
+  const main=document.querySelector('.upload-main'),nav=$('headerNav');
+  if(!main||!nav||!main.offsetParent)return;
+  const top=main.getBoundingClientRect().top+window.scrollY;
+  const room=window.innerHeight-top-nav.getBoundingClientRect().height-12;
+  document.documentElement.style.setProperty('--upload-main-min',Math.max(0,Math.round(room))+'px');
+}
+function wireUploadFit(){
+  if(typeof ResizeObserver==='function'){let queued=false;new ResizeObserver(()=>{if(queued)return;queued=true;requestAnimationFrame(()=>{queued=false;fitUploadMain()})}).observe(document.body)}
+  window.addEventListener('resize',fitUploadMain);fitUploadMain();
+}
 function wireUpload(){
-  const dz=$('dropZone'),add=$('addReportBtn'),dialog=$('reportSourceDialog');
-  const inputs={camera:$('captureInput'),photos:$('photosInput'),files:$('fileInput')};
-  // Touch devices get the three-way source sheet; a desktop opens the file browser directly.
-  add.onclick=()=>{if(matchMedia('(pointer:coarse)').matches)dialog.showModal();else inputs.files.click()};
-  $('reportSourceCancel').onclick=()=>dialog.close();
-  [['reportSourceCamera','camera'],['reportSourcePhotos','photos'],['reportSourceFiles','files']].forEach(([buttonId,source])=>{
-    $(buttonId).onclick=()=>{dialog.close();inputs[source].click()};
-  });
+  const dz=$('dropZone'),add=$('addReportBtn');
+  // One plain file input: phones show their own sheet (Take Photo, Photo Library, Choose Files); desktop opens the file browser.
+  const inputs={files:$('fileInput')};
+  add.onclick=()=>inputs.files.click();
   const pick=async(input,e)=>{
     // Copy the selection first: clearing the input empties the live FileList.
     const chosen=Array.from(e.target.files||[]);
     input.value='';
     try{await handleFiles(chosen)}catch(err){console.error('adding files failed',err);showToast('Couldn’t add that file. Try a different one.','error')}
   };
-  [...Object.values(inputs),$('srcCameraInput'),$('srcPhotosInput'),$('srcFilesInput')].forEach(input=>{if(input)input.onchange=e=>pick(input,e)});
+  [...Object.values(inputs)].forEach(input=>{if(input)input.onchange=e=>pick(input,e)});
   ['dragenter','dragover'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.add('drag-over')}));
   ['dragleave','drop'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.remove('drag-over')}));
   dz.addEventListener('drop',e=>handleFiles(e.dataTransfer.files));
@@ -1465,9 +1482,10 @@ function idCreateNewProfile(){
   pend.resolve({action:'continue-newuser'});
 }
 function idAnswerSkip(){
-  if(!__idPending)return;
-  closeIdentityModal();
-  __idPending.resolve({action:'continue'});
+  const pend=__idPending;
+  if(!pend)return;
+  closeIdentityModal();   // clears __idPending, so resolve through the captured copy
+  pend.resolve({action:'continue'});
 }
 function closeIdentityModal(){
   $('identityModal').classList.remove('active');
@@ -1900,7 +1918,7 @@ function renderAIReviewCard(a){
   const el=$('aiReviewCard'); if(!el)return;
   const hasData=(Array.isArray(a.metrics)&&a.metrics.length)||a.rawText;
   if(!hasData){el.innerHTML='';return;}
-  el.innerHTML=`<div class="ai-review-card"><h5>Explain with AI</h5><p>Sends only the numeric values, after you preview them.</p><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn-primary" onclick="explainWithGoogleAI(null)">Explain</button></div></div>`;
+  el.innerHTML=`<div class="ai-review-card"><h5>Ask AI about this report</h5><p>Chat in the app. Shares only test values, ranges and earlier results of the same tests, never your name, age, dates or file name.</p><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn-primary" onclick="openAskAI(null)">Ask AI</button></div></div>`;
 }
 
 function renderVerificationCard(a){
@@ -2072,7 +2090,7 @@ function renderMetricSheet(){
     ${m.srcLine?`<div class="prov sheet-prov"><button class="prov-toggle" onclick="toggleSheetProv()">Where did this come from?</button><div class="prov-body ${sourceCropHTML(m)?'open':''}" id="sheetProvBody">${sourceCropHTML(m)}<div class="prov-label">Read from this line of your report:</div><code class="prov-line">${esc(m.srcLine)}</code><button class="prov-flag" onclick="flagMetricByKey('${m.key}')"><svg class="icn" aria-hidden="true" focusable="false"><use href="#i-flag"/></svg> This value is wrong</button></div></div>`:''}
     ${typeof m.value==='number'?'<button type="button" class="btn-secondary" onclick="renderMetricCorrection()">Correct this result</button>':''}
     <div style="display:flex;flex-direction:column;gap:8px;margin-top:4px">
-      <button class="btn-primary sheet-ai-btn" onclick="explainMetricsNow([${metricSheetKeys.map(k=>`'${k}'`).join(',')}])">Explain ${metricSheetKeys.length>1?'these values':'this value'} with AI</button>
+      <button class="btn-primary sheet-ai-btn" onclick="explainMetricsNow([${metricSheetKeys.map(k=>`'${k}'`).join(',')}])">Ask AI about ${metricSheetKeys.length>1?'these values':'this value'}</button>
 
     </div>
   `;
@@ -2211,7 +2229,7 @@ function buildExplainPrompt(keys){
 function explainMetricsNow(keys){
   if(!keys||!keys.length)return;
   closeMetricSheet();
-  explainWithGoogleAI(keys);
+  openAskAI(keys);
 }
 
 function renderTagsNotes(a){if(!Array.isArray(a.tags))a.tags=[];$('tagsNotesCard').innerHTML=`<div style="font-weight:900;margin-bottom:10px">Tags &amp; notes</div><div class="tag-row">${a.tags.map((t,i)=>`<span class="tag">${esc(t)} <span class="x" onclick="removeTag(${i})" role="button" aria-label="Remove tag"><svg class="icn" aria-hidden="true" focusable="false"><use href="#i-x"/></svg></span></span>`).join('')}<input class="tag-input" id="tagInput" placeholder="+ tag, Enter" onkeydown="if(event.key==='Enter'){event.preventDefault();addTagFromInput()}"></div><textarea class="note-area" id="noteArea" placeholder="Add personal notes…" oninput="onNoteInput(this.value)">${esc(a.note||'')}</textarea>`}
@@ -2939,6 +2957,147 @@ function googleHandoffValueList(keys){
 // prompts a URL risks silent truncation, so past a safe length we copy the
 // prompt to the clipboard and open AI Mode blank for the person to paste.
 const GOOGLE_AI_URL_SAFE_LEN=8000;
+// ─── In-app AI chat ────────────────────────────────────────────────────────────
+// Replaces the hand-off to a Google search tab. The model sees a de-identified
+// summary (buildChatContext) and at most CHAT_MAX_QUESTIONS questions per report.
+// The conversation lives in memory only: it is gone when the report changes or the
+// page closes, but the question count is kept so reopening cannot reset it.
+const chatState={reportId:null,msgs:[],context:null,started:false,busy:false,error:'',notes:[],seed:null};
+const chatEndpoint=()=>'/api/chat';
+const chatUsedKey=()=>`chatUsed_${currentUser||'guest'}_${currentAnalysis?currentAnalysis.id:''}`;
+const chatUsed=()=>Math.max(0,Number(LS.get(chatUsedKey(),0))||0);
+const chatLeft=()=>Math.max(0,CHAT_MAX_QUESTIONS-chatUsed());
+// File names often carry the patient's name ("Jane Smith-Female42-1190.pdf") but also ordinary words
+// ("test-report.pdf"). Redacting those would rewrite the question and the summary ("this [NAME]"),
+// so only the name-like words of a file name are used.
+const CHAT_GENERIC_FILE_WORDS=/^(?:test|tests|report|reports|lab|labs|result|results|blood|urine|scan|scans|image|images|photo|photos|pdf|jpg|jpeg|png|copy|final|new|panel|health|analysis|summary|male|female|years?|yrs?|page|file|document|screenshot)$/i;
+function chatNames(){
+  const p=currentProfile(),a=currentAnalysis||{};
+  const fileWords=a.fileName?String(a.fileName).replace(/\.[a-z0-9]+$/i,'').split(/[^A-Za-z]+/).filter(w=>w.length>=3&&!CHAT_GENERIC_FILE_WORDS.test(w)).join(' '):'';
+  return [p&&p.name,p&&p.username,a.detectedPatient&&a.detectedPatient.name,fileWords].filter(Boolean);
+}
+const chatScrub=t=>LabLensDeid.deidentify(t,{names:chatNames()}).text;
+function chatRichText(t){
+  const inline=s=>esc(s).replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
+  return String(t).split(/\n{2,}/).map(block=>{
+    const lines=block.split('\n').filter(l=>l.trim());
+    if(lines.length&&lines.every(l=>/^\s*[-*•]\s+/.test(l)))return '<ul>'+lines.map(l=>`<li>${inline(l.replace(/^\s*[-*•]\s+/,''))}</li>`).join('')+'</ul>';
+    return '<p>'+lines.map(inline).join('<br>')+'</p>';
+  }).join('');
+}
+function chatSeedQuestion(keys){
+  const a=currentAnalysis;
+  const names=(a&&a.metrics||[]).filter(m=>keys.includes(m.key)&&!m.flaggedWrong).map(m=>m.name);
+  if(!names.length)return null;
+  const shown=names.slice(0,5).join(', ')+(names.length>5?` and ${names.length-5} more`:'');
+  return `Explain ${shown} in plain language: what ${names.length>1?'each measures':'it measures'}, where my result stands, and what to ask my doctor.`.slice(0,500);
+}
+async function openAskAI(keys){
+  const a=currentAnalysis;
+  if(!a||!Array.isArray(a.metrics)||!a.metrics.length){showToast('Open a report first — there\'s nothing to ask about yet.','info');return}
+  // Same switch as AI checking: nothing is sent unless the person has turned it on.
+  if(!curationEnabled()){
+    const ok=await confirmDialog('Turn on optional AI features?\n\nAsk AI sends a de-identified summary of this report (test names, values, units, ranges and earlier results of the same tests) to an AI service. It never sends your name, age, sex, date of birth, dates or file name. You will see exactly what is sent before the first question. This is the same switch as AI checking, and you can turn it off in Info.');
+    if(!ok)return;
+    LS.set(CURATE_KEY,true);
+    const t=$('curateToggle');if(t)t.checked=true;
+  }
+  if(chatState.reportId!==String(a.id)){
+    Object.assign(chatState,{reportId:String(a.id),msgs:[],started:false,busy:false,error:'',notes:[]});
+  }
+  const ctx=buildChatContext({analysis:a,history:getHistory(),deid:chatScrub});
+  if(!ctx.metricCount){showToast('There are no values to ask about yet.','info');return}
+  chatState.context=ctx;
+  chatState.seed=keys&&keys.length?chatSeedQuestion(keys):null;
+  renderChat();
+  const dlg=$('chatSheet');
+  if(!dlg.open)dlg.showModal();
+  if(chatState.started&&chatState.seed&&chatLeft()>0&&!chatState.busy){const q=chatState.seed;chatState.seed=null;sendChat(q)}
+  else setTimeout(()=>{const f=chatState.started?$('chatInput'):$('chatStart');if(f)f.focus()},50);
+}
+function closeChat(){const d=$('chatSheet');if(d&&d.open)d.close()}
+function chatStart(){
+  chatState.started=true;
+  renderChat();
+  const q=chatState.seed;chatState.seed=null;
+  if(q&&chatLeft()>0)sendChat(q);else{const f=$('chatInput');if(f)f.focus()}
+}
+function renderChat(){
+  const ctx=chatState.context,left=chatLeft();
+  const intro=$('chatIntro'),thread=$('chatThread'),chips=$('chatChips'),form=$('chatForm'),foot=$('chatFoot');
+  intro.hidden=chatState.started;
+  $('chatSheet').classList.toggle('is-intro',!chatState.started);
+  thread.hidden=form.hidden=chips.hidden=foot.hidden=!chatState.started;
+  if(!chatState.started){
+    $('chatPreview').textContent=ctx?ctx.text:'';
+    $('chatPreviewSummary').textContent=ctx?`See exactly what is sent (${ctx.metricCount} value${ctx.metricCount===1?'':'s'}${ctx.trendCount?`, ${ctx.trendCount} with earlier results`:''})`:'See exactly what is sent';
+    return;
+  }
+  const bubbles=chatState.msgs.map(m=>m.role==='user'?`<div class="chat-msg user">${esc(m.text)}</div>`:`<div class="chat-msg ai">${chatRichText(m.text)}</div>`);
+  chatState.notes.forEach(n=>bubbles.push(`<div class="chat-msg note">${esc(n)}</div>`));
+  if(chatState.busy)bubbles.push('<div class="chat-msg ai" aria-label="AI is writing"><span class="chat-typing"><i></i><i></i><i></i></span></div>');
+  if(chatState.error)bubbles.push(`<div class="chat-msg error" role="alert">${esc(chatState.error)}${chatState.fallback?'<br><button class="btn-secondary" type="button" onclick="chatUseGoogle()">Open in Google AI search instead</button>':''}</div>`);
+  if(!chatState.msgs.length&&!chatState.busy&&left>0)bubbles.unshift('<div class="chat-msg ai"><p>Hi! Ask me about the results in this report. I explain what they mean in plain language, but I can’t diagnose.</p></div>');
+  thread.innerHTML=bubbles.join('');
+  thread.scrollTop=thread.scrollHeight;
+  const suggestions=!chatState.msgs.length&&!chatState.busy&&left>0
+    ?['What is out of range?',...(ctx&&ctx.trendCount?['How have my results changed?']:[]),'What should I ask my doctor?']:[];
+  chips.hidden=!suggestions.length;
+  chips.innerHTML=suggestions.map(q=>`<button class="chat-chip" type="button" data-q="${esc(q)}">${esc(q)}</button>`).join('');
+  form.hidden=left<=0;
+  $('chatSend').disabled=chatState.busy;
+  $('chatInput').disabled=chatState.busy;
+  foot.textContent=left>0
+    ?`${left} of ${CHAT_MAX_QUESTIONS} questions left for this report · AI can make mistakes. Not medical advice.`
+    :`You’ve used all ${CHAT_MAX_QUESTIONS} questions for this report. Not medical advice; talk to your clinician about anything that worries you.`;
+}
+function chatUseGoogle(){closeChat();explainWithGoogleAI(null)}
+async function sendChat(raw){
+  const a=currentAnalysis;
+  if(chatState.busy||!a||String(a.id)!==chatState.reportId||!chatState.started)return;
+  if(chatLeft()<=0){renderChat();return}
+  const typed=String(raw||'').trim().slice(0,500);
+  if(!typed)return;
+  const q=chatScrub(typed).trim();
+  if(!q){chatState.error='Please ask without names or contact details.';chatState.fallback=false;renderChat();return}
+  chatState.notes=q!==typed?['Personal details were removed from your question before sending.']:[];
+  chatState.error='';chatState.fallback=false;chatState.busy=true;
+  chatState.msgs.push({role:'user',text:q});
+  const input=$('chatInput');if(input){input.value='';input.style.height=''}
+  renderChat();
+  try{
+    const res=await fetch(chatEndpoint(),{method:'POST',headers:{'content-type':'application/json'},
+      body:JSON.stringify({context:chatState.context.text,messages:chatState.msgs.map(m=>({role:m.role,text:m.text}))}),signal:AbortSignal.timeout(30000)});
+    if(!res.ok){const e=new Error('chat '+res.status);e.status=res.status;throw e}
+    const data=await res.json();
+    if(String(currentAnalysis&&currentAnalysis.id)!==chatState.reportId)return;
+    chatState.msgs.push({role:'model',text:String(data.reply||'').trim()||'Sorry, I could not answer that.'});
+    LS.set(chatUsedKey(),chatUsed()+1);
+  }catch(e){
+    // A failed question is not counted: take it back out and return the text to the box.
+    chatState.msgs.pop();
+    if(input)input.value=typed;
+    chatState.fallback=e&&e.status===503;
+    chatState.error=e&&e.status===503?'Ask AI is not set up here.'
+      :e&&e.status===429?'Too many questions right now. Please try again in a little while.'
+      :e&&e.status===422?'That question included details that could not be sent safely. Please rephrase it.'
+      :'Couldn’t reach the AI service. Your question was not counted, so you can try again.';
+  }finally{
+    chatState.busy=false;
+    renderChat();
+    const f=$('chatInput');if(f&&!f.disabled&&!f.closest('[hidden]'))f.focus();
+  }
+}
+function wireChat(){
+  const form=$('chatForm'),input=$('chatInput'),dlg=$('chatSheet');
+  if(!form||!input||!dlg)return;
+  form.addEventListener('submit',e=>{e.preventDefault();sendChat(input.value)});
+  input.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){e.preventDefault();sendChat(input.value)}});
+  input.addEventListener('input',()=>{input.style.height='auto';input.style.height=Math.min(input.scrollHeight,120)+'px'});
+  $('chatChips').addEventListener('click',e=>{const b=e.target.closest('.chat-chip');if(b)sendChat(b.dataset.q)});
+  dlg.addEventListener('click',e=>{if(e.target===dlg)dlg.close()});
+}
+
 async function explainWithGoogleAI(keys){
   const prompt=buildGoogleAIPrompt(keys);
   if(!prompt){ showToast('Open a report first — there\'s nothing to explain yet.','info'); return; }
@@ -3256,7 +3415,7 @@ async function init(){
       if(r){currentAnalysis=r;}
     }
   }catch(e){}
-  populateCategoryUI();wireUpload();
+  populateCategoryUI();wireUpload();wireUploadFit();wireChat();
   // (no first-run modal: a profile is offered after the first report is read)
   // Note: persistence is handled by LS helper on every change (users, history,
   // meds, med-log, theme, default-trend, AI model selection). On page close
@@ -3329,7 +3488,7 @@ function sendFeedback(e){
     if(o.classList&&o.classList.contains('modal-overlay')&&o.classList.contains('active')&&(o.id==='metricSheetOverlay'||o.id==='confirmDialogOverlay'))dismiss(o);
   });
 })();
-Object.assign(window,{fitProfileSelect,editProfileFromList,deleteProfile,openEditUserModal,onProfileSelect,addAnotherPage,showInfo,guestProfileSave,guestProfileSkip,deleteAllData,setCuration,showLastCuration,showHome,resetAll,showHistory,toggleTheme,openAddUserModal,closeAddUserModal,addUser,switchUser,logoutUser,removeFile,clearAllFiles,overrideImageQuality,setGroupMode,setUploadCategory,analyzeReport,switchTab,handleResultTabKey,loadHistoryReport,openHistoryItem,deleteHistoryItem,clearHistory,printResults,setHistoryFilter,addTagFromInput,removeTag,onNoteInput,setTrendParam,setTrendRange,setTrendView,setTrendFilter,setTrendQuery,trendTip,setDefaultTrendParam,clearDefaultTrendParam,showCurrentAnalysis,changeReportCategory,toggleProv,flagMetric,confirmMetric,setHistoryView,initMedViewer,medZoom,medReset,medRotate,medInvert,medRedraw,idAnswerYes,idAnswerNew,idAnswerSkip,idCancelClarify,idConfirmClarify,idPickField,idCancelNew,idCreateNewProfile,closeIdentityModal,renderNav,setMetricsFilter,openMetricSheet,closeMetricSheet,metricSheetPick,toggleSheetProv,flagMetricByKey,renderMetricCorrection,saveMetricCorrection,setOriginalView,copyOriginalText,onDocPageImgLoad,onDocHitTap,explainMetricsNow,explainWithGoogleAI,openFeedbackModal,closeFeedbackModal,sendFeedback,showTrends,exportBackup,openBackupPicker,importBackup,getOcrDiagnostics});if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+Object.assign(window,{editCurrentProfile,openAskAI,closeChat,chatStart,chatUseGoogle,fitProfileSelect,editProfileFromList,deleteProfile,openEditUserModal,onProfileSelect,addAnotherPage,showInfo,guestProfileSave,guestProfileSkip,deleteAllData,setCuration,showLastCuration,showHome,resetAll,showHistory,toggleTheme,openAddUserModal,closeAddUserModal,addUser,switchUser,logoutUser,removeFile,clearAllFiles,overrideImageQuality,setGroupMode,setUploadCategory,analyzeReport,switchTab,handleResultTabKey,loadHistoryReport,openHistoryItem,deleteHistoryItem,clearHistory,printResults,setHistoryFilter,addTagFromInput,removeTag,onNoteInput,setTrendParam,setTrendRange,setTrendView,setTrendFilter,setTrendQuery,trendTip,setDefaultTrendParam,clearDefaultTrendParam,showCurrentAnalysis,changeReportCategory,toggleProv,flagMetric,confirmMetric,setHistoryView,initMedViewer,medZoom,medReset,medRotate,medInvert,medRedraw,idAnswerYes,idAnswerNew,idAnswerSkip,idCancelClarify,idConfirmClarify,idPickField,idCancelNew,idCreateNewProfile,closeIdentityModal,renderNav,setMetricsFilter,openMetricSheet,closeMetricSheet,metricSheetPick,toggleSheetProv,flagMetricByKey,renderMetricCorrection,saveMetricCorrection,setOriginalView,copyOriginalText,onDocPageImgLoad,onDocHitTap,explainMetricsNow,explainWithGoogleAI,openFeedbackModal,closeFeedbackModal,sendFeedback,showTrends,exportBackup,openBackupPicker,importBackup,getOcrDiagnostics});if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 
 // ---- PWA: register the service worker ----
 // Only runs on a real http(s) origin — service workers are unavailable (and

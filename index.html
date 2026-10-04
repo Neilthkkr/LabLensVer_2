@@ -281,7 +281,7 @@
     max-width: 100% !important;
   }
   /* Avoid text truncation overlap in user badges */
-  #currentUserName, #userNameDisplay {
+  #currentUserName {
     white-space: nowrap !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
@@ -634,7 +634,6 @@ body:has(.results-section.active) .hero,body:has(.history-section[style*="block"
 body{min-height:100vh;min-height:100dvh;-webkit-tap-highlight-color:transparent;-webkit-text-size-adjust:100%}
 button,a,select,summary,label,.chip,.tab-btn,.nav-btn{touch-action:manipulation}
 .appbar{padding-top:env(safe-area-inset-top)}
-.source-list{display:none}
 .trust-line{display:flex;gap:8px;align-items:flex-start;margin:16px 2px 0;font-size:13px;color:var(--text-secondary)}
 .trust-line .icn{width:16px;height:16px;margin-top:2px;color:var(--primary)}
 .recent{margin-top:28px}
@@ -652,17 +651,10 @@ button,a,select,summary,label,.chip,.tab-btn,.nav-btn{touch-action:manipulation}
   .hero{padding:0 0 14px}
   .hero h2{font-size:30px}
   .upload-card{border:0;background:transparent}
-  .drop-zone{padding:0}
-  .drop-zone-inner{display:none}
-  .source-list{display:grid;gap:10px}
-  .src-btn{display:flex;align-items:center;gap:14px;width:100%;min-height:72px;padding:12px 16px;text-align:left;border:1px solid var(--border-strong);border-radius:16px;background:var(--card);color:var(--text);font:inherit;cursor:pointer;transition:transform .12s ease,background .12s ease}
-  .src-btn:active{transform:scale(.985)}
-  .src-btn.primary{background:var(--primary);border-color:var(--primary);color:var(--on-primary)}
-  .src-ic{flex:none;width:46px;height:46px;border-radius:12px;display:grid;place-items:center;background:var(--surface-2);color:var(--primary)}
-  .src-btn.primary .src-ic{background:rgba(255,255,255,.18);color:inherit}
-  .src-ic .icn{width:24px;height:24px}
-  .src-tx strong{display:block;font-size:17px;font-weight:600}
-  .src-tx small{display:block;font-size:13px;opacity:.75;margin-top:1px}
+  .drop-zone{padding:0;border:0;background:transparent}
+  .drop-zone-inner{display:block;padding:0;margin:0;border:0;text-align:left}
+  .drop-zone-inner .drop-icon,.drop-zone-inner p{display:none}
+  .add-report-button{width:100%;min-height:56px;font-size:17px}
   .file-list-container{margin:14px 0 0}
   .analyze-section{padding:14px 0 0;border-top:0}
   .recent{margin-top:24px}
@@ -675,7 +667,11 @@ button,a,select,summary,label,.chip,.tab-btn,.nav-btn{touch-action:manipulation}
 [data-theme="dark"] .add-more{color:var(--primary)}
 .add-more:hover{background:var(--surface-2)}
 @media(max-width:820px){
-  .drop-zone.has-files .source-list{display:none}
+  .drop-zone.has-files .drop-zone-inner{display:none}
+  /* One-handed use: with nothing added yet, the button sits at the bottom of the screen above the tab bar. */
+  .upload-section:has(.drop-zone:not(.has-files)) .upload-main{min-height:var(--upload-main-min,calc(100dvh - 420px));display:flex;flex-direction:column;justify-content:flex-end}
+  .upload-section:has(.drop-zone:not(.has-files)) .add-report-button{min-height:60px}
+  .footer{font-size:11px;line-height:1.4;opacity:.85}
   .feedback-fab{display:none}
 }
 
@@ -688,9 +684,6 @@ button,a,select,summary,label,.chip,.tab-btn,.nav-btn{touch-action:manipulation}
   .recent-row{flex-direction:column;align-items:flex-start;gap:2px}
 }
 
-.src-btn{position:relative}
-.src-input{position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:0;cursor:pointer;font-size:0;z-index:2}
-.src-btn:focus-within{outline:2px solid var(--focus);outline-offset:2px}
 .curate-link[hidden]{display:none}
 .analyze-section>*+*{margin-top:12px}
 .analyze-section .analyze-btn{margin-top:0}
@@ -708,6 +701,55 @@ button,a,select,summary,label,.chip,.tab-btn,.nav-btn{touch-action:manipulation}
 #addUserModal .modal-actions{flex-wrap:wrap;margin-top:18px}
 .tabs-hint{display:none}@media(max-width:600px){.tabs-hint{display:block;padding:8px 14px 0;color:var(--text-secondary);font-size:12px;text-align:right}}
 @media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+
+/* In-app AI chat: a bottom sheet on phones, a centred panel on larger screens. */
+.chat-sheet{box-sizing:border-box;width:min(520px,calc(100vw - 32px));max-width:none;height:min(680px,86dvh);margin:auto;padding:0;border:0;border-radius:18px;background:var(--card);color:var(--text);box-shadow:var(--shadow-lg);overflow:hidden}
+.chat-sheet[open]{display:flex;flex-direction:column}
+.chat-sheet [hidden]{display:none!important}
+.chat-sheet.is-intro{height:fit-content;max-height:min(88dvh,720px)}
+.chat-sheet::backdrop{background:rgba(15,19,18,.5)}
+.chat-head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 10px;border-bottom:1px solid var(--border)}
+.chat-head h3{margin:0;font-size:17px}
+.chat-close{display:grid;place-items:center;width:40px;height:40px;border:0;border-radius:10px;background:transparent;color:var(--text-secondary);cursor:pointer}
+.chat-close:hover{background:var(--surface-2)}
+.chat-close .icn{width:20px;height:20px}
+.chat-intro{padding:16px;overflow-y:auto;font-size:14.5px;line-height:1.5}
+.chat-intro p{margin:0 0 10px}
+.chat-lead{font-size:16px;font-weight:600}
+.chat-small,.chat-foot{font-size:12px;color:var(--text-secondary)}
+.chat-preview{margin:0 0 10px;border:1px solid var(--border);border-radius:10px;padding:8px 12px;background:var(--surface-2)}
+.chat-preview summary{cursor:pointer;font-weight:600;font-size:13.5px;min-height:28px}
+.chat-preview pre{margin:8px 0 2px;white-space:pre-wrap;word-break:break-word;font:12px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;max-height:200px;overflow:auto}
+.chat-intro-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:14px}
+.chat-thread{flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding:14px 16px}
+.chat-msg{max-width:88%;padding:10px 13px;border-radius:16px;font-size:15px;line-height:1.5;overflow-wrap:anywhere}
+.chat-msg p{margin:0 0 8px}.chat-msg p:last-child{margin:0}
+.chat-msg ul{margin:0 0 8px;padding-left:18px}.chat-msg li{margin:2px 0}
+.chat-msg.user{align-self:flex-end;background:var(--primary);color:var(--on-primary);border-bottom-right-radius:6px}
+.chat-msg.ai{align-self:flex-start;background:var(--surface-2);border-bottom-left-radius:6px}
+.chat-msg.note,.chat-msg.error{align-self:center;max-width:100%;background:transparent;font-size:13px;color:var(--text-secondary);text-align:center;padding:2px 8px}
+.chat-msg.error{color:var(--danger)}
+.chat-msg.error button{margin-top:6px}
+.chat-typing{display:inline-flex;gap:4px;align-items:center;min-height:22px}
+.chat-typing i{width:6px;height:6px;border-radius:50%;background:var(--text-secondary);opacity:.4;animation:chatDot 1s infinite}
+.chat-typing i:nth-child(2){animation-delay:.15s}.chat-typing i:nth-child(3){animation-delay:.3s}
+@keyframes chatDot{50%{opacity:1}}
+@media(prefers-reduced-motion:reduce){.chat-typing i{animation:none;opacity:.7}}
+.chat-chips{display:flex;gap:8px;flex-wrap:wrap;padding:0 16px 10px}
+.chat-chip{min-height:40px;padding:0 14px;border:1px solid var(--border-strong);border-radius:20px;background:var(--card);color:var(--text);font:inherit;font-size:14px;cursor:pointer}
+.chat-chip:hover{background:var(--surface-2)}
+.chat-form{display:flex;align-items:flex-end;gap:8px;padding:8px 12px 6px;border-top:1px solid var(--border)}
+.chat-form textarea{flex:1;min-height:44px;max-height:120px;resize:none;padding:10px 12px;border:1px solid var(--border-strong);border-radius:14px;background:var(--bg);color:var(--text);font:inherit;font-size:16px;line-height:1.35}
+.chat-send{flex:none;display:grid;place-items:center;width:44px;height:44px;border:0;border-radius:50%;background:var(--primary);color:var(--on-primary);cursor:pointer}
+.chat-send:disabled{opacity:.45;cursor:default}
+.chat-send .icn{width:20px;height:20px}
+.chat-foot{margin:0;padding:2px 16px calc(10px + env(safe-area-inset-bottom));text-align:center}
+@media(max-width:700px){.chat-sheet{position:fixed;inset:auto 0 0;width:100%;height:min(88dvh,720px);margin:0;border-radius:18px 18px 0 0}}
+
+/* Profile card: full name (wraps rather than truncating) and stacked Edit / Logout actions. */
+.user-details{min-width:0;flex:1}
+.user-name{white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere}
+.user-actions{display:flex;flex-direction:column;gap:8px;flex:none}
 </style>
 </head>
 <body>
@@ -723,26 +765,22 @@ button,a,select,summary,label,.chip,.tab-btn,.nav-btn{touch-action:manipulation}
 </div>
 </div></header>
 <div class="container">
-<section class="user-info-section" id="userInfoSection"><div class="user-avatar" id="userAvatar">U</div><div class="user-details"><div class="user-name" id="userNameDisplay">User</div><span class="data-badge" id="userDataFiles">0 files</span><span class="data-badge" id="userDataReports">0 reports</span></div><button class="action-btn" onclick="logoutUser()" style="color:var(--danger)">⤺ Logout</button></section>
-<section class="hero" id="heroSection"><h2>Lab reports, simplified</h2><p>Add a photo or PDF. Every value sits beside its normal range and links back to where it came from.</p></section>
+<section class="hero" id="heroSection"><h2>Lab reports, simplified</h2><p>Add a PDF or Photo of your Lab Report. Every value sits beside its normal range and links back to where it came from.</p></section>
+<section class="user-info-section" id="userInfoSection"><div class="user-avatar" id="userAvatar">U</div><div class="user-details"><div class="user-name" id="userNameDisplay">User</div><span class="data-badge" id="userDataFiles">0 files</span><span class="data-badge" id="userDataReports">0 reports</span></div><div class="user-actions"><button class="action-btn" id="editProfileBtn" onclick="editCurrentProfile()" type="button">✎ Edit</button><button class="action-btn" onclick="logoutUser()" style="color:var(--danger)" type="button">⤺ Logout</button></div></section>
 <div class="upcoming" id="upcomingStrip" style="display:none"></div>
 <section class="upload-section" id="uploadSection">
+<div class="upload-main">
 <div class="card upload-card">
 <div aria-label="Add a lab report" class="drop-zone" id="dropZone" role="region">
-<div class="drop-zone-inner"><div class="drop-icon" aria-hidden="true"><svg class="icn" aria-hidden="true" focusable="false"><use href="#i-upload"/></svg></div><h3>Add a lab report</h3><p>Drop a PDF or image here, or browse.</p><button class="add-report-button" id="addReportBtn" type="button">Choose file</button></div>
-<div class="source-list" role="group" aria-label="Add a lab report">
-<div class="src-btn primary" id="srcCamera"><span class="src-ic"><svg class="icn" aria-hidden="true" focusable="false"><use href="#i-camera"/></svg></span><span class="src-tx"><strong>Scan with camera</strong><small>Best for printed reports</small></span><input class="src-input" id="srcCameraInput" type="file" accept="image/*" capture="environment" aria-label="Scan a report with the camera"/></div>
-<div class="src-btn" id="srcPhotos"><span class="src-ic"><svg class="icn" aria-hidden="true" focusable="false"><use href="#i-image"/></svg></span><span class="src-tx"><strong>Choose from photos</strong><small>Screenshots and saved photos</small></span><input class="src-input" id="srcPhotosInput" type="file" multiple accept="image/png,image/jpeg,image/webp,image/bmp" aria-label="Choose report photos from your library"/></div>
-<div class="src-btn" id="srcFiles"><span class="src-ic"><svg class="icn" aria-hidden="true" focusable="false"><use href="#i-file"/></svg></span><span class="src-tx"><strong>Choose a file</strong><small>PDF or image from Files</small></span><input class="src-input" id="srcFilesInput" type="file" multiple accept="application/pdf,.pdf,image/png,image/jpeg,image/webp,image/bmp" aria-label="Choose a PDF or image file"/></div>
-</div></div>
+<div class="drop-zone-inner"><div class="drop-icon" aria-hidden="true"><svg class="icn" aria-hidden="true" focusable="false"><use href="#i-upload"/></svg></div><p>Drop a PDF or image here, or</p><button class="add-report-button" id="addReportBtn" type="button">Add a lab report</button></div>
+</div>
 <input accept="application/pdf,.pdf,image/png,image/jpeg,image/webp,image/bmp" id="fileInput" multiple="" style="display:none" type="file"/>
-<input accept="image/png,image/jpeg,image/webp,image/bmp" id="photosInput" multiple="" style="display:none" type="file"/>
-<input accept="image/*" capture="environment" id="captureInput" style="display:none" type="file"/>
 <div id="previewArea" style="display:none"><div class="file-list-container"><div class="file-list-header"><span class="file-list-count" id="fileListCount"></span><span class="fl-actions"><button class="add-more" onclick="addAnotherPage()" type="button"><svg class="icn" aria-hidden="true" focusable="false"><use href="#i-plus"/></svg><span>Add page</span></button><button class="clear-btn" onclick="clearAllFiles()" type="button"><svg class="icn" aria-hidden="true" focusable="false"><use href="#i-trash"/></svg><span>Clear all</span></button></span></div><div id="fileList"></div></div></div>
 <section class="analyze-section" id="analyzeSection" style="display:none"><button class="analyze-btn" id="analyzeBtn" onclick="analyzeReport()">Analyze</button><div class="type-picker"><span style="font-size:12px;color:var(--text-secondary);font-weight:800">Report type</span><select class="type-picker-select" id="uploadCatSelect" onchange="setUploadCategory(this.value)"><option value="auto">Auto-detect</option></select></div><div class="group-toggle" id="groupToggle"><span style="font-size:12px;color:var(--text-secondary);font-weight:800">Multiple files</span><div class="gt-options"><button class="gt-opt" id="gtCombine" onclick="setGroupMode('combine')">Merge into one report</button><button class="gt-opt active" id="gtSeparate" onclick="setGroupMode('separate')">One report per file (recommended)</button></div></div><label class="curate-opt"><input type="checkbox" id="curateToggle" onchange="setCuration(this.checked)"/><span><strong>Double-check with AI</strong><small>Review the exact result text, age and sex before each send.</small></span></label><button class="curate-link" id="curateLast" type="button" onclick="showLastCuration()" hidden>View what was last shared</button></section>
 <section class="progress-container" id="progressSection"><div class="progress-card"><div class="spinner"></div><div class="progress-text" id="progressText">Extracting information...</div><div class="progress-sub" id="progressSub">Reading files, running OCR, and interpreting parameters...</div><div class="progress-bar-track"><div class="progress-bar-fill" id="progressBarFill"></div></div><div class="progress-bar-pct" id="progressBarPct">0%</div></div></section>
 </div>
 <p class="trust-line"><svg class="icn" aria-hidden="true" focusable="false"><use href="#i-lock"/></svg><span>Read on this device. Nothing is sent unless you turn on AI checking.</span></p>
+</div>
 <div class="recent" id="recentSection" hidden><h3>Recent reports</h3><ul id="recentList"></ul></div>
 </div></section></div>
 
@@ -750,9 +788,24 @@ button,a,select,summary,label,.chip,.tab-btn,.nav-btn{touch-action:manipulation}
 <div class="info-block"><h3>How it works</h3><p>LabLens reads your report on this device with PDF and OCR engines, pulls out each value, and compares it with the reference range printed on the report. Where none is printed, general age and sex ranges are used and labelled. Every value links to the line it was read from so you can check it.</p></div>
 <div class="info-block"><h3>Not medical advice</h3><p>LabLens is for information only. It does not diagnose or recommend treatment. Text extraction can make mistakes, so check results against the original report and talk to a qualified healthcare professional.</p></div>
 <div class="info-block"><h3>Profiles</h3><ul class="profile-list" id="profileList"></ul><div class="about-actions"><button class="btn-secondary" type="button" onclick="openAddUserModal()">Add profile</button></div></div>
-<div class="info-block"><h3>Your data</h3><ul><li>Reports and profiles are stored in this browser, on this device. They are not encrypted. Anyone using this browser profile may be able to read them.</li><li>AI checking shows you the exact text, age and sex before each request. Automatic redaction can miss details, so check the preview. AI explanations and email drafts send only what you confirm.</li></ul><div class="about-actions"><button class="btn-secondary" type="button" onclick="exportBackup()">Download a backup</button><button class="btn-secondary" type="button" onclick="openBackupPicker()">Restore a backup</button><input id="backupInput" type="file" accept="application/json,.json" hidden onchange="importBackup(this.files[0]);this.value=''"/><button class="btn-secondary danger" type="button" onclick="deleteAllData()">Delete all data on this device</button></div></div>
+<div class="info-block"><h3>Your data</h3><ul><li>Reports and profiles are stored in this browser, on this device. They are not encrypted. Anyone using this browser profile may be able to read them.</li><li>AI checking shows you the exact text, age and sex before each request. Automatic redaction can miss details, so check the preview. Ask AI is the same switch: it shows the list of test names, values, ranges and earlier results of the same tests before your first question, never your name, age, dates or file name, and allows 3 questions per report. AI explanations and email drafts send only what you confirm.</li></ul><div class="about-actions"><button class="btn-secondary" type="button" onclick="exportBackup()">Download a backup</button><button class="btn-secondary" type="button" onclick="openBackupPicker()">Restore a backup</button><input id="backupInput" type="file" accept="application/json,.json" hidden onchange="importBackup(this.files[0]);this.value=''"/><button class="btn-secondary danger" type="button" onclick="deleteAllData()">Delete all data on this device</button></div></div>
 <div class="info-block"><h3>Feedback</h3><p>Found a problem or have an idea?</p><div class="about-actions"><button class="btn-secondary" type="button" onclick="openFeedbackModal()">Send feedback</button></div></div>
 <div class="info-block"><h3>About</h3><p>LabLens Ver2.0. Made for blood, urine and clinical pathology reports.</p></div></section>
+<dialog aria-labelledby="chatTitle" class="chat-sheet" id="chatSheet">
+<div class="chat-head"><h3 id="chatTitle">Ask AI</h3><button aria-label="Close chat" class="chat-close" onclick="closeChat()" type="button"><svg class="icn" aria-hidden="true" focusable="false"><use href="#i-x"/></svg></button></div>
+<div class="chat-intro" id="chatIntro" hidden>
+<p class="chat-lead">Ask questions about this report in plain language.</p>
+<p>To answer, LabLens sends only test names, values, units, reference ranges and your earlier results for the same tests, described as “about 3 months before”.</p>
+<p><strong>Never sent:</strong> your name, age, sex, date of birth, any dates, or the file name.</p>
+<details class="chat-preview"><summary id="chatPreviewSummary">See exactly what is sent</summary><pre id="chatPreview"></pre></details>
+<p class="chat-small">Redaction is automatic and can miss details, so check the list above. You get 3 questions per report.</p>
+<div class="chat-intro-actions"><button class="btn-secondary" onclick="closeChat()" type="button">Cancel</button><button class="btn-primary" id="chatStart" onclick="chatStart()" type="button">Start chat</button></div>
+</div>
+<div aria-live="polite" class="chat-thread" id="chatThread" hidden role="log"></div>
+<div class="chat-chips" id="chatChips" hidden></div>
+<form class="chat-form" id="chatForm" hidden><textarea aria-label="Your question" id="chatInput" maxlength="500" placeholder="Ask about your results" rows="1"></textarea><button aria-label="Send question" class="chat-send" id="chatSend" type="submit"><svg class="icn" aria-hidden="true" focusable="false"><use href="#i-arrow-up"/></svg></button></form>
+<p class="chat-foot" id="chatFoot" hidden></p>
+</dialog>
 <dialog id="curationPreview" class="report-source-dialog" aria-labelledby="curationPreviewTitle"><h3 id="curationPreviewTitle">Last text shared with AI</h3><p id="curationPreviewMeta" class="curation-meta"></p><pre id="curationPreviewText" class="curation-pre"></pre><form method="dialog"><button class="add-report-button" type="submit" value="close">Close</button></form></dialog>
 <dialog id="curationConsent" class="report-source-dialog" aria-labelledby="curationConsentTitle"><h3 id="curationConsentTitle">Review what AI checking will receive</h3><p>Check every line for names or other private details. Automatic redaction can miss them. Choose on-device only if anything looks wrong.</p><p id="curationConsentMeta" class="curation-meta"></p><pre id="curationConsentText" class="curation-pre"></pre><form method="dialog" class="modal-actions"><button class="btn-secondary" type="submit" value="cancel">Use on-device only</button><button class="btn-primary" type="submit" value="send">Send this text</button></form></dialog>
 <section class="results-section" id="resultsSection"><div class="result-header" id="resultHeader"><div><h3>Report extracted</h3><p id="resultDate">Analyzed</p></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="download-btn" onclick="printResults()">Save or print report</button></div></div><div class="results-body"><p class="tabs-hint">Swipe tabs for more views →</p><div aria-label="Report views" class="tabs" id="resultTabs" role="tablist"><button aria-controls="tab-summary" aria-selected="true" class="tab-btn active" data-tab="summary" id="result-tab-summary" onclick="switchTab('summary',this)" onkeydown="handleResultTabKey(event)" role="tab" tabindex="0">Summary</button><button aria-controls="tab-detailed" aria-selected="false" class="tab-btn" data-tab="detailed" id="result-tab-detailed" onclick="switchTab('detailed',this)" onkeydown="handleResultTabKey(event)" role="tab" tabindex="-1">Values</button><button aria-controls="tab-document" aria-selected="false" class="tab-btn" data-tab="document" id="result-tab-document" onclick="switchTab('document',this)" onkeydown="handleResultTabKey(event)" role="tab" tabindex="-1">Original</button><button aria-controls="tab-comparison" aria-selected="false" class="tab-btn" data-tab="comparison" id="result-tab-comparison" onclick="switchTab('comparison',this)" onkeydown="handleResultTabKey(event)" role="tab" tabindex="-1">Trends</button><button aria-controls="tab-recommendations" aria-selected="false" class="tab-btn" data-tab="recommendations" id="result-tab-recommendations" onclick="switchTab('recommendations',this)" onkeydown="handleResultTabKey(event)" role="tab" tabindex="-1">Next steps</button></div>
@@ -764,7 +817,6 @@ button,a,select,summary,label,.chip,.tab-btn,.nav-btn{touch-action:manipulation}
 </div></section>
 <section class="history-section" id="historySection"><div class="card" style="max-width:850px;margin:auto"><div class="history-header"><div><h3>Scan history</h3><p style="font-size:12px;color:var(--text-secondary)">Stored locally in this browser</p></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="action-btn" onclick="clearHistory()"><svg class="icn" aria-hidden="true" focusable="false"><use href="#i-trash"/></svg> Clear all</button></div></div><div class="history-toolbar"><input class="history-search" id="historySearch" oninput="setHistoryFilter('q',this.value)" placeholder="Search reports, dates, tags, notes…" aria-label="Search reports" type="search"/><div><button class="chip active" data-status="all" onclick="setHistoryFilter('status','all')">All</button><button class="chip" data-status="issues" onclick="setHistoryFilter('status','issues')">Needs review</button><button class="chip" data-status="normal" onclick="setHistoryFilter('status','normal')">In range</button></div></div><div class="history-list" id="historyList"></div></div></section>
 <footer class="footer"><span class="footer-about">LabLens Ver2.0 · Made for blood, urine and clinical pathology reports.</span><span class="footer-legal">Informational only, not medical advice. <button class="link-btn" type="button" onclick="showInfo()">Legal &amp; info</button></span></footer>
-<dialog aria-labelledby="reportSourceTitle" class="report-source-dialog" id="reportSourceDialog"><h3 id="reportSourceTitle">Add a report</h3><p>Choose where your report is.</p><div class="report-source-options"><button class="report-source-option" id="reportSourceCamera" type="button"><strong>Camera</strong><small>Take a new photo</small></button><button class="report-source-option" id="reportSourcePhotos" type="button"><strong>Photos</strong><small>Choose an image from your library</small></button><button class="report-source-option" id="reportSourceFiles" type="button"><strong>Files</strong><small>Choose a PDF or image</small></button></div><button class="report-source-cancel" id="reportSourceCancel" type="button">Cancel</button></dialog>
 <div class="modal-overlay" id="guestProfileModal"><div class="modal"><h3>Save these results to a profile?</h3><p>We read these details from the report. Check them, change anything that is wrong, and the report is saved to this profile so its ranges and trends stay accurate. Stored only on this device.</p><form id="guestProfileForm" onsubmit="guestProfileSave(event)">
 <div id="gpTargetWrap" hidden><label class="fld-label" for="gpTarget">Save to</label><select class="field" id="gpTarget" onchange="gpTargetChanged()"></select></div>
 <div id="gpNewFields">

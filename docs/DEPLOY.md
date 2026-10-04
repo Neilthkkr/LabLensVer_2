@@ -9,7 +9,7 @@ netlify deploy --prod
 
 ## Optional AI checking
 
-`netlify/functions/curate.mjs` serves `/api/curate`. Without configuration the app works fully on the device and the
+`netlify/functions/curate.mjs` serves `/api/curate` and `netlify/functions/chat.mjs` serves `/api/chat` (the in-app Ask AI chat; same `GEMINI_API_KEY`, max 3 questions per report, shared helpers in `netlify/lib/`). Without configuration the app works fully on the device and the
 "Double-check with AI" option falls back to the on-device reader.
 
 | Variable | Purpose |
@@ -27,7 +27,7 @@ key**. Netlify's default function timeout is 10 seconds; long reports are sent i
 ## Local development
 
 ```bash
-GEMINI_API_KEY=... node scripts/dev-server.mjs     # static app + /api/curate on http://localhost:8765
+GEMINI_API_KEY=... node scripts/dev-server.mjs     # static app + /api/curate + /api/chat on http://localhost:8765
 node scripts/probe-curation.mjs report.pdf          # prints what would be sent and how AI rows compare
 npm test                                            # unit tests
 npm run test:ui                                     # browser smoke test (needs Chrome)

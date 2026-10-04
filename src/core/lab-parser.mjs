@@ -33,7 +33,7 @@ const STANDARD_RANGES = {
   'urine appearance':{name:'Urine Appearance',min:null,max:null,unit:'',group:'urine',abbr:['appearance','physical appearance']},
   'urine colour':{name:'Urine Colour',min:null,max:null,unit:'',group:'urine',abbr:['urine color','colour']},
   'urine ketones':{name:'Urine Ketones',min:null,max:null,unit:'',group:'urine',abbr:['ketone bodies','ketones']},
-  'urine bilirubin':{name:'Urine Bilirubin',min:null,max:null,unit:'',group:'urine',abbr:['bile pigments']},
+  'urine bilirubin':{name:'Urine Bilirubin',min:null,max:null,unit:'',group:'urine',abbr:['bile pigments','bile pigment']},
   'urine urobilinogen':{name:'Urine Urobilinogen',min:null,max:null,unit:'',group:'urine',abbr:['urobilinogen']},
   'urine pus cells':{name:'Urine Pus Cells (WBC/hpf)',min:0,max:5,unit:'/hpf',group:'urine',abbr:['pus cells','wbc/hpf','leucocytes hpf']},
   'urine rbc':{name:'Urine RBC (hpf)',min:0,max:2,unit:'/hpf',group:'urine',abbr:['rbc/hpf','red blood cells hpf']},
@@ -41,6 +41,13 @@ const STANDARD_RANGES = {
   'urine casts':{name:'Urine Casts',min:null,max:null,unit:'',group:'urine',abbr:['casts','hyaline casts','granular casts']},
   'urine crystals':{name:'Urine Crystals',min:null,max:null,unit:'',group:'urine',abbr:['crystals']},
   'urine bacteria':{name:'Urine Bacteria',min:null,max:null,unit:'',group:'urine',abbr:['bacteria']},
+  'urine volume':{name:'Urine Volume (sample)',min:null,max:null,unit:'ml',group:'urine',abbr:[]},
+  'urine deposit':{name:'Urine Deposit',min:null,max:null,unit:'',group:'urine',abbr:[]},
+  'urine protein qualitative':{name:'Urine Protein (dipstick)',min:null,max:null,unit:'',group:'urine',abbr:[]},
+  'urine glucose':{name:'Urine Glucose (sugar)',min:null,max:null,unit:'',group:'urine',abbr:[]},
+  'urine blood':{name:'Urine Occult Blood',min:null,max:null,unit:'',group:'urine',abbr:[]},
+  'urine amorphous deposit':{name:'Urine Amorphous Deposit',min:null,max:null,unit:'',group:'urine',abbr:[]},
+  'urine yeast cells':{name:'Urine Yeast Cells',min:null,max:null,unit:'',group:'urine',abbr:[]},
   'urine culture':{name:'Urine Culture & Sensitivity',min:null,max:null,unit:'',group:'urine',abbr:['urine c/s','urine culture and sensitivity']},
   // Stool / fecal examination
   'stool consistency':{name:'Stool Consistency',min:null,max:null,unit:'',group:'stool',abbr:['consistency','stool physical exam']},
@@ -975,8 +982,19 @@ function assembleWrappedResultLabels(inputLines){
 // measurement row. This is deliberately stricter than the parser's forward
 // scan: it cannot turn arbitrary prose or a section heading into a result.
 function assembleSplitResultRows(inputLines){
+  // A label wrapped onto a bare "Ratio" line ("Urine - Protein/Creatinine" / "Ratio")
+  // is one label; left split, the first half reads as plain urine protein.
+  inputLines=inputLines.reduce((acc,line)=>{
+    const last=acc[acc.length-1];
+    // The wrapped word can land before the value ("…Creatinine" / "Ratio" / "0.17") or after it ("…Creatinine 0.17" / "Ratio").
+    const valueFirst=last&&/^ratio$/i.test(line)?/^(\D*[A-Za-z\/])\s+(-?\d+(?:\.\d+)?(?:\s.*)?)$/.exec(last):null;
+    if(/^ratio$/i.test(line)&&last&&!/\d/.test(last))acc[acc.length-1]+=' Ratio';
+    else if(valueFirst&&!/ratio$/i.test(valueFirst[1]))acc[acc.length-1]=`${valueFirst[1]} Ratio ${valueFirst[2]}`;
+    else acc.push(line);
+    return acc;
+  },[]);
   const out=inputLines.slice(), consumed=new Set();
-  const measurement=/[<>]?\s*-?\d+(?:\.\d+)?\s*(?:10\s*(?:\^|[³⁶⁹])|[a-zµ%/])|[<>]?\s*-?\d+(?:\.\d+)?\s+[-–—]?\s*-?\d+(?:\.\d+)?/i;
+  const measurement=/[<>]?\s*-?\d+(?:\.\d+)?\s*(?:10\s*(?:\^|[³⁶⁹])|[a-zµ%/])|[<>]?\s*-?\d+(?:\.\d+)?\s+[-–—]?\s*-?\d+(?:\.\d+)?|^[<>]?\s*-?\d+(?:\.\d+)?$/i;
   for(let i=0;i<out.length-1;i++){
     if(consumed.has(i)||/\d/.test(out[i]))continue;
     const genericProtein=/^protein$/i.test(out[i]);
@@ -1028,6 +1046,7 @@ function parseReportText(text,profile){
     if(HEADER_RE.test(t))continue;
     if(PROMO_RE.test(t))continue;
     t=t.replace(DATETIME_RE,' ').replace(/\s+/g,' ').trim();   // dates/times are never results
+    t=t.replace(/(\d)\s+[-–—]\s+(?:calculated|calc\.?)\s*$/i,'$1');   // "0.17 - Calculated": the dash is an empty unit/range column
     if(!t)continue;
     if(/^[A-Z]{1,3}$/.test(t))continue;               // watermark shards: PR, OV, AL, N…
     lines.push(t);
@@ -1049,6 +1068,7 @@ function parseReportText(text,profile){
   };
   let inProse=false;
   const consumed=new Set();
+  parseUrinalysisSection(lines,metrics,seen,consumed);
 
   for(let i=0;i<lines.length;i++){
     if(consumed.has(i))continue;
@@ -1486,7 +1506,7 @@ function parseReportText(text,profile){
   // "Red Cell Morphology Hypochromic Microcytic :" and "Platelet On Smear Adequate :"
   // that the main loop skips entirely because they have no digits.
   // They ride the existing status:'unknown' / isFinite() guarded render path safely.
-  parseQualitativeFindings(lines,metrics,seen);
+  parseQualitativeFindings(lines,metrics,seen,consumed);
   parseBloodPressure(String(text||''),metrics,seen);
   // Parsing uses decimal points internally, but provenance must show the
   // punctuation actually printed on the source page.
@@ -1497,13 +1517,91 @@ function parseReportText(text,profile){
   }
   return metrics;
 }
+// Routine urine examination. Row names here are only unambiguous INSIDE the urine
+// section: "pH" is not arterial pH, "Ketones" is not beta-hydroxybutyrate, "Red Blood
+// Cells" is not the blood count, and a bare "Protein" or "Sugar" matches nothing.
+// So rows under a urine-examination heading are read against urine analytes only.
+const URINE_ROWS=[
+  [/^(?:quantity|volume)$/,'urine volume'],[/^colou?r$/,'urine colour'],
+  [/^(?:appearance|transparency|turbidity)$/,'urine appearance'],
+  [/^(?:specific gravity|sp\.? ?gr(?:avity)?)$/,'specific gravity'],[/^(?:ph|reaction)$/,'urine ph'],
+  [/^deposit$/,'urine deposit'],[/^(?:protein|albumin)$/,'urine protein qualitative'],
+  [/^(?:sugar|glucose)$/,'urine glucose'],[/^ketones?(?: bodies)?$/,'urine ketones'],
+  [/^(?:bile pigments?|bilirubin)$/,'urine bilirubin'],[/^(?:occult )?blood$/,'urine blood'],
+  [/^urobilinogen$/,'urine urobilinogen'],[/^nitrites?$/,'urine nitrite'],
+  [/^leuko?cyte esterase$/,'urine leukocyte esterase'],
+  [/^(?:pus cells?|wbc|leuko?cytes)$/,'urine pus cells'],[/^epithelial cells?$/,'urine epithelial cells'],
+  [/^(?:red blood cells?|rbc|r\.?b\.?c\.?s?)$/,'urine rbc'],[/^casts?$/,'urine casts'],
+  [/^crystals?$/,'urine crystals'],[/^amorphous (?:deposit|material)$/,'urine amorphous deposit'],
+  [/^yeast(?: cells?)?$/,'urine yeast cells'],[/^bacteria$/,'urine bacteria']
+];
+const URINE_HEADING=/\b(?:urine|urinalysis)\b.*\b(?:examination|analysis|routine)\b|\b(?:examination|analysis)\s+(?:of\s+)?urine\b|\burinalysis\b|\burine\s+routine\b|\broutine\s+urine\b/i;
+const URINE_OUTCOME=/^(?:(?:slightly|mildly|markedly|moderately)\s+)?(?:absent|present|negative|positive|nil|trace|clear|hazy|cloudy|turbid|pale\s+yellow(?:\s*\/\s*yellow)?|dark\s+yellow|straw(?:\s+yellow)?|yellow|amber|colou?rless|red|brown|normal|abnormal|few|occasional|plenty|many|\+{1,4})(?=\s|$)/i;
+const URINE_NEGATIVE=/^(?:absent|negative|nil|not detected|none)$/i;
+function parseUrinalysisSection(lines,metrics,seen,consumed){
+  for(let i=0;i<lines.length;i++){
+    const head=lines[i];
+    if(/\d/.test(head)||head.length>60||!URINE_HEADING.test(head))continue;
+    for(let j=i+1;j<lines.length;j++){
+      const line=lines[j];
+      if(/^\*+\s*end of report|^page\s+\d/i.test(line))break;
+      const words=line.split(/\s+/);
+      let rule=null,label='',rest='';
+      for(let w=Math.min(4,words.length-1);w>=1&&!rule;w--){
+        const prefix=words.slice(0,w).join(' ');
+        rule=URINE_ROWS.find(([re])=>re.test(prefix.toLowerCase().replace(/\s+/g,' ')));
+        if(rule){label=prefix;rest=words.slice(w).join(' ')}
+      }
+      if(!rule){
+        if(/^[A-Z0-9 \/*&-]{6,}$/.test(line))break;      // next report section
+        continue;                                          // sub-heading or an unrelated row
+      }
+      const key=std_(rule[1]).key;
+      if(seen.has(key)){consumed.add(j);continue}
+      const std=std_(rule[1]);
+      const base={key,name:cleanLabel(label)||std.name,canonicalName:std.name,group:'urine',known:true,srcLine:line.slice(0,180),srcIndex:j};
+      let m;
+      const interval=/^(\d+(?:\.\d+)?)\s*[-–]\s*(\d+(?:\.\d+)?)\s*(\/(?:hpf|lpf))?\s*(?:(\d+(?:\.\d+)?)\s*[-–]\s*(\d+(?:\.\d+)?))?/.exec(rest);
+      const number=/^(\d+(?:\.\d+)?)\s*(ml|mL)?\s*(?:(\d+(?:\.\d+)?)\s*[-–]\s*(\d+(?:\.\d+)?))?(?=\s|$)/.exec(rest);
+      if(interval&&interval[4]){
+        const lo=+interval[1],hi=+interval[2],rl=+interval[4],rh=+interval[5],unit=interval[3]||std.unit||'';
+        m={...base,value:hi,valueText:`${lo}-${hi}`,unit,min:rl,max:rh,normal_range:`${rl} - ${rh}${unit?` ${unit}`:''}`,
+          refFromReport:true,rangeNote:'from this report',status:lo>rh?'high':hi<rl?'low':'normal'};
+      }else if(number){
+        const v=+number[1],unit=number[2]||std.unit||'';
+        const hasRef=number[3]!==undefined;
+        const min=hasRef?+number[3]:std.min,max=hasRef?+number[4]:std.max;
+        const ranged=min!=null&&max!=null;
+        m={...base,value:v,unit,min:ranged?min:null,max:ranged?max:null,
+          normal_range:ranged?`${min} - ${max}${unit?` ${unit}`:''}`:'',refFromReport:hasRef,
+          rangeNote:hasRef?'from this report':(ranged?'general adult range':''),status:ranged?statusFor(v,min,max):'unknown'};
+      }else{
+        const res=URINE_OUTCOME.exec(rest);
+        if(!res)continue;
+        const value=res[0].replace(/\s+/g,' ').replace(/^./,c=>c.toUpperCase());
+        const after=rest.slice(res[0].length).replace(/^\s*\/(?:hpf|lpf)\b/i,'').trim();
+        const refMatch=URINE_OUTCOME.exec(after);
+        const ref=refMatch?refMatch[0].replace(/\s*\/\s*/g,' / ').replace(/\s+/g,' ').trim():'';
+        const v=value.toLowerCase(),r=ref.toLowerCase();
+        const status=URINE_NEGATIVE.test(v)?(r&&!URINE_NEGATIVE.test(r)?'unknown':'normal')
+          :r?(r.split(/\s*\/\s*/).includes(v)||r.includes(v)&&!/slightly|mildly|markedly/.test(v)?'normal':'high')
+          :/^(?:clear|normal|pale yellow|straw|yellow|amber|colou?rless)/.test(v)?'normal':'high';
+        m={...base,value,unit:'',min:null,max:null,
+          normal_range:ref||(URINE_NEGATIVE.test(v)?'Negative':''),refFromReport:!!ref,status};
+      }
+      seen.add(key);consumed.add(j);metrics.push(m);
+    }
+  }
+}
 // Captures non-numeric clinical findings (morphology, adequacy notes) that the main
 // loop skips. Format on Indian CBC reports: "TEST_NAME FINDING_TEXT :" (trailing colon).
 // Scans prefix lengths from SHORTEST to LONGEST so "Red Cell Morphology" (3 words) is
 // preferred over "Red Cell Morphology Hypochromic" (4 words, also a fuzzy-match hit).
-function parseQualitativeFindings(lines,metrics,seen){
+function parseQualitativeFindings(lines,metrics,seen,skip){
   const QUAL_OUTCOMES = /^(reactive|non\s*reactive|non-reactive|positive|negative|present|absent|detected|not\s*detected|weakly\s*reactive|weakly\s*positive|no\s*growth|growth|normal|abnormal|nil|none\s*seen|rare|few|moderate|many|trace|small|large|clear|hazy|cloudy|turbid|pale\s+yellow|straw(?:\s+yellow)?|yellow|amber|colourless|colorless)\b/i;
-  for(const line of lines){
+  for(let li=0;li<lines.length;li++){
+    const line=lines[li];
+    if(skip&&skip.has(li))continue;                       // already read by a section parser
     if(/\d/.test(line))continue;                           // numeric rows: main loop's job
     const t=line.trim();
     if(t.length<5||t.length>120)continue;

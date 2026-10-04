@@ -22,23 +22,18 @@ test('a missing PDF engine is reported as a processing failure',()=>{
 });
 
 test('service worker refreshes the app shell before using its cache',()=>{
-  assert.match(worker,/lablens-cache-v13/);
+  assert.match(worker,/lablens-cache-v14/);
   assert.match(worker,/event\.request\.mode === 'navigate'/);
   assert.match(worker,/src\\\/core\\\/lab-parser/);
   const navigationBlock=worker.slice(worker.indexOf("event.request.mode === 'navigate'"));
   assert.ok(navigationBlock.indexOf('fetch(event.request)')<navigationBlock.indexOf('caches.match(event.request.mode'));
 });
 
-test('report sources provide camera, photos, and PDF or image files',()=>{
+test('the single report picker accepts PDFs and images and does not force the camera',()=>{
   const filePicker=html.match(/<input(?=[^>]*id="fileInput")(?=[^>]*type="file")[^>]*>/)?.[0]||'';
-  const photosPicker=html.match(/<input(?=[^>]*id="photosInput")(?=[^>]*type="file")[^>]*>/)?.[0]||'';
-  const cameraPicker=html.match(/<input(?=[^>]*id="captureInput")(?=[^>]*type="file")[^>]*>/)?.[0]||'';
   assert.match(filePicker,/accept="[^"]*application\/pdf/);
   assert.match(filePicker,/accept="[^"]*image\/jpeg/);
-  assert.match(photosPicker,/accept="[^"]*image\/jpeg/);
-  assert.doesNotMatch(photosPicker,/\bcapture=/);
-  assert.match(cameraPicker,/capture="environment"/);
-  assert.match(html,/<dialog[^>]*id="reportSourceDialog"[^>]*>/);
+  assert.doesNotMatch(filePicker,/\bcapture=/);
   assert.match(source,/if\(blocked\.length\)return showToast/);
   const start=source.indexOf('function gradeImageQualityStats');
   const end=source.indexOf('\nasync function assessImageQuality',start);
@@ -50,39 +45,24 @@ test('report sources provide camera, photos, and PDF or image files',()=>{
   assert.equal(context.grade({width:1000,height:1600,mean:180,contrast:40,sharpness:5}).level,'warn');
 });
 
-test('add report opens source choices and each choice uses its own picker',()=>{
+test('add report opens the single file picker on every device',()=>{
   const events=[];
-  const controls=Object.fromEntries(['addReportBtn','reportSourceCancel','reportSourceCamera','reportSourcePhotos','reportSourceFiles','srcCameraInput','srcPhotosInput','srcFilesInput'].map(id=>[id,{}]));
-  controls.dropZone={addEventListener(){}};
-  controls.reportSourceDialog={showModal(){events.push('choices')},close(){events.push('close')}};
-  for(const [id,source] of [['captureInput','camera'],['photosInput','photos'],['fileInput','files']]){
-    controls[id]={click(){events.push(source)}};
-  }
+  const controls={addReportBtn:{},dropZone:{addEventListener(){}},fileInput:{click(){events.push('files')}}};
   const start=source.indexOf('function wireUpload(){');
   const end=source.indexOf('\nasync function fileToDataURL',start);
   assert.ok(start>=0&&end>start,'upload wiring is discoverable');
-  let coarse=true;
-  const context={$:id=>controls[id],matchMedia:()=>({matches:coarse})};
+  const context={$:id=>controls[id]};
   vm.createContext(context);
   vm.runInContext(`${source.slice(start,end)}\nthis.wireUpload=wireUpload`,context);
   context.wireUpload();
   controls.addReportBtn.onclick();
-  assert.deepEqual(events,['choices'],'touch devices get the source sheet');
-  events.length=0;coarse=false;controls.addReportBtn.onclick();
-  assert.deepEqual(events,['files'],'desktop opens the file browser directly');
-  // The three phone source buttons are real file inputs laid over the tap target: no click proxy to break.
-  for(const id of ['srcCameraInput','srcPhotosInput','srcFilesInput'])assert.equal(typeof controls[id].onchange,'function',id+' must handle its own selection');
-  events.length=0;
-  for(const [button,source] of [['reportSourceCamera','camera'],['reportSourcePhotos','photos'],['reportSourceFiles','files']]){
-    events.length=0;
-    controls[button].onclick();
-    assert.deepEqual(events,['close',source]);
-  }
+  assert.deepEqual(events,['files']);
+  assert.equal(typeof controls.fileInput.onchange,'function','selection is handled');
 });
 
 test('every button is wired and every inline handler resolves',()=>{
   const buttonTags=[...html.matchAll(/<button\b[^>]*>/gi)].map(match=>match[0]);
-  const deliberatelyWired=new Set(['addReportBtn','reportSourceCamera','reportSourcePhotos','reportSourceFiles','reportSourceCancel','confirmDialogCancel','confirmDialogOk','btnRejectionClose','btnRejectionRetry','btnSubmitFeedback']);
+  const deliberatelyWired=new Set(['addReportBtn','confirmDialogCancel','confirmDialogOk','btnRejectionClose','btnRejectionRetry','btnSubmitFeedback']);
   const unwired=buttonTags.filter(tag=>{
     if(/\bonclick\s*=|\btype\s*=\s*["']submit["']/i.test(tag))return false;
     const id=tag.match(/\bid=["']([^"']+)["']/i)?.[1];
@@ -111,8 +91,9 @@ test('result actions and tabs use one clear action with accessible state',()=>{
   assert.equal((resultTabs.match(/\baria-selected="(?:true|false)"/g)||[]).length,5);
 });
 
-test('profiles can be edited from the menu and the Info tab, and deleted from the edit dialog',()=>{
-  assert.match(source,/__edit"?>Edit profile/);
+test('profiles can be edited from the home card and the Info tab, and deleted from the edit dialog',()=>{
+  assert.match(html,/id="editProfileBtn"[^>]*onclick="editCurrentProfile\(\)"|onclick="editCurrentProfile\(\)"[^>]*id="editProfileBtn"/);
+  assert.doesNotMatch(source,/__edit/,'the profile menu is for switching profiles, not editing');
   assert.match(html,/id="profileList"/);
   assert.match(html,/id="deleteUserBtn"/);
   // Escape / cancel dismissal picks the first .btn-secondary, so the delete control must not use that class.

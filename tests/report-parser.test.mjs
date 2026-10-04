@@ -156,3 +156,58 @@ test('bounded results are classified only when the bound proves the status',()=>
   assert.equal(context.__parseReportText('Glucose ≤ 70 mg/dL 70 - 99',{sex:'female',age:35}).find(x=>x.key==='glucose')?.status,'unknown');
   assert.equal(context.__parseReportText('Glucose > 99 mg/dL 70 - 99',{sex:'female',age:35}).find(x=>x.key==='glucose')?.status,'high');
 });
+
+test('a routine urine examination keeps every row and reads them as urine analytes',()=>{
+  const report=`Test Name Value Unit Reference Range Method
+ROUTINE EXAMINATION URINE
+Physical Examination
+Quantity 30 ml Volumetric
+Colour Pale Yellow Pale yellow/Yellow Visual Examination
+Appearance Slightly Hazy Clear Visual Examination
+Specific Gravity 1.010 1.005-1.030 Indicator System
+pH 5.0 Double indicator
+Deposit Absent Absent Visual Examination
+Chemical Examination
+Protein Absent Absent Protein-error-of-Indicators
+Sugar Absent Absent GOD-POD
+Ketones Absent Absent Legal’s Test
+Bile Pigment Absent Absent Fouchets Test
+Occult Blood Negative Negative Peroxidase activity
+Urobilinogen Absent Absent Ehrlich Reaction
+Microscopic Examination
+Pus Cells 2-3 /hpf 0-5 Microscopy
+Epithelial Cells 3-4 /hpf 0-5 Microscopy
+Red Blood Cells Absent /hpf Absent Microscopy
+Casts Absent Absent Microscopy
+Crystals Absent Absent Microscopy
+Amorphous Deposit Absent Absent Microscopy
+Yeast Cells Absent Absent Microscopy
+Bacteria Absent Absent Microscopy
+**END OF REPORT**
+Page 1 of 2
+PROTEINS/CREATININE RATIO *
+Urine - Protein 10.3 mg/dl Pyrogallol red
+Urine - Creatinine 60.82 mg/dl Alk. picrate IDMS
+Urine - Protein/Creatinine
+Ratio
+0.17 - Calculated`;
+  const metrics=parse(report);
+  const byName=Object.fromEntries(metrics.map(m=>[m.name,m]));
+  assert.equal(metrics.length,23);
+  assert.equal(byName.pH.canonicalName,'Urine pH');
+  assert.equal(byName.pH.status,'normal');
+  assert.equal(byName.Ketones.canonicalName,'Urine Ketones');
+  assert.equal(byName['Red Blood Cells'].canonicalName,'Urine RBC (hpf)');
+  for(const name of ['Quantity','Appearance','Deposit','Protein','Sugar','Bile Pigment','Occult Blood','Pus Cells','Epithelial Cells','Amorphous Deposit','Yeast Cells','Urine - Protein/Creatinine Ratio'])assert.ok(byName[name],name+' is read');
+  assert.equal(byName.Appearance.status,'high','hazy urine differs from the printed "Clear"');
+  assert.equal(byName['Pus Cells'].valueText,'2-3');
+});
+
+test('a wrapped "Ratio" label is rejoined whether it prints before or after the value',()=>{
+  for(const text of ['Urine - Protein/Creatinine\nRatio\n0.17 - Calculated','Urine - Protein/Creatinine 0.17 - Calculated\nRatio']){
+    const metrics=parse(text);
+    assert.equal(metrics.length,1,JSON.stringify(text));
+    assert.equal(metrics[0].canonicalName,'Urine Protein/Creatinine Ratio');
+    assert.equal(metrics[0].value,0.17);
+  }
+});
