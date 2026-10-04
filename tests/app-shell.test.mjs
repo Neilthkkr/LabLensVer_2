@@ -99,3 +99,8 @@ test('profiles can be edited from the home card and the Info tab, and deleted fr
   // Escape / cancel dismissal picks the first .btn-secondary, so the delete control must not use that class.
   assert.doesNotMatch(html.match(/<button[^>]*id="deleteUserBtn"[^>]*>/)[0],/btn-secondary/);
 });
+
+test('switching profile or logging out refreshes the recent reports list',()=>{
+  const body=source.slice(source.indexOf('function switchUser('),source.indexOf('function currentProfile()'));
+  assert.match(body,/renderRecents\(\)/,'a stale list would show the previous profile\'s reports');
+});
