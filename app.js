@@ -2705,6 +2705,7 @@ function renderFamily(){
 }
 function renderRecents(){
   try{renderFamily()}catch{}
+  document.body.classList.toggle('has-reports',getHistory().length>0);
   const host=$('recentList'),wrap=$('recentSection');if(!host||!wrap)return;
   const rows=getHistory().slice().sort((a,b)=>new Date(b.analyzedAt||b.date)-new Date(a.analyzedAt||a.date)).slice(0,3);
   wrap.hidden=!rows.length;

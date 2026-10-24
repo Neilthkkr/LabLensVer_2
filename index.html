@@ -697,7 +697,8 @@ button,a,select,summary,label,.chip,.tab-btn,.nav-btn{touch-action:manipulation}
 .sample-row i.hi,.sample-row i.lo{color:var(--danger)}.sample-row i.ok{color:var(--primary)}
 .sample-caption{position:absolute;left:12px;right:12px;bottom:12px;margin:0;padding:8px 12px;border-radius:8px;background:var(--card);border:1px solid var(--border);font-size:13px;font-weight:600;text-align:center;color:var(--text)}
 .upload-section:has(.drop-zone:not(.has-files)) .sample-report{display:block;margin-bottom:14px}
-@media(max-width:820px){.upload-section:has(.drop-zone:not(.has-files)) .sample-report{flex:1 1 auto;min-height:0;overflow:hidden;margin-top:14px}}
+@media(max-width:820px){.upload-section:has(.drop-zone:not(.has-files)) .sample-report{order:1;max-height:300px;overflow:hidden;margin:14px 0 0}}
+body.has-reports .sample-report{display:none!important}
 @media(max-width:820px){.results-section .tabs{position:sticky;top:calc(60px + env(safe-area-inset-top));z-index:140;background:var(--bg);border-bottom:1px solid var(--border)}}
 .fl-actions{display:inline-flex;align-items:center;gap:4px}
 .add-more{display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:0 10px;border:0;background:transparent;color:var(--primary-dark);font:inherit;font-size:14px;font-weight:600;cursor:pointer;border-radius:8px}
@@ -705,8 +706,9 @@ button,a,select,summary,label,.chip,.tab-btn,.nav-btn{touch-action:manipulation}
 .add-more:hover{background:var(--surface-2)}
 @media(max-width:820px){
   .drop-zone.has-files .drop-zone-inner{display:none}
-  /* One-handed use: with nothing added yet, the button sits at the bottom of the screen above the tab bar. */
-  .upload-section:has(.drop-zone:not(.has-files)) .upload-main{min-height:var(--upload-main-min,calc(100dvh - 420px));display:flex;flex-direction:column;justify-content:flex-end}
+  /* Add a report always sits at the top; the sample preview and family cards come below it. */
+  .upload-section:has(.drop-zone:not(.has-files)) .upload-main{display:flex;flex-direction:column}
+  .upload-section:has(.drop-zone:not(.has-files)) .upload-card{order:0}
   .upload-section:has(.drop-zone:not(.has-files)) .add-report-button{min-height:60px}
   .footer{font-size:11px;line-height:1.4;opacity:.85}
   .feedback-fab{display:none}
@@ -855,7 +857,7 @@ button,a,select,summary,label,.chip,.tab-btn,.nav-btn{touch-action:manipulation}
 <div class="tab-content" id="tab-recommendations" role="tabpanel"><div class="result-section-head"><div><h4>Suggested next steps</h4></div></div><div id="recommendationsList"></div></div>
 </div></section>
 <section class="history-section" id="historySection"><div class="card" style="max-width:850px;margin:auto"><div class="history-header"><div><h3>Scan history</h3><p style="font-size:12px;color:var(--text-secondary)">Stored locally in this browser</p></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="action-btn" onclick="clearHistory()"><svg class="icn" aria-hidden="true" focusable="false"><use href="#i-trash"/></svg> Clear all</button></div></div><div class="history-toolbar"><input class="history-search" id="historySearch" oninput="setHistoryFilter('q',this.value)" placeholder="Search reports, dates, tags, notes…" aria-label="Search reports" type="search"/><div><button class="chip active" data-status="all" onclick="setHistoryFilter('status','all')">All</button><button class="chip" data-status="issues" onclick="setHistoryFilter('status','issues')">Needs review</button><button class="chip" data-status="normal" onclick="setHistoryFilter('status','normal')">In range</button></div></div><div class="history-list" id="historyList"></div></div></section>
-<footer class="footer"><span class="footer-about">LabLens Ver2.0 · Made for blood, urine and clinical pathology reports.</span><span class="footer-legal">Informational only, not medical advice. <button class="link-btn" type="button" onclick="showInfo()">Legal &amp; info</button></span></footer>
+<footer class="footer"><span class="footer-legal">Informational only, not medical advice. <button class="link-btn" type="button" onclick="showInfo()">Legal &amp; info</button></span></footer>
 <div class="modal-overlay" id="guestProfileModal"><div class="modal"><h3>Save these results to a profile?</h3><p>We read these details from the report. Check them, change anything that is wrong, and the report is saved to this profile so its ranges and trends stay accurate. Stored only on this device.</p><form id="guestProfileForm" onsubmit="guestProfileSave(event)">
 <div id="gpTargetWrap" hidden><label class="fld-label" for="gpTarget">Save to</label><select class="field" id="gpTarget" onchange="gpTargetChanged()"></select></div>
 <div id="gpNewFields">
