@@ -6,6 +6,7 @@
    live strictly inside the user's browser (Local Storage & PWA Caching).
    ============================================================================ */
 
+import {profileOverview,latestReadings} from './src/core/family-summary.mjs';
 import {STANDARD_RANGES,rangeForProfile,std_,matchTest,statusForQualified,normalizedUnit,comparableUnit,parseReportText} from './src/core/lab-parser.mjs';
 import {buildChatContext,MAX_QUESTIONS as CHAT_MAX_QUESTIONS} from './src/core/chat-context.mjs';
 
@@ -344,7 +345,7 @@ function editProfileFromList(btn){openEditUserModal(btn.dataset.user)}
 function editCurrentProfile(){if(currentUser)openEditUserModal(currentUser)}
 function renderProfilesList(){
   const host=$('profileList');if(!host)return;
-  host.innerHTML=users.length?users.map(u=>{const a=ageYears(u.dob);return `<li><span class="pl-main"><strong>${esc(u.username)}</strong><small>${esc([u.sex==='female'?'Female':u.sex==='male'?'Male':'',a!=null?a+' years':''].filter(Boolean).join(' · ')||'No details')}</small></span><button class="btn-secondary" type="button" data-user="${esc(u.username)}" onclick="editProfileFromList(this)">Edit</button></li>`}).join(''):'<li class="pl-empty">No profiles yet. Reports are saved under Guest.</li>';
+  host.innerHTML=users.length?users.map(u=>{const a=ageYears(u.dob);return `<li><span class="pl-main"><strong>${esc(u.username)}</strong><small>${esc([u.sex==='female'?'Female':u.sex==='male'?'Male':'',a!=null?a+' years':''].filter(Boolean).join(' · ')||'No details')}</small></span><button class="btn-secondary" type="button" data-user="${esc(u.username)}" onclick="editProfileFromList(this)">Edit</button><button class="btn-secondary" type="button" data-user="${esc(u.username)}" onclick="printDoctorSummary(this.dataset.user)">Doctor summary (PDF)</button></li>`}).join(''):'<li class="pl-empty">No profiles yet. Reports are saved under Guest.</li>';
 }
 // BUG FIX: uploading in Guest mode, then creating a named profile, used to
 // silently orphan the guest data — it stayed under the 'guest' storage key
@@ -2667,7 +2668,43 @@ function displayComparison(){
 function showInfo(){renderProfilesList();['uploadSection','historySection'].forEach(i=>{const e=$(i);if(e)e.style.display='none'});$('resultsSection').classList.remove('active');$('progressSection').classList.remove('active');$('infoSection').style.display='block';setActiveNav('info');window.scrollTo({top:0,behavior:'smooth'})}
 function hideInfo(){const e=$('infoSection');if(e)e.style.display='none'}
 function addAnotherPage(){const b=$('addReportBtn');if(b)b.click()}
+function printDoctorSummary(username){
+  const u=users.find(x=>x.username===username);if(!u)return;
+  const stored=LS.get('health_reports_'+username,[]);
+  const reports=Array.isArray(stored)?stored.map(normalizeAnalysisRecord).filter(Boolean):[];
+  if(!reports.length)return showToast('This profile has no reports to summarize yet.','info');
+  const o=profileOverview(reports),rows=latestReadings(reports),a=ageYears(u.dob);
+  const flagged=s=>s&&s!=='normal'&&s!=='unknown'&&s!=='classifier';
+  const who=[u.sex==='female'?'Female':u.sex==='male'?'Male':'',a!=null?a+' years':''].filter(Boolean).join(' · ');
+  $('doctorPrint').innerHTML=`<h1>Health summary: ${esc(u.nickname||u.username)}</h1><p class="dp-sub">${esc(who)}${who?' · ':''}${reports.length} report${reports.length===1?'':'s'} · Prepared ${esc(fmtDate(new Date().toISOString()))}</p>
+<h2>Notable changes since the previous report</h2>${o.changes.length?`<ul>${o.changes.map(c=>`<li>${esc(c.text)} (${esc(c.detail)})</li>`).join('')}</ul>`:'<p>None.</p>'}
+<h2>Latest value of each test</h2><table><thead><tr><th>Test</th><th>Result</th><th>Reference range</th><th>Previous</th><th>Date</th></tr></thead><tbody>${rows.map(r=>`<tr><td class="${flagged(r.status)?'flag':''}">${esc(r.name)}${flagged(r.status)?' ('+esc(r.status)+')':''}</td><td>${esc(r.value)} ${esc(r.unit)}</td><td>${esc(r.range)}</td><td>${esc(r.prior)}</td><td>${esc(fmtDate(r.date,{month:'short',day:'numeric',year:'numeric'}))}</td></tr>`).join('')}</tbody></table>
+<p class="dp-note">Prepared with LabLens from the patient’s uploaded reports. Values were read automatically and may contain errors; please check against the original reports. This is not a diagnosis or medical advice.</p>`;
+  document.body.classList.add('print-summary');
+  const done=()=>{document.body.classList.remove('print-summary');window.removeEventListener('afterprint',done)};
+  window.addEventListener('afterprint',done);
+  window.print();
+}
+function renderFamily(){
+  const host=$('familyList'),wrap=$('familySection');if(!host||!wrap)return;
+  const cards=users.map(u=>{
+    const stored=LS.get('health_reports_'+u.username,[]);
+    const reports=Array.isArray(stored)?stored.map(normalizeAnalysisRecord).filter(Boolean):[];
+    return {u,o:profileOverview(reports)};
+  });
+  const multi=users.length>1;
+  wrap.hidden=!(multi||cards.some(c=>c.o.count));
+  $('familyTitle').textContent=multi?'Your family':'Your health';
+  $('familyHint').textContent=multi?'Each person has their own profile, reports and trends. Open a card to switch to that person.':'Reports and trends for this profile. Add a family member to keep their reports separate.';
+  host.innerHTML=cards.map(({u,o})=>{
+    const a=ageYears(u.dob),sub=[u.sex==='female'?'Female':u.sex==='male'?'Male':'',a!=null?a+' years':''].filter(Boolean).join(' · ');
+    const body=o.count?`<span class="fam-meta">${esc(fmtDate(o.latestDate,{month:'short',day:'numeric',year:'numeric'}))} · ${o.total} value${o.total===1?'':'s'} · ${o.outOfRange?`<b class="out">${o.outOfRange} outside range</b>`:'all in range'}</span>${o.changes.length?`<ul>${o.changes.map(c=>`<li class="${c.trend}">${esc(c.text)}<small>${esc(c.detail)}</small></li>`).join('')}</ul>`:(o.count>1?'<span class="fam-meta">No notable changes since the last report</span>':'<span class="fam-meta">Add another report to see trends</span>')}`:'<span class="fam-meta">No reports yet</span>';
+    const cur=u.username===currentUser;
+    return `<li class="family-card" ${cur?'aria-current="true"':''}><button type="button" class="family-open" data-user="${esc(u.username)}" onclick="switchUser(this.dataset.user)" aria-label="Open ${esc(u.nickname||u.username)}"><strong>${esc(u.nickname||u.username)}${cur?' <span class="fam-badge">Viewing</span>':''}</strong>${sub?`<small>${esc(sub)}</small>`:''}${body}</button><div class="family-actions"><button type="button" class="btn-secondary" data-user="${esc(u.username)}" onclick="printDoctorSummary(this.dataset.user)"${o.count?'':' disabled'} title="Save a printable summary to share with a doctor">Doctor summary (PDF)</button></div></li>`;
+  }).join('');
+}
 function renderRecents(){
+  try{renderFamily()}catch{}
   const host=$('recentList'),wrap=$('recentSection');if(!host||!wrap)return;
   const rows=getHistory().slice().sort((a,b)=>new Date(b.analyzedAt||b.date)-new Date(a.analyzedAt||a.date)).slice(0,3);
   wrap.hidden=!rows.length;
@@ -3488,7 +3525,7 @@ function sendFeedback(e){
     if(o.classList&&o.classList.contains('modal-overlay')&&o.classList.contains('active')&&(o.id==='metricSheetOverlay'||o.id==='confirmDialogOverlay'))dismiss(o);
   });
 })();
-Object.assign(window,{editCurrentProfile,openAskAI,closeChat,chatStart,chatUseGoogle,fitProfileSelect,editProfileFromList,deleteProfile,openEditUserModal,onProfileSelect,addAnotherPage,showInfo,guestProfileSave,guestProfileSkip,deleteAllData,setCuration,showLastCuration,showHome,resetAll,showHistory,toggleTheme,openAddUserModal,closeAddUserModal,addUser,switchUser,logoutUser,removeFile,clearAllFiles,overrideImageQuality,setGroupMode,setUploadCategory,analyzeReport,switchTab,handleResultTabKey,loadHistoryReport,openHistoryItem,deleteHistoryItem,clearHistory,printResults,setHistoryFilter,addTagFromInput,removeTag,onNoteInput,setTrendParam,setTrendRange,setTrendView,setTrendFilter,setTrendQuery,trendTip,setDefaultTrendParam,clearDefaultTrendParam,showCurrentAnalysis,changeReportCategory,toggleProv,flagMetric,confirmMetric,setHistoryView,initMedViewer,medZoom,medReset,medRotate,medInvert,medRedraw,idAnswerYes,idAnswerNew,idAnswerSkip,idCancelClarify,idConfirmClarify,idPickField,idCancelNew,idCreateNewProfile,closeIdentityModal,renderNav,setMetricsFilter,openMetricSheet,closeMetricSheet,metricSheetPick,toggleSheetProv,flagMetricByKey,renderMetricCorrection,saveMetricCorrection,setOriginalView,copyOriginalText,onDocPageImgLoad,onDocHitTap,explainMetricsNow,explainWithGoogleAI,openFeedbackModal,closeFeedbackModal,sendFeedback,showTrends,exportBackup,openBackupPicker,importBackup,getOcrDiagnostics});if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+Object.assign(window,{printDoctorSummary,editCurrentProfile,openAskAI,closeChat,chatStart,chatUseGoogle,fitProfileSelect,editProfileFromList,deleteProfile,openEditUserModal,onProfileSelect,addAnotherPage,showInfo,guestProfileSave,guestProfileSkip,deleteAllData,setCuration,showLastCuration,showHome,resetAll,showHistory,toggleTheme,openAddUserModal,closeAddUserModal,addUser,switchUser,logoutUser,removeFile,clearAllFiles,overrideImageQuality,setGroupMode,setUploadCategory,analyzeReport,switchTab,handleResultTabKey,loadHistoryReport,openHistoryItem,deleteHistoryItem,clearHistory,printResults,setHistoryFilter,addTagFromInput,removeTag,onNoteInput,setTrendParam,setTrendRange,setTrendView,setTrendFilter,setTrendQuery,trendTip,setDefaultTrendParam,clearDefaultTrendParam,showCurrentAnalysis,changeReportCategory,toggleProv,flagMetric,confirmMetric,setHistoryView,initMedViewer,medZoom,medReset,medRotate,medInvert,medRedraw,idAnswerYes,idAnswerNew,idAnswerSkip,idCancelClarify,idConfirmClarify,idPickField,idCancelNew,idCreateNewProfile,closeIdentityModal,renderNav,setMetricsFilter,openMetricSheet,closeMetricSheet,metricSheetPick,toggleSheetProv,flagMetricByKey,renderMetricCorrection,saveMetricCorrection,setOriginalView,copyOriginalText,onDocPageImgLoad,onDocHitTap,explainMetricsNow,explainWithGoogleAI,openFeedbackModal,closeFeedbackModal,sendFeedback,showTrends,exportBackup,openBackupPicker,importBackup,getOcrDiagnostics});if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 
 // ---- PWA: register the service worker ----
 // Only runs on a real http(s) origin — service workers are unavailable (and

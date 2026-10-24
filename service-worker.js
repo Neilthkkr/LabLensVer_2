@@ -5,6 +5,7 @@ const ASSETS_TO_CACHE = [
   './app.js',
   './src/core/lab-parser.mjs',
   './src/core/chat-context.mjs',
+  './src/core/family-summary.mjs',
   './manifest.webmanifest',
   './src/privacy/deidentify.js',
   './icon.svg',
@@ -62,7 +63,7 @@ self.addEventListener('fetch', event => {
   // App-shell navigations and parser code must prefer the network. Serving old
   // versions first can leave the UI running code that no longer matches
   // the vendored OCR/PDF assets, producing false "no metrics" rejections.
-  if (event.request.mode === 'navigate' || /\/(?:app\.js|src\/core\/lab-parser\.mjs|src\/core\/chat-context\.mjs)$/.test(new URL(event.request.url).pathname)) {
+  if (event.request.mode === 'navigate' || /\/(?:app\.js|src\/core\/lab-parser\.mjs|src\/core\/chat-context\.mjs|src\/core\/family-summary\.mjs)$/.test(new URL(event.request.url).pathname)) {
     event.respondWith(
       fetch(event.request).then(response => {
         if (response && response.status === 200) {
